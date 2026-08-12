@@ -1,0 +1,65 @@
+/** Domain-Typen: Kontakte (Kund:innen & Lieferant:innen) */
+
+export type Kontakt = {
+  id: string;
+  firma: string;
+  name: string;
+  ist_kunde: boolean;
+  ist_lieferant: boolean;
+  strasse: string;
+  plz: string;
+  ort: string;
+  land: string;
+  email: string;
+  telefon: string;
+  iban: string;
+  bic: string;
+  notiz: string;
+  created?: string;
+  updated?: string;
+};
+
+export type KontaktInput = {
+  name: string;
+  ist_kunde: boolean;
+  ist_lieferant: boolean;
+  strasse?: string;
+  plz?: string;
+  ort?: string;
+  land?: string;
+  email?: string;
+  telefon?: string;
+  iban?: string;
+  bic?: string;
+  notiz?: string;
+};
+
+export type Ansprechpartner = {
+  id: string;
+  firma: string;
+  kontakt: string;
+  name: string;
+  email: string;
+  telefon: string;
+  position: string;
+};
+
+export type AnsprechpartnerInput = {
+  name: string;
+  email?: string;
+  telefon?: string;
+  position?: string;
+};
+
+export type KontaktFilter = {
+  q?: string;
+  rolle?: "kunde" | "lieferant" | "alle";
+};
+
+export type KontaktListResult = {
+  items: Kontakt[];
+  totalItems: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};

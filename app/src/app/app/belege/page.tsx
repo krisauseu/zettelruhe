@@ -1,0 +1,267 @@
+import Link from "next/link";
+import { requireFirmaSession } from "@/lib/session";
+import { formatMoneyDe } from "@/lib/money";
+import {
+  BELEG_STATUS_LABELS,
+  BUCHUNGSRICHTUNG_LABELS,
+  formatDateDe,
+} from "@/lib/labels";
+import {
+  listBelege,
+  type BelegStatus,
+  type Buchungsrichtung,
+} from "@/modules/expenses";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+
+type SearchParams = Promise<{
+  q?: string;
+  page?: string;
+  status?: string;
+  richtung?: string;
+  von?: string;
+  bis?: string;
+}>;
+
+export default async function BelegeListPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const session = await requireFirmaSession();
+  const sp = await searchParams;
+
+  const q = sp.q?.trim() ?? "";
+  const von = sp.von?.trim() ?? "";
+  const bis = sp.bis?.trim() ?? "";
+  const status =
+    sp.status === "entwurf" || sp.status === "festgeschrieben"
+      ? (sp.status as BelegStatus)
+      : "";
+  const richtung =
+    sp.richtung === "einnahme" || sp.richtung === "ausgabe"
+      ? (sp.richtung as Buchungsrichtung)
+      : "";
+  const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+
+  const result = await listBelege(
+    session.firmaId,
+    {
+      q: q || undefined,
+      status: status || undefined,
+      richtung: richtung || undefined,
+      von: von || undefined,
+      bis: bis || undefined,
+    },
+    page,
+    50,
+  );
+
+  return (
+    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Belege
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ausgaben und Einnahmen mit Datei — Festschreibung schreibt ins
+            Buchungsjournal.
+          </p>
+        </div>
+        <Link
+          href="/app/belege/neu"
+          className={cn(buttonVariants({ size: "sm" }))}
+        >
+          Beleg anlegen
+        </Link>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Filter</CardTitle>
+          <CardDescription>
+            Nach Text, Status, Richtung oder Zeitraum filtern.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="flex flex-wrap items-end gap-4" method="get">
+            <div className="flex min-w-[10rem] flex-1 flex-col gap-1.5">
+              <Label htmlFor="q" className="text-xs text-muted-foreground">
+                Suche
+              </Label>
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder="Kategorie, Notiz, Nummer …"
+              />
+            </div>
+            <div className="flex w-40 flex-col gap-1.5">
+              <Label
+                htmlFor="status"
+                className="text-xs text-muted-foreground"
+              >
+                Status
+              </Label>
+              <select
+                id="status"
+                name="status"
+                defaultValue={status}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+              >
+                <option value="">Alle</option>
+                <option value="entwurf">Entwurf</option>
+                <option value="festgeschrieben">Festgeschrieben</option>
+              </select>
+            </div>
+            <div className="flex w-36 flex-col gap-1.5">
+              <Label
+                htmlFor="richtung"
+                className="text-xs text-muted-foreground"
+              >
+                Richtung
+              </Label>
+              <select
+                id="richtung"
+                name="richtung"
+                defaultValue={richtung}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+              >
+                <option value="">Alle</option>
+                <option value="ausgabe">Ausgabe</option>
+                <option value="einnahme">Einnahme</option>
+              </select>
+            </div>
+            <div className="flex w-36 flex-col gap-1.5">
+              <Label htmlFor="von" className="text-xs text-muted-foreground">
+                Von
+              </Label>
+              <Input id="von" name="von" type="date" defaultValue={von} />
+            </div>
+            <div className="flex w-36 flex-col gap-1.5">
+              <Label htmlFor="bis" className="text-xs text-muted-foreground">
+                Bis
+              </Label>
+              <Input id="bis" name="bis" type="date" defaultValue={bis} />
+            </div>
+            <Button type="submit" variant="secondary">
+              Filtern
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          {result.items.length === 0 ? (
+            <EmptyState
+              title={q || status ? "Keine Belege gefunden" : "Noch keine Belege"}
+              description={
+                q || status
+                  ? "Filter anpassen oder neuen Beleg anlegen."
+                  : "Ausgaben und Einnahmen mit Datei — Festschreibung schreibt ins Buchungsjournal."
+              }
+              actionHref="/app/belege/neu"
+              actionLabel="Ersten Beleg anlegen"
+            />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead>Datum</TableHead>
+                  <TableHead>Bezeichnung</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Richtung</TableHead>
+                  <TableHead className="text-right">Brutto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {result.items.map((b) => {
+                  const label =
+                    b.belegnummer ||
+                    b.kategorie ||
+                    b.notiz ||
+                    "Beleg";
+                  return (
+                    <TableRow key={b.id}>
+                      <TableCell className="whitespace-nowrap text-sm">
+                        {formatDateDe(b.belegdatum)}
+                      </TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/app/belege/${b.id}`}
+                          className="font-medium text-foreground hover:text-primary hover:underline"
+                        >
+                          {label}
+                        </Link>
+                        {b.datei ? (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            mit Datei
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            b.status === "festgeschrieben"
+                              ? "success"
+                              : "secondary"
+                          }
+                        >
+                          {BELEG_STATUS_LABELS[b.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            b.richtung === "einnahme" ? "success" : "muted"
+                          }
+                        >
+                          {BUCHUNGSRICHTUNG_LABELS[b.richtung]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs tabular-nums">
+                        {formatMoneyDe(b.betrag_brutto, { currency: true })}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <p>{result.totalItems} Beleg/Belege</p>
+        {result.totalPages > 1 ? (
+          <p>
+            Seite {result.page} / {result.totalPages}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
