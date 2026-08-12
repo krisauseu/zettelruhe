@@ -20,7 +20,8 @@ _Last updated: 2026-08-12_
 
 ## What's next
 
-- Meilenstein 2 (Roadmap): Steuer & Compliance vertiefen (UStVA/ELSTER-XML light, ZM, USt-IdNr., E-Rechnungs-Versand, optional Multi-Firma-UI)
+- **Funktionstest M1** vor M2: [`docs/funktionstest-m1.md`](./funktionstest-m1.md) (Happy Path + Betrieb/Backup)
+- Danach Meilenstein 2 (Roadmap): Steuer & Compliance vertiefen (UStVA/ELSTER-XML light, ZM, USt-IdNr., E-Rechnungs-Versand, optional Multi-Firma-UI)
 - Optional Feinschliff: Open Decisions (Journal↔Zahlungen), MT940, robusteres ZUGFeRD-PDF
 
 ## Open decisions

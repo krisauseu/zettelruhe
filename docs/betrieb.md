@@ -176,6 +176,10 @@ Compose: Services `next` und `pocketbase` haben Healthchecks (siehe `docker-comp
 - DATEV light / Journal-CSV / Belegarchiv: UI **Export** (`/app/export`)
 - Keine GoBD- oder DATEV-Zertifizierung (ADR-0004)
 
+## 10. Funktionstest vor M2
+
+Manuelle Checkliste (Happy Path + Backup/Restore): [`funktionstest-m1.md`](./funktionstest-m1.md).
+
 ---
 
 _Stand: Bauabschnitt 14 (Härten)._

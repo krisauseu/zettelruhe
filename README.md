@@ -130,6 +130,7 @@ LICENSE              AGPL-3.0
 | [`CONTEXT.md`](./CONTEXT.md) | Glossary und Scope |
 | [`docs/feature-roadmap.md`](./docs/feature-roadmap.md) | v1 / M2 / später |
 | [`docs/betrieb.md`](./docs/betrieb.md) | Backup, Secrets, Health, Updates |
+| [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) | Manueller Funktionstest vor M2 |
 | [`docs/verfahrensdokumentation.md`](./docs/verfahrensdokumentation.md) | GoBD-Vorlage |
 | [`docs/adr/`](./docs/adr/) | Architekturentscheidungen |
 | [`docs/90-status.md`](./docs/90-status.md) | Projektstand |

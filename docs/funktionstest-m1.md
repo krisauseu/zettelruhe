@@ -1,0 +1,276 @@
+# Funktionstest Meilenstein 1 — Zettelruhe
+
+Checkliste vor **Meilenstein 2**. Ableitung: v1-Happy-Path (`CONTEXT.md`), Feature-Roadmap, Betrieb (`docs/betrieb.md`).
+
+**Ziel:** Manuell verifizieren, dass die self-hosted Solo-Instanz im Alltag trägt — nicht Feature-Parität, nicht M2.
+
+| Feld | Eintrag |
+|------|---------|
+| Instanz / Host | _…_ |
+| Datum | _…_ |
+| Steuer-Modus getestet | ☐ Kleinunternehmerregelung · ☐ Regelbesteuerung (Ist) |
+| Tester:in | _…_ |
+| Ergebnis gesamt | ☐ bestanden · ☐ bestanden mit Mängeln · ☐ nicht bestanden |
+
+**Legende:** `[ ]` offen · `[x]` ok · `[~]` ok mit Hinweis · `[!]` Fehler (kurz notieren)
+
+**Erwartung zu Zahlungen (ehrlich):** Manuelle/Bank-Zahlungen erzeugen **kein** Journal. EÜR/DATEV/USt basieren auf dem **Buchungsjournal**. Offene Posten kommen aus Rechnungen/Zahlungen.
+
+Fixtures: `app/src/modules/einvoice/fixtures/` (XRechnung/ZUGFeRD-Minimal).
+
+---
+
+## 0. Vorbereitung
+
+- [ ] `cp .env.example .env` — echte Secrets, **keine** `change-me`-Werte wenn „Prod-like“
+- [ ] `SESSION_SECRET` ≥ 32 Zeichen Zufall; `PB_SUPERUSER_*` stark und einzigartig
+- [ ] `APP_URL` = erreichbare URL (lokal `http://localhost`, sonst Host ohne trailing slash)
+- [ ] `docker compose up --build -d`
+- [ ] `docker compose ps` → next + pocketbase **healthy**, caddy up
+- [ ] `curl -sS "$APP_URL/health"` → `"ok":true`, `"pocketbase":"ok"` (Warnings bei Platzhaltern ok für Dev)
+- [ ] Browser: App über Caddy (`APP_URL`), nicht nur Port 3000
+
+**Smoke-Befehle (optional):**
+
+```bash
+docker compose ps
+curl -sS http://localhost/health
+curl -sSI http://localhost/app   # erwartet 307 → /login
+```
+
+---
+
+## 1. Fundament: Setup, Auth, Shell
+
+- [ ] Erster Besuch: Setup-Wizard **oder** Login (wenn schon eingerichtet)
+- [ ] Setup (leere Instanz): Eigentümer:in, Firma, **Steuer-Modus**, SKR → Redirect `/app`
+- [ ] Abmelden → Login mit richtigen Daten → `/app`
+- [ ] Login falsch → de-DE Fehlermeldung, keine Session
+- [ ] Geschützte Routen ohne Cookie → Redirect `/login` (`/app`, `/app/suche`, …)
+- [ ] Sidebar: Gruppen lesbar; Theme-Toggle; Abmelden
+- [ ] **Firma** (`/app/firma`): Stammdaten speichern (Name, Adresse, Steuer-Modus-Anzeige)
+- [ ] Nummernkreise: Entwürfe **ohne** Nummernverbrauch (später bei Angebot/Rechnung prüfen)
+
+---
+
+## 2. Stammdaten: Kontakte & Katalog
+
+### Kontakte
+
+- [ ] Leerer State verständlich + Link „anlegen“
+- [ ] Kund:in anlegen (Name, Adresse, E-Mail, optional IBAN)
+- [ ] Lieferant:in anlegen
+- [ ] Filter/Suche in der Liste
+- [ ] Detail: Ansprechpartner light anlegen
+- [ ] CSV-Export lädt Datei
+- [ ] CSV-Import (Template oder Export-Runde) ohne Datenverlust der Pflichtfelder
+
+### Katalog
+
+- [ ] Position anlegen (Bezeichnung, Preis, Einheit; USt nur sinnvoll bei Regelbesteuerung)
+- [ ] Bearbeiten / Liste / Filter
+- [ ] CSV-Export / optional Import
+
+---
+
+## 3. Arbeit: Projekte, Zeiten, Fahrten
+
+- [ ] Projekt optional unter Kund:in anlegen
+- [ ] Zeiteintrag: Kund:in Pflicht, Dauer, Status abrechenbar
+- [ ] Fahrt: km, Default abrechenbar, optional Projekt
+- [ ] 1-Klick-Übernahme offener Zeiten/Fahrten → **Rechnungs-Entwurf** (kein Journal bei Zeit/Fahrt allein)
+- [ ] Status nach Übernahme plausibel (z. B. abgerechnet / nicht mehr offen)
+
+---
+
+## 4. Verkauf: Angebot → Rechnung
+
+### Angebot
+
+- [ ] Entwurf mit Positionen (Menge, Preis); **keine** Angebotsnummer im Entwurf
+- [ ] Senden → Nummer + PDF; PDF öffnen/downloaden
+- [ ] Steuer-Modus: Kleinunternehmer → §-19-Hinweis, **ohne** USt-Zeilen; Regelbesteuerung → USt-Ausweis
+- [ ] Status light: Gesendet → Angenommen (o. Ä.)
+- [ ] Angenommenes Angebot → Rechnungs-Entwurf übernehmen
+
+### Rechnung
+
+- [ ] Freie Rechnung als Entwurf; Positionen; **keine** Rechnungsnummer im Entwurf
+- [ ] Festschreiben → Nummer + PDF + **Journal**-Zeile (`quelle_typ` Rechnung)
+- [ ] PDF: Logo/Pflichtangaben light; bei Kleinunternehmer §-19
+- [ ] Entwurf nach Festschreibung **nicht** still änderbar (Immutability)
+- [ ] Liste Filter (Status, Datum, Suche)
+
+### Wiederkehrend (light)
+
+- [ ] Vorlage anlegen (Rhythmus, Positionen, Kund:in)
+- [ ] Manuell erzeugen → **Rechnungs-Entwurf** (kein Auto-Festschreiben)
+- [ ] Optional: Job-Tick abwarten oder manuell anstoßen (wenn SMTP/Jobs konfiguriert)
+
+### SMTP (optional, wenn `SMTP_*` gesetzt)
+
+- [ ] Rechnung/Angebot per E-Mail; ohne SMTP: klare de-DE-Meldung
+
+---
+
+## 5. Zahlungen & offene Posten
+
+- [ ] Festgeschriebene offene Rechnung unter **Zahlungen** / Offene Posten
+- [ ] Teilzahlung erfassen → Status **teilbezahlt**, offener Betrag stimmt
+- [ ] Restzahlung → **bezahlt**
+- [ ] **Kein** neuer Journal-Eintrag allein durch Zahlung (Stichprobe Journal)
+- [ ] Zahlungserinnerung manuell light (UI), falls vorhanden — kein automatischer Mahnlauf erwartet
+
+---
+
+## 6. Belege, Kasse, Journal
+
+### Belege
+
+- [ ] Entwurf mit Datei (PDF/Bild), Kategorie, Beträge
+- [ ] Festschreiben → Belegnummer + Journal; Datei danach immutable
+- [ ] Datei-Download über App-Route
+- [ ] Stille Änderung nach Festschreibung abgelehnt / UI read-only
+
+### Kassenbuch
+
+- [ ] Bareinnahme anlegen → Belegnummer + Saldo + Journal
+- [ ] Barausgabe; Saldo ≥ 0 (Negativsaldo abgelehnt)
+- [ ] Storno light → Gegenbuchung, Original bleibt
+- [ ] Hinweis: Barzahlung an Rechnung ≠ automatischer Kassenbuch-Eintrag
+
+### Journal
+
+- [ ] Liste zeigt Beleg-, Rechnungs-, Kassen-Buchungen
+- [ ] Manuelle Buchung = sofort festgeschrieben
+- [ ] Storno → Gegenbuchung mit Bezug; kein Update/Delete am Original
+- [ ] Filter Datum / Suche light
+
+---
+
+## 7. Bank & Matching
+
+- [ ] Bankkonto anlegen
+- [ ] CSV-Import (de-DE) → Bewegungen sichtbar; Idempotenz (gleicher Import erneut ohne Duplikat-Chaos)
+- [ ] Match-Vorschlag gegen offene Rechnung → Matching erzeugt Zahlung (Status Rechnung)
+- [ ] **Kein** Journal allein durch Match
+- [ ] MT940: nicht als v1-Pflicht erwarten (Follow-up)
+
+---
+
+## 8. E-Rechnung Empfang
+
+- [ ] Upload Fixture XRechnung (`fixtures/xrechnung-minimal.xml`) → Original archiviert
+- [ ] Parse-Vorschau; optional Beleg-Entwurf
+- [ ] Kleinunternehmer: keine Vorsteuer-Vorbefüllung; Regelbesteuerung: USt wo geparst
+- [ ] Original-Download
+- [ ] Optional ZUGFeRD-CII-Fixture; bei PDF-only light: Fehler/Hinweis ok, Original bleibt
+
+---
+
+## 9. Auswertungen, Export, Suche
+
+- [ ] **Übersicht** (`/app`): Kennzahlen Monat; Schnellstart-Links
+- [ ] **Auswertungen / EÜR**: Perioden; Summen plausibel zu Journal
+- [ ] **USt-Übersicht**: nur Regelbesteuerung nutzbar; unter Kleinunternehmer klarer Hinweis
+- [ ] **Export DATEV light** CSV lädt (`zettelruhe-datev-csv-light-v1`, kein Zertifizierungs-Claim)
+- [ ] Journal-CSV (Semikolon, UTF-8)
+- [ ] Belegarchiv-ZIP (Metadaten + Dateien festgeschriebener Belege)
+- [ ] Downloads unter `/app/export/*`, **nicht** unter `/api/*`
+- [ ] **Suche** (`/app/suche`): Treffer Kontakt / Rechnung / Beleg / Angebot (min. 2 Zeichen)
+
+---
+
+## 10. GoBD / Immutability (Stichproben)
+
+- [ ] Festgeschriebene Journal-Zeile: kein Edit/Delete in der UI
+- [ ] Festgeschriebene Belegdatei / Rechnungs-PDF: keine stille Ersetzung
+- [ ] Korrektur nur Storno/Gegenbuchung bzw. neues Dokument
+- [ ] `docs/verfahrensdokumentation.md` gelesen; individuelle Felder notiert (optional)
+
+---
+
+## 11. Betrieb, Backup, Security light
+
+Details: [`docs/betrieb.md`](./betrieb.md).
+
+### Health & Header
+
+- [ ] `/health` erreichbar ohne Login
+- [ ] Response-Header u. a. `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` (über Caddy)
+- [ ] PB-Admin `/_/` nur bewusst erreichbar (lokal ok; Prod: nicht öffentlich)
+
+### Backup
+
+- [ ] Stack stoppen (oder bewusstes Online-Backup)
+- [ ] Volume `zettelruhe_pb_data` als tar sichern (Befehl aus `betrieb.md`)
+- [ ] `.env` separat kopiert
+
+### Restore (mind. einmal)
+
+- [ ] Restore-Test in **frischem** Volume oder zweiter Umgebung (Prod-Daten nicht zerstören)
+- [ ] Nach Restore: Login, Stichprobe Journal, Beleg-PDF/Datei, eine Rechnung
+- [ ] Datum des Restore-Tests in Verfahrensdoku notieren
+
+### Secrets
+
+- [ ] `.env` nicht im Git; Rechte am Host angemessen
+- [ ] Superuser ≠ App-Login der Eigentümer:in verstanden
+
+---
+
+## 12. Regression / UX light
+
+- [ ] Leere Listen: sinnvolle de-DE-Texte + Anlege-Links (Kontakte, Rechnungen, Belege, …)
+- [ ] Mobile Viewport: Sidebar/Hauptinhalt bedienbar genug (kein Profi-PWA-Anspruch)
+- [ ] Dark Mode: Lesbarkeit Formulare/Tabellen
+- [ ] Keine englischen Roh-Fehler auf Happy-Path-Aktionen
+
+---
+
+## 13. Bewusst nicht testen (v1 / M2)
+
+Nicht als Fehler werten:
+
+- ELSTER-Versand, UStVA-Abgabe, ZM, USt-IdNr.-API  
+- E-Rechnungs-**Versand**  
+- PSD2, OCR, REST-API, Kundenportal, automatischer Mahnlauf  
+- Multi-Firma-UI, Soll-Versteuerung, Abschlagskette  
+- GoBD-/DATEV-**Zertifikat**  
+- Journal-Eintrag **nur** durch Zahlung (Open Decision)  
+- MT940 als Pflicht
+
+---
+
+## Ergebnis & Freigabe
+
+### Kritische Mängel (blockieren M2-Start nur wenn Alltag unbenutzbar)
+
+| ID | Modul / Route | Beschreibung | Schwere |
+|----|---------------|--------------|---------|
+|    |               |              |         |
+
+### Hinweise / Nice-to-have
+
+| ID | Beschreibung |
+|----|--------------|
+|    |              |
+
+### Freigabe
+
+- [ ] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
+- [ ] Backup **und** Restore einmal nachgewiesen
+- [ ] Open Decisions verstanden (Zahlung ≠ Journal)
+- [ ] **M2 darf starten** — ja / nein: _…_
+
+Unterschrift / Datum: _…_
+
+---
+
+## Kurzpfad (30–45 min)
+
+Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschreiben + PDF + Journal → Beleg festschreiben → Teilzahlung → EÜR + DATEV-Download → Suche → Health + ein Backup (ohne Restore). Restore und Bank/E-Rechnung/Wiederkehrend nachziehen.
+
+---
+
+_Stand: nach Bauabschnitt 14 (M1 hartbar). Bei Software-Updates Checkliste nachziehen._
