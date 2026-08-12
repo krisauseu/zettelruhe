@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-12_
 
-**Last session:** 2026-08-12 — Bauabschnitt 14 (Härten)
+**Last session:** 2026-08-12 — BA14 + GitHub private repo + Funktionstest-Checkliste M1
 
 ## What's done
 
