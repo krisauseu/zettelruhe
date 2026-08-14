@@ -4,6 +4,8 @@
 
 export const MODULE_ID = "catalog" as const;
 
+export { KATALOG_EINHEITEN, einheitOptionen } from "./einheiten";
+
 export type {
   KatalogFilter,
   KatalogListResult,

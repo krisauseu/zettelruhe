@@ -16,6 +16,7 @@ import {
   todayBerlin,
 } from "@/modules/journal";
 import { Button } from "@/components/ui/button";
+import { ConfirmForm } from "@/components/ui/confirm-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -215,7 +216,13 @@ export default async function JournalDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={storniereBuchungAction} className="flex flex-col gap-4">
+            <ConfirmForm
+              action={storniereBuchungAction}
+              title="Gegenbuchung festschreiben?"
+              message="Es wird eine neue, entgegengesetzte Buchung erzeugt. Der Original-Eintrag bleibt unverändert."
+              confirmLabel="Jetzt stornieren"
+              className="flex flex-col gap-4"
+            >
               <input type="hidden" name="id" value={id} />
               <div className="flex max-w-xs flex-col gap-1.5">
                 <Label htmlFor="buchungsdatum">Buchungsdatum Storno</Label>
@@ -229,7 +236,7 @@ export default async function JournalDetailPage({
               <Button type="submit" variant="danger" size="sm">
                 Gegenbuchung festschreiben
               </Button>
-            </form>
+            </ConfirmForm>
           </CardContent>
         </Card>
       ) : null}

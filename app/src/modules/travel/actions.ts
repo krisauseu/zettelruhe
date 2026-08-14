@@ -61,7 +61,7 @@ export async function createFahrtAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/fahrten");
-  redirect(`/app/fahrten/${id}`);
+  redirect(`/app/fahrten/${id}?created=1`);
 }
 
 /** Fahrt speichern. */

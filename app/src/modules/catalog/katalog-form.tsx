@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { KatalogPosition } from "./types";
+import { einheitOptionen } from "./einheiten";
 
 type Props = {
   action: (formData: FormData) => Promise<void>;
@@ -40,13 +41,18 @@ export function KatalogForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="einheit">Einheit</Label>
-          <Input
+          <Select
             id="einheit"
             name="einheit"
             required
-            defaultValue={position?.einheit ?? "Stück"}
-            placeholder="Stück, Stunde, Pauschale …"
-          />
+            defaultValue={position?.einheit || "Stück"}
+          >
+            {einheitOptionen(position?.einheit).map((e) => (
+              <option key={e} value={e}>
+                {e}
+              </option>
+            ))}
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="preis">Preis (EUR)</Label>

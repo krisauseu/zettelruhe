@@ -73,7 +73,7 @@ export async function createBelegAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/belege");
-  redirect(`/app/belege/${id}`);
+  redirect(`/app/belege/${id}?created=1`);
 }
 
 /** Entwurf speichern. */

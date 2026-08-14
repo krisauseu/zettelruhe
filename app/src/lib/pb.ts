@@ -49,6 +49,11 @@ export type FirmaRecord = {
   land?: string;
   steuernummer?: string;
   ust_id?: string;
+  /** PB-Dateiname, leer = kein Logo */
+  logo?: string;
+  dokument_akzentfarbe?: string;
+  dokument_kopftext?: string;
+  dokument_fusstext?: string;
 };
 
 export type AuthUser = {
@@ -201,6 +206,10 @@ type PbFirma = {
   land?: string;
   steuernummer?: string;
   ust_id?: string;
+  logo?: string;
+  dokument_akzentfarbe?: string;
+  dokument_kopftext?: string;
+  dokument_fusstext?: string;
 };
 
 function mapFirma(r: PbFirma): FirmaRecord {
@@ -216,6 +225,10 @@ function mapFirma(r: PbFirma): FirmaRecord {
     land: r.land ?? "DE",
     steuernummer: r.steuernummer ?? "",
     ust_id: r.ust_id ?? "",
+    logo: r.logo ?? "",
+    dokument_akzentfarbe: r.dokument_akzentfarbe ?? "",
+    dokument_kopftext: r.dokument_kopftext ?? "",
+    dokument_fusstext: r.dokument_fusstext ?? "",
   };
 }
 
@@ -230,19 +243,37 @@ export async function getFirstFirma(): Promise<FirmaRecord | null> {
   return mapFirma(list.items[0]);
 }
 
+export type FirmaStammdatenInput = {
+  name: string;
+  steuermodus: Steuermodus;
+  skr?: SkrWahl;
+  strasse?: string;
+  plz?: string;
+  ort?: string;
+  land?: string;
+  steuernummer?: string;
+  ust_id?: string;
+  nummernkreise?: Nummernkreise;
+  dokument_akzentfarbe?: string;
+  dokument_kopftext?: string;
+  dokument_fusstext?: string;
+  logo?: Blob;
+  logo_entfernen?: boolean;
+};
+
 export async function createFirma(input: {
   name: string;
   steuermodus: Steuermodus;
   skr: SkrWahl;
+  strasse?: string;
+  plz?: string;
+  ort?: string;
+  land?: string;
+  steuernummer?: string;
+  ust_id?: string;
 }): Promise<FirmaRecord> {
   const token = await getAdminToken();
-  const r = await pbFetch<{
-    id: string;
-    name: string;
-    steuermodus: Steuermodus;
-    skr: SkrWahl;
-    nummernkreise: Nummernkreise;
-  }>("/api/collections/firmen/records", {
+  const r = await pbFetch<PbFirma>("/api/collections/firmen/records", {
     method: "POST",
     token,
     body: JSON.stringify({
@@ -250,16 +281,67 @@ export async function createFirma(input: {
       steuermodus: input.steuermodus,
       skr: input.skr,
       nummernkreise: DEFAULT_NUMMERNKREISE,
-      land: "DE",
+      strasse: (input.strasse ?? "").trim(),
+      plz: (input.plz ?? "").trim(),
+      ort: (input.ort ?? "").trim(),
+      land: (input.land ?? "DE").trim() || "DE",
+      steuernummer: (input.steuernummer ?? "").trim(),
+      ust_id: (input.ust_id ?? "").trim(),
     }),
   });
-  return {
-    id: r.id,
-    name: r.name,
-    steuermodus: r.steuermodus,
-    skr: r.skr,
-    nummernkreise: r.nummernkreise,
+  return mapFirma(r);
+}
+
+export async function updateFirma(
+  id: string,
+  input: FirmaStammdatenInput,
+): Promise<FirmaRecord> {
+  const scalars: Record<string, unknown> = {
+    name: input.name.trim(),
+    steuermodus: input.steuermodus,
+    strasse: (input.strasse ?? "").trim(),
+    plz: (input.plz ?? "").trim(),
+    ort: (input.ort ?? "").trim(),
+    land: (input.land ?? "DE").trim() || "DE",
+    steuernummer: (input.steuernummer ?? "").trim(),
+    ust_id: (input.ust_id ?? "").trim(),
   };
+  if (input.skr) {
+    scalars.skr = input.skr;
+  }
+  if (input.nummernkreise) {
+    scalars.nummernkreise = input.nummernkreise;
+  }
+  if (input.dokument_akzentfarbe !== undefined) {
+    scalars.dokument_akzentfarbe = input.dokument_akzentfarbe;
+  }
+  if (input.dokument_kopftext !== undefined) {
+    scalars.dokument_kopftext = input.dokument_kopftext;
+  }
+  if (input.dokument_fusstext !== undefined) {
+    scalars.dokument_fusstext = input.dokument_fusstext;
+  }
+
+  const hasLogo = input.logo instanceof Blob;
+  const removeLogo = Boolean(input.logo_entfernen);
+  if (hasLogo || removeLogo) {
+    const fields: Record<string, string | Blob | null | undefined> = {};
+    for (const [key, value] of Object.entries(scalars)) {
+      if (value === undefined || value === null) continue;
+      fields[key] =
+        typeof value === "string" ? value : JSON.stringify(value);
+    }
+    fields.logo = hasLogo ? input.logo : "";
+    const r = await updateRecordMultipart<PbFirma>("firmen", id, fields);
+    return mapFirma(r);
+  }
+
+  const r = await pbFetch<PbFirma>(`/api/collections/firmen/records/${id}`, {
+    method: "PATCH",
+    token: await getAdminToken(),
+    body: JSON.stringify(scalars),
+  });
+  return mapFirma(r);
 }
 
 export async function createEigentuemer(input: {

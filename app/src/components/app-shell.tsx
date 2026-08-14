@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { LogOut } from "lucide-react";
 import type { SessionPayload } from "@/lib/session";
 import { logoutAction } from "@/modules/platform/auth-actions";
 import { Button } from "@/components/ui/button";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { FlashToast } from "@/components/ui/flash-toast";
 
 /** Serializable nav config (icon keys, not React components). Gruppen light BA14. */
 const NAV: NavItem[] = [
@@ -51,10 +53,14 @@ export function AppShell({
   return (
     <div className="flex min-h-full flex-1 bg-background">
       <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-        <div className="border-b border-sidebar-border px-4 py-5">
+        <div className="relative border-b border-sidebar-border px-4 py-5">
+          <div
+            className="absolute inset-x-0 top-0 h-0.5 bg-primary"
+            aria-hidden
+          />
           <Link
             href="/app"
-            className="text-lg font-semibold tracking-tight text-sidebar-foreground"
+            className="text-lg font-semibold tracking-tight text-primary"
           >
             Zettelruhe
           </Link>
@@ -82,6 +88,9 @@ export function AppShell({
       </aside>
 
       <main className="flex-1 overflow-auto">
+        <Suspense fallback={null}>
+          <FlashToast />
+        </Suspense>
         <div className="mx-auto min-h-full p-6 md:p-8">{children}</div>
       </main>
     </div>

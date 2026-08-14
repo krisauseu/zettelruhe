@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession, requireFirmaSession } from "@/lib/session";
 import {
   kontakteCsvTemplate,
+  listAllAnsprechpartner,
   listAllKontakte,
   serializeKontakteCsv,
 } from "@/modules/contacts";
@@ -34,7 +35,14 @@ export async function GET(request: Request) {
     filename = "kontakte-vorlage.csv";
   } else {
     const items = await listAllKontakte(firmaId);
-    body = serializeKontakteCsv(items);
+    const aps = await listAllAnsprechpartner(firmaId);
+    const byKontakt = new Map<string, typeof aps>();
+    for (const ap of aps) {
+      const list = byKontakt.get(ap.kontakt) ?? [];
+      list.push(ap);
+      byKontakt.set(ap.kontakt, list);
+    }
+    body = serializeKontakteCsv(items, ";", byKontakt);
     filename = `kontakte-${new Date().toISOString().slice(0, 10)}.csv`;
   }
 

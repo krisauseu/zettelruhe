@@ -84,8 +84,8 @@ export default async function RechnungenListPage({
             Rechnungen
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Freie Rechnungen — Entwurf bearbeiten, bei Festschreibung Nummer,
-            PDF und Buchungsjournal.
+            Freie Rechnungen — Entwurf mit Vorschau, bei Festschreibung Nummer,
+            Original-PDF und Buchungsjournal.
           </p>
         </div>
         <Link
@@ -208,11 +208,13 @@ export default async function RechnungenListPage({
                           variant={
                             r.status === "bezahlt"
                               ? "success"
-                              : r.status === "entwurf"
-                                ? "secondary"
-                                : r.status === "ueberfaellig"
-                                  ? "outline"
-                                  : "default"
+                              : r.status === "storniert"
+                                ? "danger"
+                                : r.status === "entwurf"
+                                  ? "secondary"
+                                  : r.status === "ueberfaellig"
+                                    ? "warning"
+                                    : "default"
                           }
                         >
                           {RECHNUNG_STATUS_LABELS[r.status]}

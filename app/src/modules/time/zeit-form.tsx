@@ -137,18 +137,24 @@ export function ZeitForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="minuten" className="text-xs text-muted-foreground">
-            Minuten
+            Minuten (15-Min-Raster)
           </Label>
-          <Input
+          <Select
             id="minuten"
             name="minuten"
-            type="number"
-            min={0}
-            max={59}
-            step={1}
             disabled={readOnly}
-            defaultValue={dauer.minuten}
-          />
+            defaultValue={String(dauer.minuten)}
+          >
+            {Array.from(
+              new Set([0, 15, 30, 45, dauer.minuten].filter((m) => m >= 0 && m < 60)),
+            )
+              .sort((a, b) => a - b)
+              .map((m) => (
+                <option key={m} value={m}>
+                  {String(m).padStart(2, "0")}
+                </option>
+              ))}
+          </Select>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label
@@ -167,8 +173,8 @@ export function ZeitForm({
           />
         </div>
         <p className="text-xs text-muted-foreground sm:col-span-3">
-          Stunden und Minuten haben Vorrang. Alternativ nur Dezimalstunden
-          ausfüllen (Komma oder Punkt).
+          Stunden und Minuten haben Vorrang (Minuten in 15er-Schritten).
+          Alternativ Dezimalstunden in 0,25-Schritten (z. B. 1,25 = 1:15 h).
         </p>
       </fieldset>
 

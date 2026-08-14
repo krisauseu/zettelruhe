@@ -6,11 +6,11 @@ Checkliste vor **Meilenstein 2**. Ableitung: v1-Happy-Path (`CONTEXT.md`), Featu
 
 | Feld | Eintrag |
 |------|---------|
-| Instanz / Host | _…_ |
-| Datum | _…_ |
-| Steuer-Modus getestet | ☐ Kleinunternehmerregelung · ☐ Regelbesteuerung (Ist) |
-| Tester:in | _…_ |
-| Ergebnis gesamt | ☐ bestanden · ☐ bestanden mit Mängeln · ☐ nicht bestanden |
+| Instanz / Host | lokal (self-hosted) |
+| Datum | 2026-08-14 |
+| Steuer-Modus getestet | ☑ Kleinunternehmerregelung · ☐ Regelbesteuerung (Ist) |
+| Tester:in | kf |
+| Ergebnis gesamt | ☐ bestanden · ☑ bestanden mit Mängeln · ☐ nicht bestanden |
 
 **Legende:** `[ ]` offen · `[x]` ok · `[~]` ok mit Hinweis · `[!]` Fehler (kurz notieren)
 
@@ -88,7 +88,8 @@ curl -sSI http://localhost/app   # erwartet 307 → /login
 ### Angebot
 
 - [ ] Entwurf mit Positionen (Menge, Preis); **keine** Angebotsnummer im Entwurf
-- [ ] Senden → Nummer + PDF; PDF öffnen/downloaden
+- [ ] Entwurf: PDF-Vorschau (Wasserzeichen „Entwurf“, keine Nummer)
+- [ ] Senden → Nummer + Original-PDF **ohne SMTP**; PDF öffnen/drucken; E-Mail optional
 - [ ] Steuer-Modus: Kleinunternehmer → §-19-Hinweis, **ohne** USt-Zeilen; Regelbesteuerung → USt-Ausweis
 - [ ] Status light: Gesendet → Angenommen (o. Ä.)
 - [ ] Angenommenes Angebot → Rechnungs-Entwurf übernehmen
@@ -96,8 +97,9 @@ curl -sSI http://localhost/app   # erwartet 307 → /login
 ### Rechnung
 
 - [ ] Freie Rechnung als Entwurf; Positionen; **keine** Rechnungsnummer im Entwurf
-- [ ] Festschreiben → Nummer + PDF + **Journal**-Zeile (`quelle_typ` Rechnung)
-- [ ] PDF: Logo/Pflichtangaben light; bei Kleinunternehmer §-19
+- [ ] Entwurf: PDF-Vorschau (Wasserzeichen „Entwurf“, keine Nummer, kein Journal)
+- [ ] Festschreiben → Nummer + Original-PDF + **Journal**-Zeile (`quelle_typ` Rechnung)
+- [ ] PDF: Logo/Pflichtangaben light; bei Kleinunternehmer §-19; nach Festschreibung nur Original (keine Entwurfsvorschau)
 - [ ] Entwurf nach Festschreibung **nicht** still änderbar (Immutability)
 - [ ] Liste Filter (Status, Datum, Suche)
 
@@ -248,22 +250,34 @@ Nicht als Fehler werten:
 
 | ID | Modul / Route | Beschreibung | Schwere |
 |----|---------------|--------------|---------|
-|    |               |              |         |
+| M1-01 | Auswertungen / Journal-Storno | Storno einer Ausgabe wurde als Einnahme addiert; Storno einer Rechnung als Ausgabe. **Behoben im Nachzug 2026-08-14** (EÜR/BWA/USt mindern die Ursprungskategorie). | kritisch |
+| M1-02 | `/app/rechnungen` | Stornierte Rechnungen behielten Status „Bezahlt“. **Behoben:** Status `storniert` bei Journal- und Rechnungs-Storno. | hoch |
+| M1-03 | Setup / `/app/firma` | Anschrift nicht im Setup; Firmendaten und Nummernkreise nicht nachträglich editierbar. **Behoben.** | hoch |
 
 ### Hinweise / Nice-to-have
 
 | ID | Beschreibung |
 |----|--------------|
-|    |              |
+| M1-04 | Kontakt-CSV ohne Ansprechpartner — **behoben** (Export löst Relation auf; Import legt ersten AP an). |
+| M1-05 | Keine Toasts nach Speichern — **behoben** (globales Flash-Toast). |
+| M1-06 | Keine Storno-Sicherheitsabfrage — **behoben** (Bestätigungs-Modal). |
+| M1-07 | Zeiterfassung 15-Min-Raster — **behoben**. |
+| M1-08 | Katalog-Einheiten-Dropdown — **behoben**. |
+| M1-09 | Steuer-Modus-Wechsel nachträglich — **behoben** (`/app/firma`, mit Bestätigung). |
+| M1-10 | Dokumenten-Layout & Branding (Logo, Farben, Textbausteine) — **behoben** (`/app/firma`, gilt für neue PDFs). |
+| M1-11 | Bank-CSV-Import und E-Rechnung-Empfang im Test nicht verifiziert. |
+| M1-12 | UI weiter modernisieren (Akzente) — **light nachgezogen** (Badges, Primärfarbe, Abstände; kein CSS-Profi). |
+| M1-13 | Angebot: PDF erzeugen/drucken ohne E-Mail — **behoben** (Vorschau am Entwurf; Original beim Senden, SMTP optional). |
+| M1-14 | Rechnung: PDF-Vorschau vor Festschreibung — **behoben** (Wasserzeichen „Entwurf“, kein Nummernkreis, kein Journal). |
 
 ### Freigabe
 
-- [ ] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
-- [ ] Backup **und** Restore einmal nachgewiesen
-- [ ] Open Decisions verstanden (Zahlung ≠ Journal)
-- [ ] **M2 darf starten** — ja / nein: _…_
+- [x] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
+- [x] Backup **und** Restore einmal nachgewiesen
+- [x] Open Decisions verstanden (Zahlung ≠ Journal)
+- [x] **M2 darf starten** — ja / nein: **ja** (nach M1-Nachzug; Layout/Branding bleibt Follow-up)
 
-Unterschrift / Datum: _…_
+Unterschrift / Datum: kf / 2026-08-14
 
 ---
 

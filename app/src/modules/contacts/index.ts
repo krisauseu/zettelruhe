@@ -19,6 +19,7 @@ export {
   deleteAnsprechpartner,
   deleteKontakt,
   getKontakt,
+  listAllAnsprechpartner,
   listAllKontakte,
   listAnsprechpartner,
   listKontakte,

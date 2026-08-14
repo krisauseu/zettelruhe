@@ -20,7 +20,11 @@ import {
   updateRecordMultipart,
 } from "@/lib/pb";
 import { getKontakt } from "@/modules/contacts";
-import { festschreibenBuchung } from "@/modules/journal/repository";
+import {
+  festschreibenBuchung,
+  findStornoFuer,
+  storniereBuchung,
+} from "@/modules/journal/repository";
 import type { JournalEintrag } from "@/modules/journal/types";
 import {
   ANGEBOT_GESENDET_ERROR,
@@ -29,8 +33,15 @@ import {
   assertAngebotEntwurfOhneNummer,
   assertCanChangeAngebotStatus,
   assertCanFestschreiben,
+  assertCanPreviewAngebotPdf,
+  assertCanPreviewRechnungPdf,
+  assertCanServeOriginalAngebotPdf,
+  assertCanServeOriginalRechnungPdf,
+  assertCanStornierenRechnung,
   assertCanSenden,
   assertCanUebernehmenInRechnung,
+  assertAngebotVorschauNurEntwurf,
+  assertRechnungVorschauNurEntwurf,
   assertEntwurfEditable,
   assertEntwurfOhneNummer,
   buildJournalInputFromRechnung,
@@ -38,11 +49,14 @@ import {
   defaultGueltigBis,
   FESTGESCHRIEBEN_ERROR,
   festschreibungsZeitpunktUtc,
+  RECHNUNG_STORNO_ENTWURF_ERROR,
   PDF_IMMUTABLE_ERROR,
   validateAngebotInput,
   validateRechnungInput,
 } from "./invariants";
+import { loadDokumentLayout } from "./dokument-layout";
 import { renderAngebotPdf, renderRechnungPdf } from "./pdf";
+import { pdfDateiname } from "./pdf-layout";
 import type {
   Angebot,
   AngebotFilter,
@@ -383,13 +397,15 @@ export async function festschreibenRechnung(
   const now = opts?.now ?? new Date();
   const rechnungsnummer = await allocateRechnungsnummer(firmaId);
 
-  // PDF mit vergebener Nummer erzeugen
+  const layout = await loadDokumentLayout(firma);
   const pdfBuffer = await renderRechnungPdf({
     rechnung: { ...existing, rechnungsnummer },
     positionen: existing.positionen,
     firma,
     kunde,
     rechnungsnummer,
+    entwurf: false,
+    layout,
   });
 
   const journalInput = buildJournalInputFromRechnung(
@@ -423,6 +439,60 @@ export async function festschreibenRechnung(
     rechnung: { ...rechnung, positionen: existing.positionen },
     journal,
   };
+}
+
+/** Status auf storniert setzen (idempotent, wenn bereits storniert). */
+export async function markRechnungStorniert(
+  firmaId: string,
+  id: string,
+): Promise<Rechnung> {
+  const existing = await getRechnung(firmaId, id);
+  if (!existing) {
+    throw new Error("Rechnung nicht gefunden.");
+  }
+  if (existing.status === "storniert") {
+    return existing;
+  }
+  if (existing.status === "entwurf") {
+    throw new Error(RECHNUNG_STORNO_ENTWURF_ERROR);
+  }
+  const r = await updateRecord<PbRechnung>(COL, id, { status: "storniert" });
+  return mapRechnung(r);
+}
+
+/**
+ * Rechnung stornieren: Journal-Gegenbuchung (falls noch keine) + Status storniert.
+ * Inhalt/PDF bleiben unverändert (GoBD).
+ */
+export async function storniereRechnung(
+  firmaId: string,
+  id: string,
+  opts?: { buchungsdatum?: string; buchungstext?: string; now?: Date },
+): Promise<{ rechnung: Rechnung; journal: JournalEintrag | null }> {
+  const existing = await getRechnung(firmaId, id);
+  if (!existing) {
+    throw new Error("Rechnung nicht gefunden.");
+  }
+  assertCanStornierenRechnung(existing);
+
+  let journal: JournalEintrag | null = null;
+  if (existing.journal_eintrag) {
+    const already = await findStornoFuer(firmaId, existing.journal_eintrag);
+    if (already) {
+      journal = already;
+    } else {
+      journal = await storniereBuchung(firmaId, existing.journal_eintrag, {
+        buchungsdatum: opts?.buchungsdatum,
+        buchungstext:
+          opts?.buchungstext ||
+          `Storno Rechnung ${existing.rechnungsnummer || existing.id}`,
+        now: opts?.now,
+      });
+    }
+  }
+
+  const rechnung = await markRechnungStorniert(firmaId, id);
+  return { rechnung, journal };
 }
 
 export async function getRechnung(
@@ -506,19 +576,56 @@ export async function getRechnungPdfResponse(
   if (!rechnung) {
     throw new Error("Rechnung nicht gefunden.");
   }
-  if (!rechnung.pdf) {
-    throw new Error("Kein PDF an der Rechnung.");
-  }
-  // Nach Festschreibung immutable — kein Replace hier
-  if (rechnung.status === "entwurf") {
-    // Entwurf hat normalerweise kein PDF; falls doch, nicht als final anbieten
-  }
+  assertCanServeOriginalRechnungPdf(rechnung);
   const response = await fetchRecordFile(COL, id, rechnung.pdf);
-  const filename =
-    rechnung.rechnungsnummer
-      ? `${rechnung.rechnungsnummer}.pdf`
-      : rechnung.pdf;
+  const filename = pdfDateiname({
+    art: "rechnung",
+    entwurf: false,
+    nummer: rechnung.rechnungsnummer,
+  });
   return { response, filename, rechnung };
+}
+
+/**
+ * On-the-fly-Vorschau eines Rechnungs-Entwurfs.
+ * Kein Persistieren, kein Nummernkreis, kein Journal.
+ */
+export async function renderRechnungVorschauPdf(
+  firmaId: string,
+  id: string,
+): Promise<{ buffer: Buffer; filename: string }> {
+  const existing = await getRechnungMitPositionen(firmaId, id);
+  if (!existing) {
+    throw new Error("Rechnung nicht gefunden.");
+  }
+  assertRechnungVorschauNurEntwurf(existing);
+  assertCanPreviewRechnungPdf(existing, existing.positionen);
+
+  const firma = await getFirmaById(firmaId);
+  if (!firma) {
+    throw new Error("Firma nicht gefunden.");
+  }
+  const kunde = existing.kunde
+    ? await getKontakt(firmaId, existing.kunde)
+    : null;
+  if (!kunde) {
+    throw new Error("Kund:in nicht gefunden.");
+  }
+
+  const layout = await loadDokumentLayout(firma);
+  const buffer = await renderRechnungPdf({
+    rechnung: existing,
+    positionen: existing.positionen,
+    firma,
+    kunde,
+    rechnungsnummer: "",
+    entwurf: true,
+    layout,
+  });
+  return {
+    buffer,
+    filename: pdfDateiname({ art: "rechnung", entwurf: true }),
+  };
 }
 
 /**
@@ -845,12 +952,15 @@ export async function sendenAngebot(
   const now = opts?.now ?? new Date();
   const angebotsnummer = await allocateAngebotsnummer(firmaId);
 
+  const layout = await loadDokumentLayout(firma);
   const pdfBuffer = await renderAngebotPdf({
     angebot: { ...existing, angebotsnummer },
     positionen: existing.positionen,
     firma,
     kunde,
     angebotsnummer,
+    entwurf: false,
+    layout,
   });
 
   const gesendet_am = festschreibungsZeitpunktUtc(now);
@@ -1012,14 +1122,56 @@ export async function getAngebotPdfResponse(
   if (!angebot) {
     throw new Error("Angebot nicht gefunden.");
   }
-  if (!angebot.pdf) {
-    throw new Error("Kein PDF am Angebot.");
-  }
+  assertCanServeOriginalAngebotPdf(angebot);
   const response = await fetchRecordFile(COL_A, id, angebot.pdf);
-  const filename = angebot.angebotsnummer
-    ? `${angebot.angebotsnummer}.pdf`
-    : angebot.pdf;
+  const filename = pdfDateiname({
+    art: "angebot",
+    entwurf: false,
+    nummer: angebot.angebotsnummer,
+  });
   return { response, filename, angebot };
+}
+
+/**
+ * On-the-fly-Vorschau eines Angebots-Entwurfs.
+ * Kein Persistieren, kein Nummernkreis.
+ */
+export async function renderAngebotVorschauPdf(
+  firmaId: string,
+  id: string,
+): Promise<{ buffer: Buffer; filename: string }> {
+  const existing = await getAngebotMitPositionen(firmaId, id);
+  if (!existing) {
+    throw new Error("Angebot nicht gefunden.");
+  }
+  assertAngebotVorschauNurEntwurf(existing);
+  assertCanPreviewAngebotPdf(existing, existing.positionen);
+
+  const firma = await getFirmaById(firmaId);
+  if (!firma) {
+    throw new Error("Firma nicht gefunden.");
+  }
+  const kunde = existing.kunde
+    ? await getKontakt(firmaId, existing.kunde)
+    : null;
+  if (!kunde) {
+    throw new Error("Kund:in nicht gefunden.");
+  }
+
+  const layout = await loadDokumentLayout(firma);
+  const buffer = await renderAngebotPdf({
+    angebot: existing,
+    positionen: existing.positionen,
+    firma,
+    kunde,
+    angebotsnummer: "",
+    entwurf: true,
+    layout,
+  });
+  return {
+    buffer,
+    filename: pdfDateiname({ art: "angebot", entwurf: true }),
+  };
 }
 
 export async function updateGesendetesAngebot(): Promise<never> {

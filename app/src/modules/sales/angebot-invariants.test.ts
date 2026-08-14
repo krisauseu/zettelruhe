@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   ANGEBOT_GESENDET_ERROR,
   ANGEBOT_PDF_IMMUTABLE_ERROR,
+  PDF_ORIGINAL_NUR_NACH_SENDEN_ERROR,
+  PDF_VORSCHAU_NUR_ENTWURF_ERROR,
   ANGEBOT_STATUS_TRANSITIONS,
   assertAngebotEntwurfEditable,
   assertAngebotEntwurfOhneNummer,
+  assertAngebotVorschauNurEntwurf,
   assertCanChangeAngebotStatus,
+  assertCanPreviewAngebotPdf,
+  assertCanServeOriginalAngebotPdf,
   assertCanSenden,
   assertCanUebernehmenInRechnung,
   defaultGueltigBis,
@@ -241,5 +246,37 @@ describe("PDF / §-19-Hinweis", () => {
 
   it("§-19-Hinweis gemeinsam mit Rechnung", () => {
     expect(KLEINUNTERNEHMER_HINWEIS).toMatch(/§ 19/);
+  });
+});
+
+describe("Angebots-PDF Vorschau vs. Original", () => {
+  it("erlaubt Vorschau nur für sendefähigen Entwurf", () => {
+    expect(() =>
+      assertCanPreviewAngebotPdf(sampleAngebot(), [samplePos()]),
+    ).not.toThrow();
+    expect(() =>
+      assertCanPreviewAngebotPdf(sampleAngebot({ kunde: null }), [
+        samplePos(),
+      ]),
+    ).toThrow(/Kund:in/);
+  });
+
+  it("serviert Original nicht am Entwurf", () => {
+    expect(() => assertCanServeOriginalAngebotPdf(sampleAngebot())).toThrow(
+      PDF_ORIGINAL_NUR_NACH_SENDEN_ERROR,
+    );
+    expect(() =>
+      assertCanServeOriginalAngebotPdf(
+        sampleAngebot({ status: "gesendet", pdf: "A-0001.pdf" }),
+      ),
+    ).not.toThrow();
+  });
+
+  it("blockiert Vorschau nach Senden", () => {
+    expect(() =>
+      assertAngebotVorschauNurEntwurf(
+        sampleAngebot({ status: "gesendet" }),
+      ),
+    ).toThrow(PDF_VORSCHAU_NUR_ENTWURF_ERROR);
   });
 });

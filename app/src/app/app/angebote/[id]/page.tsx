@@ -27,7 +27,8 @@ import {
   sendeAngebotMailAction,
 } from "@/modules/jobs";
 import { AngebotForm } from "@/modules/sales/angebot-form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -126,7 +127,7 @@ export default async function AngebotDetailPage({
   const nextStatuses = ANGEBOT_STATUS_TRANSITIONS[angebot.status] ?? [];
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8">
       <div>
         <p className="text-sm text-muted-foreground">
           <Link
@@ -164,7 +165,8 @@ export default async function AngebotDetailPage({
         ) : null}
         {sp.gesendet ? (
           <p className="mt-2 text-sm text-green-700 dark:text-green-400">
-            Angebot gesendet: Nummer vergeben, PDF erzeugt. Kein
+            Angebot gesendet: Nummer vergeben, Original-PDF erzeugt. E-Mail
+            ist optional — Druck und Postweg gehen über das PDF. Kein
             Buchungsjournal (erst bei Rechnung).
           </p>
         ) : null}
@@ -281,18 +283,20 @@ export default async function AngebotDetailPage({
                 ) : null}
                 <div className="sm:col-span-2">
                   <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    PDF
+                    Original-PDF
                   </dt>
-                  <dd className="mt-1 text-sm">
+                  <dd className="mt-2">
                     {angebot.pdf ? (
                       <Link
                         href={`/app/angebote/${angebot.id}/pdf`}
-                        className="text-primary underline-offset-4 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cn(buttonVariants({ size: "sm" }))}
                       >
-                        PDF anzeigen/herunterladen
+                        PDF ansehen / drucken
                       </Link>
                     ) : (
-                      "—"
+                      <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </dd>
                 </div>
@@ -369,13 +373,12 @@ export default async function AngebotDetailPage({
 
           <Card>
             <CardHeader>
-              <CardTitle>E-Mail-Versand</CardTitle>
+              <CardTitle>E-Mail (optional)</CardTitle>
               <CardDescription>
-                SMTP light an die Kontakt-E-Mail
+                Zusätzlich zum PDF. Für Postweg reicht „PDF ansehen / drucken“.
                 {isSmtpConfigured()
-                  ? ""
-                  : " — SMTP ist nicht konfiguriert (SMTP_HOST)."}
-                .
+                  ? " Versand an die Kontakt-E-Mail."
+                  : " SMTP ist nicht konfiguriert (SMTP_HOST) — kein Mailversand."}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -383,6 +386,7 @@ export default async function AngebotDetailPage({
                 <input type="hidden" name="id" value={id} />
                 <Button
                   type="submit"
+                  variant="secondary"
                   size="sm"
                   disabled={!isSmtpConfigured() || !angebot.pdf}
                 >
@@ -438,8 +442,9 @@ export default async function AngebotDetailPage({
             <CardHeader>
               <CardTitle>Entwurf bearbeiten</CardTitle>
               <CardDescription>
-                Speichern aktualisiert den Entwurf. Senden vergibt die Nummer
-                und erzeugt das PDF (ohne Buchungsjournal).
+                Speichern aktualisiert den Entwurf. Die Vorschau zeigt den
+                zuletzt gespeicherten Stand. Senden vergibt die Nummer und
+                erzeugt das Original-PDF (ohne Buchungsjournal).
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -455,13 +460,41 @@ export default async function AngebotDetailPage({
             </CardContent>
           </Card>
 
+          <Card className="border-primary/25">
+            <CardHeader>
+              <CardTitle>Vorschau / Druck (Entwurf)</CardTitle>
+              <CardDescription>
+                On-the-fly mit Wasserzeichen „Entwurf“. Keine Angebotsnummer,
+                kein Verbrauch des Nummernkreises. Zeigt den zuletzt
+                gespeicherten Entwurf.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!angebot.kunde ? (
+                <p className="text-sm text-destructive">
+                  Bitte zuerst eine:n Kund:in speichern, dann Vorschau öffnen.
+                </p>
+              ) : (
+                <Link
+                  href={`/app/angebote/${angebot.id}/pdf/vorschau`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(buttonVariants({ variant: "outline" }))}
+                >
+                  PDF-Vorschau öffnen
+                </Link>
+              )}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Senden</CardTitle>
               <CardDescription>
-                Vergibt die Angebotsnummer aus dem Nummernkreis, erzeugt das PDF
-                und sperrt danach Inhalt und Dokument. Kein Eintrag ins
-                Buchungsjournal.
+                Fachliches Abschließen: vergibt die Angebotsnummer, erzeugt das
+                Original-PDF (ohne Wasserzeichen) und sperrt Inhalt und
+                Dokument. Danach Druck, Postweg oder optional E-Mail. Kein
+                Eintrag ins Buchungsjournal. SMTP ist nicht nötig.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">

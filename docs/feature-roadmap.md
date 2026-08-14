@@ -9,8 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (BA14):** Meilenstein 1 ist **hartbar abgeschlossen** (Fachmodule + Betrieb light).  
-Offene Feinschliffe und M2-Themen bleiben in den Abschnitten darunter bzw. unter Meilenstein 2.
+**Status (BA14 + M1-Nachzug + PDF/Layout 2026-08-14):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Storno-/Firma-Mängel und PDF-Vorschau/Layout light sind nachgezogen. Offen aus dem Test: Nachtest Bank-CSV und E-Rechnung-Empfang (M1-11).
 
 ### Fundament & Stammdaten
 

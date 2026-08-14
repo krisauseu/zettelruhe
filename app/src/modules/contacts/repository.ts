@@ -232,6 +232,27 @@ export async function deleteAnsprechpartner(
   await deleteRecord(COL_ANSPRECHPARTNER, id);
 }
 
+/** Alle Ansprechpartner einer Firma (für CSV-Export) */
+export async function listAllAnsprechpartner(
+  firmaId: string,
+): Promise<Ansprechpartner[]> {
+  const all: Ansprechpartner[] = [];
+  let page = 1;
+  let totalPages = 1;
+  while (page <= totalPages) {
+    const result = await listRecords<PbAnsprechpartner>(COL_ANSPRECHPARTNER, {
+      page,
+      perPage: 200,
+      filter: pbEq("firma", firmaId),
+      sort: "name",
+    });
+    all.push(...result.items.map(mapAnsprechpartner));
+    totalPages = result.totalPages;
+    page += 1;
+  }
+  return all;
+}
+
 /** Alle Kontakte einer Firma (für CSV-Export) */
 export async function listAllKontakte(firmaId: string): Promise<Kontakt[]> {
   const all: Kontakt[] = [];

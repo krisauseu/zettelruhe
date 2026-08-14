@@ -59,7 +59,7 @@ export async function createZeiteintragAction(
   }
 
   revalidatePath("/app/zeiten");
-  redirect(`/app/zeiten/${id}`);
+  redirect(`/app/zeiten/${id}?created=1`);
 }
 
 /** Zeiteintrag speichern. */

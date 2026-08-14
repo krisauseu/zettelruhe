@@ -55,7 +55,7 @@ export async function createBankkontoAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/bankkonten");
-  redirect(`/app/bankkonten/${id}`);
+  redirect(`/app/bankkonten/${id}?created=1`);
 }
 
 export async function updateBankkontoAction(formData: FormData): Promise<void> {

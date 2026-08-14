@@ -2,7 +2,12 @@
  * CSV Import/Export für Kontakte (de-DE-tauglich, Semikolon-Delimiter).
  */
 
-import type { Kontakt, KontaktInput } from "./types";
+import type {
+  Ansprechpartner,
+  AnsprechpartnerInput,
+  Kontakt,
+  KontaktInput,
+} from "./types";
 
 export const KONTAKTE_CSV_HEADERS = [
   "name",
@@ -17,6 +22,11 @@ export const KONTAKTE_CSV_HEADERS = [
   "iban",
   "bic",
   "notiz",
+  "ansprechpartner_name",
+  "ansprechpartner_email",
+  "ansprechpartner_telefon",
+  "ansprechpartner_position",
+  "ansprechpartner_weitere",
 ] as const;
 
 export type KontakteCsvHeader = (typeof KONTAKTE_CSV_HEADERS)[number];
@@ -46,6 +56,12 @@ const HEADER_ALIASES: Record<string, KontakteCsvHeader> = {
   bic: "bic",
   notiz: "notiz",
   notizen: "notiz",
+  ansprechpartner_name: "ansprechpartner_name",
+  ansprechpartner: "ansprechpartner_name",
+  ansprechpartner_email: "ansprechpartner_email",
+  ansprechpartner_telefon: "ansprechpartner_telefon",
+  ansprechpartner_position: "ansprechpartner_position",
+  ansprechpartner_weitere: "ansprechpartner_weitere",
 };
 
 function detectDelimiter(headerLine: string): "," | ";" {
@@ -132,8 +148,12 @@ function formatBool(v: boolean): string {
   return v ? "ja" : "nein";
 }
 
+export type KontaktCsvItem = KontaktInput & {
+  ansprechpartner?: AnsprechpartnerInput;
+};
+
 export type CsvParseResult = {
-  items: KontaktInput[];
+  items: KontaktCsvItem[];
   errors: string[];
   skipped: number;
 };
@@ -168,7 +188,7 @@ export function parseKontakteCsv(text: string): CsvParseResult {
     };
   }
 
-  const items: KontaktInput[] = [];
+  const items: KontaktCsvItem[] = [];
   const errors: string[] = [];
   let skipped = 0;
 
@@ -193,7 +213,8 @@ export function parseKontakteCsv(text: string): CsvParseResult {
       ist_kunde = true;
     }
 
-    items.push({
+    const apName = cell("ansprechpartner_name");
+    const item: KontaktCsvItem = {
       name,
       ist_kunde,
       ist_lieferant,
@@ -206,7 +227,16 @@ export function parseKontakteCsv(text: string): CsvParseResult {
       iban: cell("iban"),
       bic: cell("bic"),
       notiz: cell("notiz"),
-    });
+    };
+    if (apName) {
+      item.ansprechpartner = {
+        name: apName,
+        email: cell("ansprechpartner_email"),
+        telefon: cell("ansprechpartner_telefon"),
+        position: cell("ansprechpartner_position"),
+      };
+    }
+    items.push(item);
   }
 
   if (items.length === 0 && errors.length === 0) {
@@ -216,15 +246,31 @@ export function parseKontakteCsv(text: string): CsvParseResult {
   return { items, errors, skipped };
 }
 
-/** Serialisiert Kontakte als Semikolon-CSV (Excel de-DE) */
+function formatWeitere(rest: Ansprechpartner[]): string {
+  return rest
+    .map((ap) => {
+      const bits = [ap.name];
+      if (ap.position) bits.push(ap.position);
+      if (ap.email) bits.push(ap.email);
+      if (ap.telefon) bits.push(ap.telefon);
+      return bits.join(", ");
+    })
+    .join(" | ");
+}
+
+/** Serialisiert Kontakte als Semikolon-CSV (Excel de-DE), inkl. Ansprechpartner. */
 export function serializeKontakteCsv(
   items: Kontakt[],
   delimiter: ";" | "," = ";",
+  ansprechpartnerByKontakt: Map<string, Ansprechpartner[]> = new Map(),
 ): string {
   const lines: string[] = [];
   lines.push(KONTAKTE_CSV_HEADERS.join(delimiter));
 
   for (const k of items) {
+    const aps = ansprechpartnerByKontakt.get(k.id) ?? [];
+    const first = aps[0];
+    const weitere = aps.slice(1);
     const values = [
       k.name,
       formatBool(k.ist_kunde),
@@ -238,6 +284,11 @@ export function serializeKontakteCsv(
       k.iban,
       k.bic,
       k.notiz,
+      first?.name ?? "",
+      first?.email ?? "",
+      first?.telefon ?? "",
+      first?.position ?? "",
+      formatWeitere(weitere),
     ].map((v) => escapeCsvField(v, delimiter));
     lines.push(values.join(delimiter));
   }

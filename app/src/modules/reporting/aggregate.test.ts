@@ -5,6 +5,7 @@ import {
   buildDashboard,
   buildEur,
   buildUstUebersicht,
+  isStornoEintrag,
   mapEurKategorie,
   sumOffenePosten,
 } from "./aggregate";
@@ -51,10 +52,29 @@ describe("mapEurKategorie", () => {
       mapEurKategorie(je({ richtung: "ausgabe", betrag_brutto: "1", quelle_typ: "kasse" })),
     ).toBe("barausgaben");
   });
+
+  it("ordnet Storno der Ursprungskategorie zu", () => {
+    const rechnung = je({
+      id: "r1",
+      richtung: "einnahme",
+      betrag_brutto: "30.00",
+      quelle_typ: "rechnung",
+    });
+    const storno = je({
+      id: "s1",
+      richtung: "ausgabe",
+      betrag_brutto: "30.00",
+      quelle_typ: "storno",
+      storno_von: "r1",
+    });
+    const originals = new Map([["r1", rechnung]]);
+    expect(mapEurKategorie(storno, originals)).toBe("umsatzerloese");
+    expect(isStornoEintrag(storno)).toBe(true);
+  });
 });
 
 describe("buildEur", () => {
-  it("summiert Einnahmen und Ausgaben inkl. Storno-Netto", () => {
+  it("mindert die Ursprungskategorie bei Storno (nicht Gegenrichtung)", () => {
     const items = [
       je({
         id: "1",
@@ -72,7 +92,6 @@ describe("buildEur", () => {
         betrag_ust: "0.00",
         quelle_typ: "beleg",
       }),
-      // Storno der Rechnung: Gegenbuchung als Ausgabe
       je({
         id: "3",
         richtung: "ausgabe",
@@ -84,11 +103,93 @@ describe("buildEur", () => {
       }),
     ];
     const eur = buildEur(items, Z);
-    expect(eur.summe_einnahmen_brutto).toBe("119.00");
-    // 50 + 119 Storno
-    expect(eur.summe_ausgaben_brutto).toBe("169.00");
+    expect(eur.summe_einnahmen_brutto).toBe("0.00");
+    expect(eur.summe_ausgaben_brutto).toBe("50.00");
     expect(eur.ueberschuss_brutto).toBe("-50.00");
     expect(eur.anzahl_buchungen).toBe(3);
+    const umsatz = eur.einnahmen.find((z) => z.id === "umsatzerloese");
+    expect(umsatz?.summe_brutto).toBe("0.00");
+    const sonstAus = eur.ausgaben.find((z) => z.id === "sonstige_ausgaben");
+    expect(sonstAus?.summe_brutto).toBe("0.00");
+  });
+
+  it("bildet den Funktionstest-Fall (Beleg-/Rechnungs-/Kassen-Storno) korrekt ab", () => {
+    const items = [
+      je({
+        id: "r1",
+        richtung: "einnahme",
+        betrag_brutto: "120.00",
+        betrag_netto: "120.00",
+        quelle_typ: "rechnung",
+      }),
+      je({
+        id: "r2",
+        richtung: "einnahme",
+        betrag_brutto: "30.00",
+        betrag_netto: "30.00",
+        quelle_typ: "rechnung",
+      }),
+      je({
+        id: "b1",
+        richtung: "ausgabe",
+        betrag_brutto: "26.00",
+        betrag_netto: "26.00",
+        quelle_typ: "beleg",
+      }),
+      je({
+        id: "sb1",
+        richtung: "einnahme",
+        betrag_brutto: "26.00",
+        betrag_netto: "26.00",
+        quelle_typ: "storno",
+        storno_von: "b1",
+      }),
+      je({
+        id: "sr2",
+        richtung: "ausgabe",
+        betrag_brutto: "30.00",
+        betrag_netto: "30.00",
+        quelle_typ: "storno",
+        storno_von: "r2",
+      }),
+      je({
+        id: "k1",
+        richtung: "einnahme",
+        betrag_brutto: "100.00",
+        betrag_netto: "100.00",
+        quelle_typ: "kasse",
+      }),
+      je({
+        id: "sk1",
+        richtung: "ausgabe",
+        betrag_brutto: "100.00",
+        betrag_netto: "100.00",
+        quelle_typ: "storno",
+        storno_von: "k1",
+      }),
+    ];
+    const eur = buildEur(items, Z);
+    expect(eur.einnahmen.find((z) => z.id === "umsatzerloese")?.summe_brutto).toBe(
+      "120.00",
+    );
+    expect(eur.einnahmen.find((z) => z.id === "bareinnahmen")?.summe_brutto).toBe(
+      "0.00",
+    );
+    expect(
+      eur.einnahmen.find((z) => z.id === "sonstige_einnahmen")?.summe_brutto,
+    ).toBe("0.00");
+    expect(
+      eur.ausgaben.find((z) => z.id === "betriebsausgaben")?.summe_brutto,
+    ).toBe("0.00");
+    expect(eur.ausgaben.find((z) => z.id === "barausgaben")?.summe_brutto).toBe(
+      "0.00",
+    );
+    expect(
+      eur.ausgaben.find((z) => z.id === "sonstige_ausgaben")?.summe_brutto,
+    ).toBe("0.00");
+    expect(eur.summe_einnahmen_brutto).toBe("120.00");
+    expect(eur.summe_ausgaben_brutto).toBe("0.00");
+    expect(eur.ueberschuss_brutto).toBe("120.00");
   });
 
   it("füllt alle Kategorien (auch 0)", () => {
@@ -141,6 +242,34 @@ describe("buildUstUebersicht", () => {
     expect(u.summe_vorsteuer).toBe("7.00");
     expect(u.zahllast).toBe("12.00");
   });
+
+  it("mindert USt-Einnahmen bei Rechnungs-Storno, nicht Vorsteuer", () => {
+    const items = [
+      je({
+        id: "1",
+        richtung: "einnahme",
+        betrag_brutto: "119.00",
+        betrag_netto: "100.00",
+        betrag_ust: "19.00",
+        steuersatz: "19",
+        quelle_typ: "rechnung",
+      }),
+      je({
+        id: "2",
+        richtung: "ausgabe",
+        betrag_brutto: "119.00",
+        betrag_netto: "100.00",
+        betrag_ust: "19.00",
+        steuersatz: "19",
+        quelle_typ: "storno",
+        storno_von: "1",
+      }),
+    ];
+    const u = buildUstUebersicht(items, Z, "regelbesteuerung_ist");
+    expect(u.summe_ust_einnahmen).toBe("0.00");
+    expect(u.summe_vorsteuer).toBe("0.00");
+    expect(u.zahllast).toBe("0.00");
+  });
 });
 
 describe("buildBwaLight / Dashboard", () => {
@@ -155,6 +284,30 @@ describe("buildBwaLight / Dashboard", () => {
     expect(bwa.einnahmen_brutto).toBe("200.00");
     expect(bwa.ausgaben_brutto).toBe("80.00");
     expect(bwa.ergebnis_brutto).toBe("120.00");
+  });
+
+  it("BWA mindert Einnahmen bei Rechnungs-Storno statt Ausgaben zu erhöhen", () => {
+    const bwa = buildBwaLight(
+      [
+        je({
+          id: "1",
+          richtung: "einnahme",
+          betrag_brutto: "30.00",
+          quelle_typ: "rechnung",
+        }),
+        je({
+          id: "2",
+          richtung: "ausgabe",
+          betrag_brutto: "30.00",
+          quelle_typ: "storno",
+          storno_von: "1",
+        }),
+      ],
+      Z,
+    );
+    expect(bwa.einnahmen_brutto).toBe("0.00");
+    expect(bwa.ausgaben_brutto).toBe("0.00");
+    expect(bwa.ergebnis_brutto).toBe("0.00");
   });
 
   it("Dashboard ohne USt-Zahllast bei Kleinunternehmer", () => {

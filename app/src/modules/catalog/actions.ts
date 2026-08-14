@@ -88,7 +88,7 @@ export async function createKatalogAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/katalog");
-  redirect(`/app/katalog/${id}`);
+  redirect(`/app/katalog/${id}?created=1`);
 }
 
 export async function updateKatalogAction(formData: FormData): Promise<void> {

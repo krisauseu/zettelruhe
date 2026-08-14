@@ -59,6 +59,24 @@ export function SetupForm({ error }: { error?: string | null }) {
           <Input id="firmaName" name="firmaName" required />
         </div>
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="strasse">Straße und Hausnummer</Label>
+          <Input id="strasse" name="strasse" autoComplete="street-address" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="plz">PLZ</Label>
+            <Input id="plz" name="plz" autoComplete="postal-code" />
+          </div>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <Label htmlFor="ort">Ort</Label>
+            <Input id="ort" name="ort" autoComplete="address-level2" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="steuernummer">Steuernummer (optional)</Label>
+          <Input id="steuernummer" name="steuernummer" />
+        </div>
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="steuermodus">Steuer-Modus</Label>
           <Select
             id="steuermodus"

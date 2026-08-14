@@ -5,7 +5,7 @@
 
 import { getFirmaById } from "@/lib/pb";
 import type { Steuermodus } from "@/lib/pb";
-import { listJournal } from "@/modules/journal/repository";
+import { getJournalEintrag, listJournal } from "@/modules/journal/repository";
 import type { JournalEintrag } from "@/modules/journal/types";
 import { listBelege, getBelegDateiResponse } from "@/modules/expenses/repository";
 import type { Beleg } from "@/modules/expenses/types";
@@ -62,6 +62,39 @@ export async function listJournalInZeitraum(
   return items;
 }
 
+/**
+ * Originale zu Storno-Zeilen, die außerhalb des Zeitraums liegen.
+ * Nur für Kategorie-/Richtungs-Lookup — nicht in die Periodensumme.
+ */
+export async function resolveStornoOriginale(
+  firmaId: string,
+  items: JournalEintrag[],
+): Promise<JournalEintrag[]> {
+  const have = new Set(items.map((e) => e.id));
+  const missing = [
+    ...new Set(
+      items
+        .filter((e) => e.storno_von && !have.has(e.storno_von))
+        .map((e) => e.storno_von as string),
+    ),
+  ];
+  const extra: JournalEintrag[] = [];
+  for (const id of missing) {
+    const e = await getJournalEintrag(firmaId, id);
+    if (e) extra.push(e);
+  }
+  return extra;
+}
+
+async function journalMitStornoKontext(
+  firmaId: string,
+  zeitraum: Zeitraum,
+): Promise<{ items: JournalEintrag[]; extra: JournalEintrag[] }> {
+  const items = await listJournalInZeitraum(firmaId, zeitraum);
+  const extra = await resolveStornoOriginale(firmaId, items);
+  return { items, extra };
+}
+
 async function loadSteuermodus(firmaId: string): Promise<Steuermodus> {
   const firma = await getFirmaById(firmaId);
   return firma?.steuermodus ?? "kleinunternehmer";
@@ -71,8 +104,8 @@ export async function getEurAuswertung(
   firmaId: string,
   zeitraum: Zeitraum,
 ): Promise<EurAuswertung> {
-  const items = await listJournalInZeitraum(firmaId, zeitraum);
-  return buildEur(items, validateZeitraum(zeitraum));
+  const { items, extra } = await journalMitStornoKontext(firmaId, zeitraum);
+  return buildEur(items, validateZeitraum(zeitraum), extra);
 }
 
 export async function getUstUebersicht(
@@ -80,16 +113,16 @@ export async function getUstUebersicht(
   zeitraum: Zeitraum,
 ): Promise<UstUebersicht> {
   const steuermodus = await loadSteuermodus(firmaId);
-  const items = await listJournalInZeitraum(firmaId, zeitraum);
-  return buildUstUebersicht(items, validateZeitraum(zeitraum), steuermodus);
+  const { items, extra } = await journalMitStornoKontext(firmaId, zeitraum);
+  return buildUstUebersicht(items, validateZeitraum(zeitraum), steuermodus, extra);
 }
 
 export async function getBwaLight(
   firmaId: string,
   zeitraum: Zeitraum,
 ): Promise<BwaLight> {
-  const items = await listJournalInZeitraum(firmaId, zeitraum);
-  return buildBwaLight(items, validateZeitraum(zeitraum));
+  const { items, extra } = await journalMitStornoKontext(firmaId, zeitraum);
+  return buildBwaLight(items, validateZeitraum(zeitraum), extra);
 }
 
 export async function getDashboardKennzahlen(
@@ -97,7 +130,7 @@ export async function getDashboardKennzahlen(
   zeitraum: Zeitraum,
 ): Promise<DashboardKennzahlen> {
   const steuermodus = await loadSteuermodus(firmaId);
-  const items = await listJournalInZeitraum(firmaId, zeitraum);
+  const { items, extra } = await journalMitStornoKontext(firmaId, zeitraum);
   // Offene Posten: gesamter Stand (nicht zeitraumgebunden) — liquiditätsrelevant
   const offene = await listOffenePosten(firmaId, 1, 500);
   const summe = sumOffenePosten(offene.items);
@@ -106,6 +139,7 @@ export async function getDashboardKennzahlen(
     validateZeitraum(zeitraum),
     steuermodus,
     summe,
+    extra,
   );
 }
 

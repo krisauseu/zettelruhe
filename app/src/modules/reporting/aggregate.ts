@@ -1,12 +1,21 @@
 /**
  * Reine Aggregationen über Journal-Zeilen (ohne I/O).
  * Journal = Source of Truth für gebuchte Beträge (ADR-0004).
- * Storno-Gegenbuchungen sind normale Zeilen mit invertierter Richtung —
- * Summen bilden Netto-Effekt korrekt ab, ohne Sonderlogik.
+ *
+ * Storno ist eine Gegenbuchung (invertierte Richtung, absolute Beträge).
+ * In Auswertungen mindert der Storno die Ursprungskategorie — er darf nicht
+ * als Gegenrichtung (Ausgabe-Storno → Einnahme, Rechnungs-Storno → Ausgabe)
+ * in die Summen einfließen. Sonst stimmt nur der Überschuss, nicht EÜR/USt.
  */
 
 import { money, moneyToString, subMoney, sumMoney } from "@/lib/money";
-import type { JournalEintrag, Steuersatz } from "@/modules/journal/types";
+import { invertRichtung } from "@/modules/journal/invariants";
+import type {
+  Buchungsrichtung,
+  JournalEintrag,
+  QuelleTyp,
+  Steuersatz,
+} from "@/modules/journal/types";
 import type { Steuermodus } from "@/lib/pb";
 import type {
   BwaLight,
@@ -40,17 +49,72 @@ const EUR_META: Record<
   sonstige_ausgaben: { label: "Sonstige Ausgaben", richtung: "ausgabe" },
 };
 
-/** Light-Mapping Journal-Zeile → EÜR-Kategorie */
-export function mapEurKategorie(e: JournalEintrag): EurKategorieId {
-  if (e.richtung === "einnahme") {
-    if (e.quelle_typ === "rechnung") return "umsatzerloese";
-    if (e.quelle_typ === "kasse") return "bareinnahmen";
+export function isStornoEintrag(
+  e: Pick<JournalEintrag, "quelle_typ" | "storno_von">,
+): boolean {
+  return e.quelle_typ === "storno" || Boolean(e.storno_von);
+}
+
+export function indexJournalById(
+  eintraege: JournalEintrag[],
+): Map<string, JournalEintrag> {
+  const map = new Map<string, JournalEintrag>();
+  for (const e of eintraege) {
+    map.set(e.id, e);
+  }
+  return map;
+}
+
+function quelleFuerKategorie(quelle_typ: QuelleTyp): QuelleTyp {
+  return quelle_typ === "storno" ? "manuell" : quelle_typ;
+}
+
+/** Light-Mapping Richtung + Quelle → EÜR-Kategorie (ohne Storno-Auflösung). */
+export function mapEurKategorieFromQuelle(
+  richtung: Buchungsrichtung,
+  quelle_typ: QuelleTyp,
+): EurKategorieId {
+  const quelle = quelleFuerKategorie(quelle_typ);
+  if (richtung === "einnahme") {
+    if (quelle === "rechnung") return "umsatzerloese";
+    if (quelle === "kasse") return "bareinnahmen";
     return "sonstige_einnahmen";
   }
-  // ausgabe
-  if (e.quelle_typ === "beleg") return "betriebsausgaben";
-  if (e.quelle_typ === "kasse") return "barausgaben";
+  if (quelle === "beleg") return "betriebsausgaben";
+  if (quelle === "kasse") return "barausgaben";
   return "sonstige_ausgaben";
+}
+
+/**
+ * EÜR-Kategorie der wirtschaftlichen Herkunft.
+ * Storno → Kategorie des Originals (Lookup oder rekonstruierte Richtung).
+ */
+export function mapEurKategorie(
+  e: JournalEintrag,
+  originals?: Map<string, JournalEintrag>,
+): EurKategorieId {
+  if (isStornoEintrag(e)) {
+    const orig = e.storno_von ? originals?.get(e.storno_von) : undefined;
+    if (orig) {
+      return mapEurKategorieFromQuelle(orig.richtung, orig.quelle_typ);
+    }
+    if (e.quelle_typ !== "storno") {
+      return mapEurKategorieFromQuelle(invertRichtung(e.richtung), e.quelle_typ);
+    }
+    return mapEurKategorieFromQuelle(invertRichtung(e.richtung), "manuell");
+  }
+  return mapEurKategorieFromQuelle(e.richtung, e.quelle_typ);
+}
+
+/** Wirtschaftliche Richtung vor dem Storno (für BWA/USt). */
+export function wirtschaftlicheRichtung(
+  e: JournalEintrag,
+  originals?: Map<string, JournalEintrag>,
+): Buchungsrichtung {
+  if (!isStornoEintrag(e)) return e.richtung;
+  const orig = e.storno_von ? originals?.get(e.storno_von) : undefined;
+  if (orig) return orig.richtung;
+  return invertRichtung(e.richtung);
 }
 
 function emptyKategorie(id: EurKategorieId): EurKategorieZeile {
@@ -77,11 +141,23 @@ function emptyAcc(): Acc {
   return { brutto: money(0), netto: money(0), ust: money(0), anzahl: 0 };
 }
 
-function accAdd(a: Acc, e: JournalEintrag): void {
-  a.brutto = a.brutto.plus(money(e.betrag_brutto));
-  a.netto = a.netto.plus(money(e.betrag_netto));
-  a.ust = a.ust.plus(money(e.betrag_ust));
-  a.anzahl += 1;
+function accAdd(a: Acc, e: JournalEintrag, sign: 1 | -1): void {
+  const faktor = sign === 1 ? 1 : -1;
+  a.brutto = a.brutto.plus(money(e.betrag_brutto).times(faktor));
+  a.netto = a.netto.plus(money(e.betrag_netto).times(faktor));
+  a.ust = a.ust.plus(money(e.betrag_ust).times(faktor));
+  if (sign === 1) {
+    a.anzahl += 1;
+  } else if (a.anzahl > 0) {
+    a.anzahl -= 1;
+  }
+}
+
+function originalsMap(
+  eintraege: JournalEintrag[],
+  extraOriginale: JournalEintrag[] = [],
+): Map<string, JournalEintrag> {
+  return indexJournalById([...extraOriginale, ...eintraege]);
 }
 
 function accToZeile(id: EurKategorieId, a: Acc): EurKategorieZeile {
@@ -95,15 +171,25 @@ function accToZeile(id: EurKategorieId, a: Acc): EurKategorieZeile {
   };
 }
 
-/** EÜR light aus Journal-Zeilen (bereits zeitraum-gefiltert) */
-export function buildEur(eintraege: JournalEintrag[], zeitraum: Zeitraum): EurAuswertung {
+/**
+ * EÜR light aus Journal-Zeilen (bereits zeitraum-gefiltert).
+ * `extraOriginale` nur für Kategorie-Lookup, wenn das Original außerhalb
+ * des Zeitraums liegt — Beträge dieser Zeilen fließen nicht ein.
+ */
+export function buildEur(
+  eintraege: JournalEintrag[],
+  zeitraum: Zeitraum,
+  extraOriginale: JournalEintrag[] = [],
+): EurAuswertung {
   const ids = Object.keys(EUR_META) as EurKategorieId[];
   const map = new Map<EurKategorieId, Acc>();
   for (const id of ids) map.set(id, emptyAcc());
 
+  const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
-    const kat = mapEurKategorie(e);
-    accAdd(map.get(kat)!, e);
+    const kat = mapEurKategorie(e, originals);
+    const sign: 1 | -1 = isStornoEintrag(e) ? -1 : 1;
+    accAdd(map.get(kat)!, e, sign);
   }
 
   const einnahmenIds: EurKategorieId[] = [
@@ -150,6 +236,7 @@ export function buildUstUebersicht(
   eintraege: JournalEintrag[],
   zeitraum: Zeitraum,
   steuermodus: Steuermodus,
+  extraOriginale: JournalEintrag[] = [],
 ): UstUebersicht {
   if (steuermodus === "kleinunternehmer") {
     return {
@@ -187,15 +274,22 @@ export function buildUstUebersicht(
     return a;
   }
 
+  const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
     const k = steuersatzKey(e.steuersatz);
     const a = get(k);
-    if (e.richtung === "einnahme") {
-      a.ust_einnahmen = a.ust_einnahmen.plus(money(e.betrag_ust));
-      a.netto_einnahmen = a.netto_einnahmen.plus(money(e.betrag_netto));
+    const richtung = wirtschaftlicheRichtung(e, originals);
+    const faktor = isStornoEintrag(e) ? -1 : 1;
+    if (richtung === "einnahme") {
+      a.ust_einnahmen = a.ust_einnahmen.plus(money(e.betrag_ust).times(faktor));
+      a.netto_einnahmen = a.netto_einnahmen.plus(
+        money(e.betrag_netto).times(faktor),
+      );
     } else {
-      a.vorsteuer = a.vorsteuer.plus(money(e.betrag_ust));
-      a.netto_ausgaben = a.netto_ausgaben.plus(money(e.betrag_netto));
+      a.vorsteuer = a.vorsteuer.plus(money(e.betrag_ust).times(faktor));
+      a.netto_ausgaben = a.netto_ausgaben.plus(
+        money(e.betrag_netto).times(faktor),
+      );
     }
   }
 
@@ -243,14 +337,18 @@ export function buildUstUebersicht(
 export function buildBwaLight(
   eintraege: JournalEintrag[],
   zeitraum: Zeitraum,
+  extraOriginale: JournalEintrag[] = [],
 ): BwaLight {
   let ein = money(0);
   let aus = money(0);
+  const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
-    if (e.richtung === "einnahme") {
-      ein = ein.plus(money(e.betrag_brutto));
+    const richtung = wirtschaftlicheRichtung(e, originals);
+    const faktor = isStornoEintrag(e) ? -1 : 1;
+    if (richtung === "einnahme") {
+      ein = ein.plus(money(e.betrag_brutto).times(faktor));
     } else {
-      aus = aus.plus(money(e.betrag_brutto));
+      aus = aus.plus(money(e.betrag_brutto).times(faktor));
     }
   }
   return {
@@ -266,11 +364,12 @@ export function buildDashboard(
   zeitraum: Zeitraum,
   steuermodus: Steuermodus,
   offenePosten: { summe: string; anzahl: number },
+  extraOriginale: JournalEintrag[] = [],
 ): DashboardKennzahlen {
-  const bwa = buildBwaLight(eintraege, zeitraum);
+  const bwa = buildBwaLight(eintraege, zeitraum, extraOriginale);
   const ust =
     steuermodus === "regelbesteuerung_ist"
-      ? buildUstUebersicht(eintraege, zeitraum, steuermodus)
+      ? buildUstUebersicht(eintraege, zeitraum, steuermodus, extraOriginale)
       : null;
 
   return {

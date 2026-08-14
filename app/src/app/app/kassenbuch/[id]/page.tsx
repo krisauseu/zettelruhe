@@ -16,6 +16,7 @@ import {
 } from "@/modules/cash";
 import { getKontakt } from "@/modules/contacts";
 import { Button } from "@/components/ui/button";
+import { ConfirmForm } from "@/components/ui/confirm-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -256,8 +257,11 @@ export default async function KassenbuchDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form
+            <ConfirmForm
               action={storniereKassenbuchAction}
+              title="Kassenbuch-Eintrag stornieren?"
+              message="Es wird eine entgegengesetzte Kassenbuch-Buchung erzeugt. Der Original-Eintrag bleibt unverändert. Der Saldo darf dabei nicht negativ werden."
+              confirmLabel="Jetzt stornieren"
               className="flex flex-col gap-4"
             >
               <input type="hidden" name="id" value={id} />
@@ -273,7 +277,7 @@ export default async function KassenbuchDetailPage({
               <Button type="submit" variant="danger" size="sm">
                 Gegenbuchung festschreiben
               </Button>
-            </form>
+            </ConfirmForm>
           </CardContent>
         </Card>
       ) : null}

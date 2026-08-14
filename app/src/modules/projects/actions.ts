@@ -49,7 +49,7 @@ export async function createProjektAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/projekte");
-  redirect(`/app/projekte/${id}`);
+  redirect(`/app/projekte/${id}?created=1`);
 }
 
 /** Projekt speichern. */

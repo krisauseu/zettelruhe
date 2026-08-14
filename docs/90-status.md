@@ -1,28 +1,30 @@
 # Status — Zettelruhe
 
-_Last updated: 2026-08-12_
+_Last updated: 2026-08-14_
 
-**Last session:** 2026-08-12 — BA14 + GitHub private repo + Funktionstest-Checkliste M1
+**Last session:** 2026-08-14 — M1-13/14/10/12: Entwurfsvorschau, Original erst bei Senden/Festschreibung, Layout light, UI-Akzente
 
 ## What's done
 
 - Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0016
-- **Bauabschnitt 1–13** erledigt (Fundament → Reporting/Export) — siehe frühere Status-Einträge / Session-Logs
-- **Bauabschnitt 14 (Härten)** umgesetzt:
-  - Betrieb: `docs/betrieb.md` (Backup/Restore Volume, Secrets, Session/CSRF, Health, Updates)
-  - README / `.env.example` / Verfahrensdoku poliert; keine Prod-Default-Claims
-  - Security light: ENV-Check + Startup-Warnungen, Caddy-Header, `APP_URL` → Server-Action-Origins
-  - Health: `GET /health` + Compose-Healthchecks (next, pocketbase)
-  - UX: Nav-Gruppen, Übersicht-Schnellstart, EmptyStates an kritischen Listen, de-DE Login-Fehler unverändert ok
-  - Suche light: `/app/suche` über Kontakte/Rechnungen/Belege/Angebote
-  - 237 Unit-Tests grün; `docker compose up` healthy
-- **v1 Meilenstein 1** als **hartbar abgeschlossen** markiert (Roadmap + README)
+- **Bauabschnitt 1–14** erledigt (Fundament → Härten)
+- **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
+- **M1-Nachzug** aus dem Test:
+  - Storno mindert in EÜR/BWA/USt die Ursprungskategorie (nicht Gegenrichtung)
+  - Rechnungsstatus wird beim Storno zuverlässig **storniert**; Storno-UI + Bestätigungs-Modal
+  - Firma: Anschrift im Setup; `/app/firma` editierbar inkl. Nummernkreise und Steuer-Modus-Wechsel
+  - Kontakt-CSV inkl. Ansprechpartner; Katalog-Einheiten als Auswahlliste; Zeiten 15-Min-Raster
+  - Globale Toasts für schreibende Aktionen
+- **M1-13 + M1-14:** Entwurfs-PDF on-the-fly (Wasserzeichen „Entwurf“, kein Nummernkreis, kein Journal); Original erst bei Senden / Festschreibung; E-Mail optional
+- **M1-10:** Dokumenten-Layout light (Logo, Akzentfarbe, Kopf-/Fußtext) an der Firma
+- **M1-12:** UI-Akzente light (kein CSS-Profi-Layout)
+- 261 Unit-Tests grün
 
 ## What's next
 
-- **Funktionstest M1** vor M2: [`docs/funktionstest-m1.md`](./funktionstest-m1.md) (Happy Path + Betrieb/Backup)
-- Danach Meilenstein 2 (Roadmap): Steuer & Compliance vertiefen (UStVA/ELSTER-XML light, ZM, USt-IdNr., E-Rechnungs-Versand, optional Multi-Firma-UI)
-- Optional Feinschliff: Open Decisions (Journal↔Zahlungen), MT940, robusteres ZUGFeRD-PDF
+- Funktionstest nachziehen: Bank-CSV-Import, E-Rechnung-Empfang (Fixtures unter `app/src/modules/einvoice/fixtures/`) — **M1-11**, nur testen
+- Meilenstein 2 (Roadmap): UStVA/ELSTER-XML light, ZM, USt-IdNr., E-Rechnungs-Versand, optional Multi-Firma-UI
+- Open Decisions: Journal-Nachzug für Zahlungen; Kassenbuch aus Barzahlung; MT940; robusteres ZUGFeRD-PDF
 
 ## Open decisions
 
@@ -58,4 +60,4 @@ _Last updated: 2026-08-12_
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-12-bauabschnitt-14-haerten.md`](./sessions/2026-08-12-bauabschnitt-14-haerten.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-14-m1-pdf-vorschau-layout.md`](./sessions/2026-08-14-m1-pdf-vorschau-layout.md)

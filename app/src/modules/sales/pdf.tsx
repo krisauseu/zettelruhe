@@ -1,12 +1,14 @@
 /**
  * Rechnungs- und Angebots-PDF mit @react-pdf/renderer (ADR-0014).
- * Layout light — kein Briefpapier, keine Multi-Vorlagen.
+ * Layout light — Logo/Akzent/Textbausteine aus der Firma; kein Briefpapier.
+ * Entwurf: Wasserzeichen, keine Nummer. Original: persistiert, ohne Wasserzeichen.
  * Nur serverseitig aufrufen.
  */
 
 import React from "react";
 import {
   Document,
+  Image,
   Page,
   Text,
   View,
@@ -17,6 +19,13 @@ import { formatMoneyDe } from "@/lib/money";
 import type { FirmaRecord, Steuermodus } from "@/lib/pb";
 import type { Kontakt } from "@/modules/contacts/types";
 import { KLEINUNTERNEHMER_HINWEIS } from "./invariants";
+import {
+  DEFAULT_DOKUMENT_AKZENTFARBE,
+  PDF_WASSERZEICHEN_ENTWURF,
+  defaultDokumentPdfLayout,
+  pdfNummerAnzeige,
+  type DokumentPdfLayout,
+} from "./pdf-layout";
 import type {
   Angebot,
   Angebotsposition,
@@ -27,14 +36,33 @@ import type {
 const styles = StyleSheet.create({
   page: {
     padding: 40,
+    paddingBottom: 72,
     fontSize: 10,
     fontFamily: "Helvetica",
     color: "#111",
   },
+  watermark: {
+    position: "absolute",
+    top: 300,
+    left: 40,
+    right: 40,
+    textAlign: "center",
+    fontSize: 64,
+    fontFamily: "Helvetica-Bold",
+    color: "#D0D0D0",
+    letterSpacing: 6,
+    transform: "rotate(-28deg)",
+  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  logo: {
+    width: 110,
+    height: 44,
+    objectFit: "contain",
+    marginBottom: 8,
   },
   firmaName: {
     fontSize: 14,
@@ -50,6 +78,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Helvetica-Bold",
     marginBottom: 8,
+  },
+  kopftext: {
+    marginBottom: 14,
+    fontSize: 9,
+    color: "#333",
+    lineHeight: 1.4,
   },
   metaBlock: {
     marginBottom: 20,
@@ -115,7 +149,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: "absolute",
-    bottom: 30,
+    bottom: 28,
     left: 40,
     right: 40,
     fontSize: 8,
@@ -123,6 +157,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: "#ccc",
     paddingTop: 6,
+  },
+  footerBlock: {
+    marginBottom: 3,
+    lineHeight: 1.35,
   },
 });
 
@@ -148,13 +186,77 @@ function addressLines(opts: {
   return lines;
 }
 
+function resolveLayout(layout?: DokumentPdfLayout): DokumentPdfLayout {
+  return layout ?? defaultDokumentPdfLayout();
+}
+
+function FirmaBlock({
+  firma,
+  layout,
+}: {
+  firma: FirmaRecord;
+  layout: DokumentPdfLayout;
+}) {
+  const firmaLines = addressLines({
+    name: firma.name,
+    strasse: firma.strasse,
+    plz: firma.plz,
+    ort: firma.ort,
+    land: firma.land,
+  });
+  return (
+    <View>
+      {layout.logoDataUri ? (
+        <Image src={layout.logoDataUri} style={styles.logo} />
+      ) : null}
+      {firmaLines.map((l) => (
+        <Text
+          key={l}
+          style={l === firma.name ? styles.firmaName : styles.muted}
+        >
+          {l}
+        </Text>
+      ))}
+      {firma.steuernummer ? (
+        <Text style={styles.muted}>St.-Nr.: {firma.steuernummer}</Text>
+      ) : null}
+      {firma.ust_id ? (
+        <Text style={styles.muted}>USt-IdNr.: {firma.ust_id}</Text>
+      ) : null}
+    </View>
+  );
+}
+
+function DokumentFooter({
+  firma,
+  layout,
+}: {
+  firma: FirmaRecord;
+  layout: DokumentPdfLayout;
+}) {
+  return (
+    <View style={styles.footer} fixed>
+      {layout.fusstext ? (
+        <Text style={styles.footerBlock}>{layout.fusstext}</Text>
+      ) : null}
+      <Text>
+        {firma.name}
+        {firma.steuernummer ? ` · St.-Nr. ${firma.steuernummer}` : ""}
+        {firma.ust_id ? ` · USt-IdNr. ${firma.ust_id}` : ""}
+      </Text>
+    </View>
+  );
+}
+
 export type RechnungPdfData = {
   rechnung: Rechnung;
   positionen: Rechnungsposition[];
   firma: FirmaRecord;
   kunde: Kontakt;
-  /** Bereits vergebene Nummer (bei Festschreibung) */
-  rechnungsnummer: string;
+  /** Bereits vergebene Nummer (bei Festschreibung); leer im Entwurf */
+  rechnungsnummer?: string;
+  entwurf?: boolean;
+  layout?: DokumentPdfLayout;
 };
 
 function RechnungDocument({
@@ -163,14 +265,15 @@ function RechnungDocument({
   firma,
   kunde,
   rechnungsnummer,
+  entwurf = false,
+  layout: layoutIn,
 }: RechnungPdfData) {
+  const layout = resolveLayout(layoutIn);
+  const accent = layout.akzentfarbe || DEFAULT_DOKUMENT_AKZENTFARBE;
   const showUst = rechnung.steuermodus === "regelbesteuerung_ist";
-  const firmaLines = addressLines({
-    name: firma.name,
-    strasse: firma.strasse,
-    plz: firma.plz,
-    ort: firma.ort,
-    land: firma.land,
+  const nummer = pdfNummerAnzeige({
+    entwurf,
+    nummer: rechnungsnummer || rechnung.rechnungsnummer,
   });
   const kundeLines = addressLines({
     name: kunde.name,
@@ -183,28 +286,19 @@ function RechnungDocument({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {entwurf ? (
+          <Text style={styles.watermark}>{PDF_WASSERZEICHEN_ENTWURF}</Text>
+        ) : null}
+
         <View style={styles.headerRow}>
+          <FirmaBlock firma={firma} layout={layout} />
           <View>
-            {firmaLines.map((l) => (
-              <Text
-                key={l}
-                style={l === firma.name ? styles.firmaName : styles.muted}
-              >
-                {l}
-              </Text>
-            ))}
-            {firma.steuernummer ? (
-              <Text style={styles.muted}>St.-Nr.: {firma.steuernummer}</Text>
-            ) : null}
-            {firma.ust_id ? (
-              <Text style={styles.muted}>USt-IdNr.: {firma.ust_id}</Text>
-            ) : null}
-          </View>
-          <View>
-            <Text style={styles.title}>Rechnung</Text>
+            <Text style={[styles.title, { color: accent }]}>
+              {entwurf ? "Rechnung (Entwurf)" : "Rechnung"}
+            </Text>
             <Text style={styles.metaLine}>
               <Text style={styles.label}>Nr.: </Text>
-              {rechnungsnummer}
+              {nummer}
             </Text>
             <Text style={styles.metaLine}>
               <Text style={styles.label}>Datum: </Text>
@@ -219,7 +313,9 @@ function RechnungDocument({
             {rechnung.leistungszeitraum_von || rechnung.leistungszeitraum_bis ? (
               <Text style={styles.metaLine}>
                 <Text style={styles.label}>Leistungszeitraum: </Text>
-                {formatDateDe(rechnung.leistungszeitraum_von || rechnung.rechnungsdatum)}
+                {formatDateDe(
+                  rechnung.leistungszeitraum_von || rechnung.rechnungsdatum,
+                )}
                 {" – "}
                 {formatDateDe(
                   rechnung.leistungszeitraum_bis ||
@@ -231,6 +327,10 @@ function RechnungDocument({
           </View>
         </View>
 
+        {layout.kopftext ? (
+          <Text style={styles.kopftext}>{layout.kopftext}</Text>
+        ) : null}
+
         <View style={styles.metaBlock}>
           <Text style={styles.label}>Rechnungsempfänger:in</Text>
           {kundeLines.map((l) => (
@@ -239,7 +339,7 @@ function RechnungDocument({
         </View>
 
         <View style={styles.table}>
-          <View style={styles.tableHeader}>
+          <View style={[styles.tableHeader, { borderBottomColor: accent }]}>
             <Text style={styles.colBez}>Bezeichnung</Text>
             <Text style={styles.colMenge}>Menge</Text>
             <Text style={styles.colEinheit}>Einh.</Text>
@@ -248,7 +348,10 @@ function RechnungDocument({
             <Text style={styles.colSumme}>Summe (€)</Text>
           </View>
           {positionen.map((p) => (
-            <View key={p.id || `${p.sortierung}-${p.bezeichnung}`} style={styles.tableRow}>
+            <View
+              key={p.id || `${p.sortierung}-${p.bezeichnung}`}
+              style={styles.tableRow}
+            >
               <Text style={styles.colBez}>{p.bezeichnung}</Text>
               <Text style={styles.colMenge}>{p.menge.replace(".", ",")}</Text>
               <Text style={styles.colEinheit}>{p.einheit || "—"}</Text>
@@ -272,13 +375,23 @@ function RechnungDocument({
             <>
               <View style={styles.totalRow}>
                 <Text>Netto</Text>
-                <Text>{formatMoneyDe(rechnung.betrag_netto, { currency: true })}</Text>
+                <Text>
+                  {formatMoneyDe(rechnung.betrag_netto, { currency: true })}
+                </Text>
               </View>
               <View style={styles.totalRow}>
                 <Text>USt</Text>
-                <Text>{formatMoneyDe(rechnung.betrag_ust, { currency: true })}</Text>
+                <Text>
+                  {formatMoneyDe(rechnung.betrag_ust, { currency: true })}
+                </Text>
               </View>
-              <View style={[styles.totalRow, styles.totalBold]}>
+              <View
+                style={[
+                  styles.totalRow,
+                  styles.totalBold,
+                  { borderTopColor: accent },
+                ]}
+              >
                 <Text>Brutto</Text>
                 <Text>
                   {formatMoneyDe(rechnung.betrag_brutto, { currency: true })}
@@ -286,7 +399,13 @@ function RechnungDocument({
               </View>
             </>
           ) : (
-            <View style={[styles.totalRow, styles.totalBold]}>
+            <View
+              style={[
+                styles.totalRow,
+                styles.totalBold,
+                { borderTopColor: accent },
+              ]}
+            >
               <Text>Gesamt</Text>
               <Text>
                 {formatMoneyDe(rechnung.betrag_brutto, { currency: true })}
@@ -306,21 +425,13 @@ function RechnungDocument({
           </View>
         ) : null}
 
-        <View style={styles.footer} fixed>
-          <Text>
-            {firma.name}
-            {firma.steuernummer ? ` · St.-Nr. ${firma.steuernummer}` : ""}
-            {firma.ust_id ? ` · USt-IdNr. ${firma.ust_id}` : ""}
-          </Text>
-        </View>
+        <DokumentFooter firma={firma} layout={layout} />
       </Page>
     </Document>
   );
 }
 
-/**
- * Erzeugt PDF-Bytes für eine Rechnung.
- */
+/** Erzeugt PDF-Bytes für eine Rechnung. */
 export async function renderRechnungPdf(
   data: RechnungPdfData,
 ): Promise<Buffer> {
@@ -336,16 +447,14 @@ export function steuermodusLabel(m: Steuermodus): string {
     : "Regelbesteuerung";
 }
 
-// ---------------------------------------------------------------------------
-// Angebot PDF
-// ---------------------------------------------------------------------------
-
 export type AngebotPdfData = {
   angebot: Angebot;
   positionen: Angebotsposition[];
   firma: FirmaRecord;
   kunde: Kontakt;
-  angebotsnummer: string;
+  angebotsnummer?: string;
+  entwurf?: boolean;
+  layout?: DokumentPdfLayout;
 };
 
 function AngebotDocument({
@@ -354,14 +463,15 @@ function AngebotDocument({
   firma,
   kunde,
   angebotsnummer,
+  entwurf = false,
+  layout: layoutIn,
 }: AngebotPdfData) {
+  const layout = resolveLayout(layoutIn);
+  const accent = layout.akzentfarbe || DEFAULT_DOKUMENT_AKZENTFARBE;
   const showUst = angebot.steuermodus === "regelbesteuerung_ist";
-  const firmaLines = addressLines({
-    name: firma.name,
-    strasse: firma.strasse,
-    plz: firma.plz,
-    ort: firma.ort,
-    land: firma.land,
+  const nummer = pdfNummerAnzeige({
+    entwurf,
+    nummer: angebotsnummer || angebot.angebotsnummer,
   });
   const kundeLines = addressLines({
     name: kunde.name,
@@ -374,28 +484,19 @@ function AngebotDocument({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {entwurf ? (
+          <Text style={styles.watermark}>{PDF_WASSERZEICHEN_ENTWURF}</Text>
+        ) : null}
+
         <View style={styles.headerRow}>
+          <FirmaBlock firma={firma} layout={layout} />
           <View>
-            {firmaLines.map((l) => (
-              <Text
-                key={l}
-                style={l === firma.name ? styles.firmaName : styles.muted}
-              >
-                {l}
-              </Text>
-            ))}
-            {firma.steuernummer ? (
-              <Text style={styles.muted}>St.-Nr.: {firma.steuernummer}</Text>
-            ) : null}
-            {firma.ust_id ? (
-              <Text style={styles.muted}>USt-IdNr.: {firma.ust_id}</Text>
-            ) : null}
-          </View>
-          <View>
-            <Text style={styles.title}>Angebot</Text>
+            <Text style={[styles.title, { color: accent }]}>
+              {entwurf ? "Angebot (Entwurf)" : "Angebot"}
+            </Text>
             <Text style={styles.metaLine}>
               <Text style={styles.label}>Nr.: </Text>
-              {angebotsnummer}
+              {nummer}
             </Text>
             <Text style={styles.metaLine}>
               <Text style={styles.label}>Datum: </Text>
@@ -410,6 +511,10 @@ function AngebotDocument({
           </View>
         </View>
 
+        {layout.kopftext ? (
+          <Text style={styles.kopftext}>{layout.kopftext}</Text>
+        ) : null}
+
         <View style={styles.metaBlock}>
           <Text style={styles.label}>Angebotsempfänger:in</Text>
           {kundeLines.map((l) => (
@@ -418,7 +523,7 @@ function AngebotDocument({
         </View>
 
         <View style={styles.table}>
-          <View style={styles.tableHeader}>
+          <View style={[styles.tableHeader, { borderBottomColor: accent }]}>
             <Text style={styles.colBez}>Bezeichnung</Text>
             <Text style={styles.colMenge}>Menge</Text>
             <Text style={styles.colEinheit}>Einh.</Text>
@@ -464,7 +569,13 @@ function AngebotDocument({
                   {formatMoneyDe(angebot.betrag_ust, { currency: true })}
                 </Text>
               </View>
-              <View style={[styles.totalRow, styles.totalBold]}>
+              <View
+                style={[
+                  styles.totalRow,
+                  styles.totalBold,
+                  { borderTopColor: accent },
+                ]}
+              >
                 <Text>Brutto</Text>
                 <Text>
                   {formatMoneyDe(angebot.betrag_brutto, { currency: true })}
@@ -472,7 +583,13 @@ function AngebotDocument({
               </View>
             </>
           ) : (
-            <View style={[styles.totalRow, styles.totalBold]}>
+            <View
+              style={[
+                styles.totalRow,
+                styles.totalBold,
+                { borderTopColor: accent },
+              ]}
+            >
               <Text>Gesamt</Text>
               <Text>
                 {formatMoneyDe(angebot.betrag_brutto, { currency: true })}
@@ -492,13 +609,7 @@ function AngebotDocument({
           </View>
         ) : null}
 
-        <View style={styles.footer} fixed>
-          <Text>
-            {firma.name}
-            {firma.steuernummer ? ` · St.-Nr. ${firma.steuernummer}` : ""}
-            {firma.ust_id ? ` · USt-IdNr. ${firma.ust_id}` : ""}
-          </Text>
-        </View>
+        <DokumentFooter firma={firma} layout={layout} />
       </Page>
     </Document>
   );

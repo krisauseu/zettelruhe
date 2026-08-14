@@ -90,8 +90,9 @@ export default async function AngeboteListPage({
             Angebote
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Noch nicht verbindliche Verkaufsdokumente — Entwurf bearbeiten, bei
-            Senden Nummer und PDF (ohne Buchungsjournal).
+            Noch nicht verbindliche Verkaufsdokumente — Entwurf mit Vorschau,
+            beim Senden Nummer und Original-PDF (ohne Buchungsjournal, ohne
+            SMTP-Pflicht).
           </p>
         </div>
         <Link

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   assertCanFestschreiben,
+  assertCanPreviewRechnungPdf,
+  assertCanServeOriginalRechnungPdf,
+  assertCanStornierenRechnung,
+  assertRechnungVorschauNurEntwurf,
   assertEntwurfEditable,
   assertEntwurfOhneNummer,
   buildJournalInputFromRechnung,
@@ -11,6 +15,10 @@ import {
   isFestgeschrieben,
   KLEINUNTERNEHMER_HINWEIS,
   PDF_IMMUTABLE_ERROR,
+  PDF_ORIGINAL_NUR_NACH_FESTSCHREIBUNG_ERROR,
+  PDF_VORSCHAU_NUR_ENTWURF_ERROR,
+  RECHNUNG_STORNO_BEREITS_ERROR,
+  RECHNUNG_STORNO_ENTWURF_ERROR,
   sumPositionen,
   validateRechnungInput,
 } from "./invariants";
@@ -232,6 +240,26 @@ describe("Entwurf vs. Festschreibung", () => {
   });
 });
 
+describe("assertCanStornierenRechnung", () => {
+  it("erlaubt festgeschriebene Status", () => {
+    expect(() =>
+      assertCanStornierenRechnung(sampleRechnung({ status: "offen" })),
+    ).not.toThrow();
+    expect(() =>
+      assertCanStornierenRechnung(sampleRechnung({ status: "bezahlt" })),
+    ).not.toThrow();
+  });
+
+  it("lehnt Entwurf und bereits Storniertes ab", () => {
+    expect(() =>
+      assertCanStornierenRechnung(sampleRechnung({ status: "entwurf" })),
+    ).toThrow(RECHNUNG_STORNO_ENTWURF_ERROR);
+    expect(() =>
+      assertCanStornierenRechnung(sampleRechnung({ status: "storniert" })),
+    ).toThrow(RECHNUNG_STORNO_BEREITS_ERROR);
+  });
+});
+
 describe("buildJournalInputFromRechnung", () => {
   it("setzt quelle_typ=rechnung und Richtung Einnahme", () => {
     const j = buildJournalInputFromRechnung(sampleRechnung(), {
@@ -261,5 +289,40 @@ describe("PDF / §-19-Hinweis", () => {
 
   it("§-19-Hinweis für Kleinunternehmerregelung", () => {
     expect(KLEINUNTERNEHMER_HINWEIS).toMatch(/§ 19/);
+  });
+});
+
+describe("Rechnungs-PDF Vorschau vs. Original", () => {
+  it("erlaubt Vorschau nur für sendefähigen Entwurf", () => {
+    expect(() =>
+      assertCanPreviewRechnungPdf(sampleRechnung(), [samplePos()]),
+    ).not.toThrow();
+    expect(() =>
+      assertCanPreviewRechnungPdf(sampleRechnung({ kunde: null }), [
+        samplePos(),
+      ]),
+    ).toThrow(/Kund:in/);
+    expect(() =>
+      assertCanPreviewRechnungPdf(sampleRechnung({ status: "offen" }), [
+        samplePos(),
+      ]),
+    ).toThrow(/Nur Entwürfe/);
+  });
+
+  it("serviert Original nicht am Entwurf", () => {
+    expect(() =>
+      assertCanServeOriginalRechnungPdf(sampleRechnung()),
+    ).toThrow(PDF_ORIGINAL_NUR_NACH_FESTSCHREIBUNG_ERROR);
+    expect(() =>
+      assertCanServeOriginalRechnungPdf(
+        sampleRechnung({ status: "offen", pdf: "R-0001.pdf" }),
+      ),
+    ).not.toThrow();
+  });
+
+  it("blockiert Vorschau nach Festschreibung", () => {
+    expect(() =>
+      assertRechnungVorschauNurEntwurf(sampleRechnung({ status: "offen" })),
+    ).toThrow(PDF_VORSCHAU_NUR_ENTWURF_ERROR);
   });
 });

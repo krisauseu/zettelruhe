@@ -25,15 +25,20 @@ import {
   deleteRechnungAction,
   festschreibenRechnungAction,
   getRechnungMitPositionen,
+  storniereRechnungAction,
   updateRechnungAction,
 } from "@/modules/sales";
+import { ConfirmForm } from "@/components/ui/confirm-form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   isSmtpConfigured,
   sendeRechnungMailAction,
   sendeZahlungserinnerungAction,
 } from "@/modules/jobs";
 import { RechnungForm } from "@/modules/sales/rechnung-form";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -63,20 +68,23 @@ type SearchParams = Promise<{
   mail?: string;
   mailTo?: string;
   erinnerung?: string;
+  storniert?: string;
 }>;
 
 function statusBadgeVariant(
   status: string,
-): "success" | "secondary" | "default" | "muted" | "outline" {
+): "success" | "secondary" | "default" | "muted" | "outline" | "warning" | "danger" {
   switch (status) {
     case "bezahlt":
       return "success";
     case "teilbezahlt":
       return "default";
     case "ueberfaellig":
-      return "outline";
+      return "warning";
     case "offen":
       return "default";
+    case "storniert":
+      return "danger";
     default:
       return "secondary";
   }
@@ -149,7 +157,7 @@ export default async function RechnungDetailPage({
     : "";
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8">
       <div>
         <p className="text-sm text-muted-foreground">
           <Link
@@ -212,6 +220,11 @@ export default async function RechnungDetailPage({
           <p className="mt-2 text-sm text-green-700 dark:text-green-400">
             Zahlungserinnerung gesendet
             {sp.mailTo ? ` an ${sp.mailTo}` : ""}.
+          </p>
+        ) : null}
+        {sp.storniert ? (
+          <p className="mt-2 text-sm text-success">
+            Rechnung storniert. Gegenbuchung im Journal erzeugt.
           </p>
         ) : null}
       </div>
@@ -337,18 +350,20 @@ export default async function RechnungDetailPage({
                 ) : null}
                 <div className="sm:col-span-2">
                   <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    PDF
+                    Original-PDF
                   </dt>
-                  <dd className="mt-1 text-sm">
+                  <dd className="mt-2">
                     {rechnung.pdf ? (
                       <Link
                         href={`/app/rechnungen/${rechnung.id}/pdf`}
-                        className="text-primary underline-offset-4 hover:underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cn(buttonVariants({ size: "sm" }))}
                       >
-                        PDF anzeigen/herunterladen
+                        PDF ansehen / drucken
                       </Link>
                     ) : (
-                      "—"
+                      <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </dd>
                 </div>
@@ -425,13 +440,14 @@ export default async function RechnungDetailPage({
 
           <Card>
             <CardHeader>
-              <CardTitle>E-Mail-Versand</CardTitle>
+              <CardTitle>E-Mail (optional)</CardTitle>
               <CardDescription>
-                SMTP light an die Kontakt-E-Mail
+                Zusätzlich zum Original-PDF. Für Postweg reicht „PDF ansehen /
+                drucken“.
                 {isSmtpConfigured()
-                  ? ""
-                  : " — SMTP ist nicht konfiguriert (SMTP_HOST)."}
-                . Zahlungserinnerung manuell, kein Mahnlauf.
+                  ? " Versand an die Kontakt-E-Mail."
+                  : " SMTP ist nicht konfiguriert (SMTP_HOST) — kein Mailversand."}{" "}
+                Zahlungserinnerung manuell, kein Mahnlauf.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
@@ -439,6 +455,7 @@ export default async function RechnungDetailPage({
                 <input type="hidden" name="id" value={id} />
                 <Button
                   type="submit"
+                  variant="secondary"
                   size="sm"
                   disabled={!isSmtpConfigured() || !rechnung.pdf}
                 >
@@ -588,6 +605,43 @@ export default async function RechnungDetailPage({
               </CardContent>
             </Card>
           ) : null}
+
+          {rechnung.status !== "storniert" ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Storno</CardTitle>
+                <CardDescription>
+                  Erzeugt eine Gegenbuchung im Journal und setzt den Status auf
+                  storniert. Die Originalrechnung und das PDF bleiben erhalten.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ConfirmForm
+                  action={storniereRechnungAction}
+                  title="Rechnung stornieren?"
+                  message={`Rechnung ${rechnung.rechnungsnummer || ""} wird storniert. Es entsteht eine Gegenbuchung; das Original bleibt unverändert.`}
+                  confirmLabel="Jetzt stornieren"
+                  className="flex flex-col gap-4"
+                >
+                  <input type="hidden" name="id" value={id} />
+                  <div className="flex max-w-xs flex-col gap-1.5">
+                    <Label htmlFor="buchungsdatum">Buchungsdatum Storno</Label>
+                    <Input
+                      id="buchungsdatum"
+                      name="buchungsdatum"
+                      type="date"
+                      defaultValue={todayBerlin()}
+                    />
+                  </div>
+                  <div>
+                    <Button type="submit" variant="danger" size="sm">
+                      Rechnung stornieren
+                    </Button>
+                  </div>
+                </ConfirmForm>
+              </CardContent>
+            </Card>
+          ) : null}
         </>
       ) : (
         <>
@@ -595,8 +649,9 @@ export default async function RechnungDetailPage({
             <CardHeader>
               <CardTitle>Entwurf bearbeiten</CardTitle>
               <CardDescription>
-                Speichern aktualisiert den Entwurf. Festschreiben vergibt die
-                Nummer, erzeugt das PDF und schreibt ins Buchungsjournal.
+                Speichern aktualisiert den Entwurf. Die Vorschau zeigt den
+                zuletzt gespeicherten Stand. Festschreiben vergibt die Nummer,
+                erzeugt das Original-PDF und schreibt ins Buchungsjournal.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -612,13 +667,41 @@ export default async function RechnungDetailPage({
             </CardContent>
           </Card>
 
+          <Card className="border-primary/25">
+            <CardHeader>
+              <CardTitle>Vorschau / Druck (Entwurf)</CardTitle>
+              <CardDescription>
+                On-the-fly mit Wasserzeichen „Entwurf“. Keine Rechnungsnummer,
+                kein Journal, kein Verbrauch des Nummernkreises. Nach der
+                Festschreibung gibt es nur noch das Original-PDF.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!rechnung.kunde ? (
+                <p className="text-sm text-destructive">
+                  Bitte zuerst eine:n Kund:in speichern, dann Vorschau öffnen.
+                </p>
+              ) : (
+                <Link
+                  href={`/app/rechnungen/${rechnung.id}/pdf/vorschau`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cn(buttonVariants({ variant: "outline" }))}
+                >
+                  PDF-Vorschau öffnen
+                </Link>
+              )}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Festschreiben</CardTitle>
               <CardDescription>
                 Vergibt die Rechnungsnummer aus dem Nummernkreis, erzeugt das
-                PDF, schreibt eine Einnahme ins Buchungsjournal und sperrt
-                danach Dokument und Metadaten (GoBD-Mindeststandard).
+                Original-PDF (ohne Wasserzeichen), schreibt eine Einnahme ins
+                Buchungsjournal und sperrt danach Dokument und Metadaten
+                (GoBD-Mindeststandard).
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">

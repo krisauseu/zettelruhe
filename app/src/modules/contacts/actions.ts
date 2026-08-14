@@ -72,7 +72,7 @@ export async function createKontaktAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/kontakte");
-  redirect(`/app/kontakte/${id}`);
+  redirect(`/app/kontakte/${id}?created=1`);
 }
 
 export async function updateKontaktAction(formData: FormData): Promise<void> {
@@ -193,8 +193,11 @@ export async function importKontakteAction(formData: FormData): Promise<void> {
 
   for (const item of parsed.items) {
     try {
-      await createKontakt(firmaId, item);
+      const createdKontakt = await createKontakt(firmaId, item);
       created += 1;
+      if (item.ansprechpartner?.name) {
+        await createAnsprechpartner(firmaId, createdKontakt.id, item.ansprechpartner);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unbekannt";
       failures.push(`${item.name}: ${msg}`);

@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
+import { markRechnungStorniert } from "@/modules/sales/repository";
 import {
   festschreibenBuchung,
+  getJournalEintrag,
   storniereBuchung,
 } from "./repository";
 import type { Buchungsrichtung, JournalBuchungInput, Steuersatz } from "./types";
@@ -62,7 +64,7 @@ export async function festschreibenManuelleBuchungAction(
   }
 
   revalidatePath("/app/journal");
-  redirect(`/app/journal/${id}`);
+  redirect(`/app/journal/${id}?created=1`);
 }
 
 /** Storno/Gegenbuchung zu einem festgeschriebenen Eintrag. */
@@ -76,6 +78,11 @@ export async function storniereBuchungAction(
   const buchungsdatum = formString(formData, "buchungsdatum") || undefined;
   const buchungstext = formString(formData, "buchungstext") || undefined;
 
+  const original = await getJournalEintrag(firmaId, id);
+  if (!original) {
+    redirect("/app/journal");
+  }
+
   let stornoId: string;
   try {
     const storno = await storniereBuchung(firmaId, id, {
@@ -83,12 +90,18 @@ export async function storniereBuchungAction(
       buchungstext,
     });
     stornoId = storno.id;
+    if (original.quelle_typ === "rechnung" && original.quelle_id) {
+      await markRechnungStorniert(firmaId, original.quelle_id);
+    }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Storno fehlgeschlagen.";
     redirect(`/app/journal/${id}?error=${encodeURIComponent(msg)}`);
   }
 
   revalidatePath("/app/journal");
+  revalidatePath("/app/rechnungen");
+  revalidatePath("/app/auswertungen");
+  revalidatePath("/app/eur");
   revalidatePath(`/app/journal/${id}`);
-  redirect(`/app/journal/${stornoId}`);
+  redirect(`/app/journal/${stornoId}?storniert=1`);
 }

@@ -105,4 +105,60 @@ describe("serializeKontakteCsv", () => {
     expect(result.items[0].iban).toBe("DE89370400440532013000");
     expect(result.items[0].notiz).toBe('Zeile "eins"');
   });
+
+  it("exportiert und importiert den ersten Ansprechpartner", () => {
+    const items: Kontakt[] = [
+      {
+        id: "1",
+        firma: "f",
+        name: "Alpha GmbH",
+        ist_kunde: true,
+        ist_lieferant: false,
+        strasse: "",
+        plz: "",
+        ort: "",
+        land: "DE",
+        email: "",
+        telefon: "",
+        iban: "",
+        bic: "",
+        notiz: "",
+      },
+    ];
+    const csv = serializeKontakteCsv(
+      items,
+      ";",
+      new Map([
+        [
+          "1",
+          [
+            {
+              id: "ap1",
+              firma: "f",
+              kontakt: "1",
+              name: "Ina Beispiel",
+              email: "ina@alpha.de",
+              telefon: "030 1",
+              position: "Buchhaltung",
+            },
+            {
+              id: "ap2",
+              firma: "f",
+              kontakt: "1",
+              name: "Otto Zweit",
+              email: "otto@alpha.de",
+              telefon: "",
+              position: "",
+            },
+          ],
+        ],
+      ]),
+    );
+    expect(csv).toContain("ansprechpartner_name");
+    expect(csv).toContain("Ina Beispiel");
+    expect(csv).toContain("Otto Zweit");
+    const result = parseKontakteCsv(csv);
+    expect(result.items[0].ansprechpartner?.name).toBe("Ina Beispiel");
+    expect(result.items[0].ansprechpartner?.email).toBe("ina@alpha.de");
+  });
 });

@@ -62,10 +62,36 @@ const VALID_STEUERMODUS = new Set<Steuermodus>([
 ]);
 
 export const FESTGESCHRIEBEN_ERROR =
-  "Festgeschriebene Rechnungen dürfen nicht still geändert oder gelöscht werden. Korrektur über Gutschrift/Storno (folgt in späteren Abschnitten).";
+  "Festgeschriebene Rechnungen dürfen nicht still geändert oder gelöscht werden. Korrektur über Gutschrift/Storno.";
+
+export const RECHNUNG_STORNO_ENTWURF_ERROR =
+  "Entwürfe werden gelöscht, nicht storniert.";
+
+export const RECHNUNG_STORNO_BEREITS_ERROR =
+  "Die Rechnung ist bereits storniert.";
+
+export function assertCanStornierenRechnung(
+  rechnung: Pick<Rechnung, "status">,
+): void {
+  if (rechnung.status === "entwurf") {
+    throw new Error(RECHNUNG_STORNO_ENTWURF_ERROR);
+  }
+  if (rechnung.status === "storniert") {
+    throw new Error(RECHNUNG_STORNO_BEREITS_ERROR);
+  }
+}
 
 export const PDF_IMMUTABLE_ERROR =
   "Das Rechnungs-PDF ist nach der Festschreibung unveränderbar (ADR-0012).";
+
+export const PDF_ORIGINAL_NUR_NACH_FESTSCHREIBUNG_ERROR =
+  "Das Original-PDF gibt es erst nach der Festschreibung. Für den Entwurf die Vorschau nutzen.";
+
+export const PDF_ORIGINAL_NUR_NACH_SENDEN_ERROR =
+  "Das Original-PDF gibt es erst nach dem Senden. Für den Entwurf die Vorschau nutzen.";
+
+export const PDF_VORSCHAU_NUR_ENTWURF_ERROR =
+  "Die Entwurfsvorschau ist nur für Entwürfe. Nach dem Senden bzw. der Festschreibung nur das Original-PDF.";
 
 /** § 19 UStG-Hinweis (Kleinunternehmerregelung) für PDF/Dokument */
 export const KLEINUNTERNEHMER_HINWEIS =
@@ -348,6 +374,37 @@ export function assertCanFestschreiben(
 }
 
 /**
+ * Vorschau-PDF: dieselben Voraussetzungen wie Festschreiben
+ * (Kund:in, Positionen), aber ohne Nummer und ohne Journal.
+ */
+export function assertCanPreviewRechnungPdf(
+  rechnung: Rechnung,
+  positionen: Rechnungsposition[],
+): void {
+  assertCanFestschreiben(rechnung, positionen);
+}
+
+/** Gespeichertes Original-PDF nur nach Festschreibung. */
+export function assertCanServeOriginalRechnungPdf(
+  rechnung: Pick<Rechnung, "status" | "pdf">,
+): void {
+  if (rechnung.status === "entwurf") {
+    throw new Error(PDF_ORIGINAL_NUR_NACH_FESTSCHREIBUNG_ERROR);
+  }
+  if (!rechnung.pdf) {
+    throw new Error("Kein PDF an der Rechnung.");
+  }
+}
+
+export function assertRechnungVorschauNurEntwurf(
+  rechnung: Pick<Rechnung, "status">,
+): void {
+  if (rechnung.status !== "entwurf") {
+    throw new Error(PDF_VORSCHAU_NUR_ENTWURF_ERROR);
+  }
+}
+
+/**
  * Invariante: Entwurf hat keine Rechnungsnummer (Nummern erst bei Festschreibung).
  */
 export function assertEntwurfOhneNummer(
@@ -607,6 +664,37 @@ export function assertCanSenden(
   }
   if (money(angebot.betrag_brutto).lte(0)) {
     throw new Error("Angebotsbetrag muss größer als 0 sein.");
+  }
+}
+
+/**
+ * Vorschau-PDF: dieselben Voraussetzungen wie Senden,
+ * ohne Nummernverbrauch und ohne Persistenz.
+ */
+export function assertCanPreviewAngebotPdf(
+  angebot: Angebot,
+  positionen: Angebotsposition[],
+): void {
+  assertCanSenden(angebot, positionen);
+}
+
+/** Gespeichertes Original-PDF nur nach dem Senden. */
+export function assertCanServeOriginalAngebotPdf(
+  angebot: Pick<Angebot, "status" | "pdf">,
+): void {
+  if (angebot.status === "entwurf") {
+    throw new Error(PDF_ORIGINAL_NUR_NACH_SENDEN_ERROR);
+  }
+  if (!angebot.pdf) {
+    throw new Error("Kein PDF am Angebot.");
+  }
+}
+
+export function assertAngebotVorschauNurEntwurf(
+  angebot: Pick<Angebot, "status">,
+): void {
+  if (angebot.status !== "entwurf") {
+    throw new Error(PDF_VORSCHAU_NUR_ENTWURF_ERROR);
   }
 }
 

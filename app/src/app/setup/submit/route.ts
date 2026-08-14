@@ -28,6 +28,10 @@ export async function POST(request: Request) {
   const password = str(formData, "password");
   const passwordConfirm = str(formData, "passwordConfirm");
   const firmaName = str(formData, "firmaName");
+  const strasse = str(formData, "strasse");
+  const plz = str(formData, "plz");
+  const ort = str(formData, "ort");
+  const steuernummer = str(formData, "steuernummer");
   const steuermodus = str(formData, "steuermodus") as Steuermodus;
   const skr = str(formData, "skr") as SkrWahl;
 
@@ -57,7 +61,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const firma = await createFirma({ name: firmaName, steuermodus, skr });
+    const firma = await createFirma({
+      name: firmaName,
+      steuermodus,
+      skr,
+      strasse,
+      plz,
+      ort,
+      steuernummer,
+    });
     const user = await createEigentuemer({
       email,
       password,

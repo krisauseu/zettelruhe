@@ -11,6 +11,7 @@ import {
   deleteRechnung,
   festschreibenRechnung,
   sendenAngebot,
+  storniereRechnung,
   setAngebotStatus,
   uebernehmenAlsRechnung,
   updateAngebot,
@@ -114,7 +115,7 @@ export async function createRechnungAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/rechnungen");
-  redirect(`/app/rechnungen/${id}`);
+  redirect(`/app/rechnungen/${id}?created=1`);
 }
 
 /** Entwurf speichern. */
@@ -179,6 +180,31 @@ export async function festschreibenRechnungAction(
   redirect(`/app/rechnungen/${id}?festgeschrieben=1`);
 }
 
+/** Festgeschriebene Rechnung stornieren: Gegenbuchung + Status. */
+export async function storniereRechnungAction(
+  formData: FormData,
+): Promise<void> {
+  const firmaId = await requireFirmaId();
+  const id = formString(formData, "id");
+  if (!id) redirect("/app/rechnungen");
+
+  const buchungsdatum = formString(formData, "buchungsdatum") || undefined;
+
+  try {
+    await storniereRechnung(firmaId, id, { buchungsdatum });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Storno fehlgeschlagen.";
+    redirect(`/app/rechnungen/${id}?error=${encodeURIComponent(msg)}`);
+  }
+
+  revalidatePath("/app/rechnungen");
+  revalidatePath("/app/journal");
+  revalidatePath("/app/auswertungen");
+  revalidatePath("/app/eur");
+  revalidatePath(`/app/rechnungen/${id}`);
+  redirect(`/app/rechnungen/${id}?storniert=1`);
+}
+
 // ---------------------------------------------------------------------------
 // Angebote
 // ---------------------------------------------------------------------------
@@ -209,7 +235,7 @@ export async function createAngebotAction(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/app/angebote");
-  redirect(`/app/angebote/${id}`);
+  redirect(`/app/angebote/${id}?created=1`);
 }
 
 /** Entwurf speichern. */

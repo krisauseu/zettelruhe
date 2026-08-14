@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { einheitOptionen } from "@/modules/catalog/einheiten";
 import type { Steuermodus } from "@/lib/pb";
 import type { RechnungMitPositionen } from "./types";
 import { todayBerlin } from "./invariants";
@@ -43,7 +45,7 @@ function emptyRow(): PositionRow {
     key: `n-${Math.random().toString(36).slice(2, 9)}`,
     bezeichnung: "",
     menge: "1",
-    einheit: "",
+    einheit: "Stück",
     einzelpreis: "",
     steuersatz: "19",
     katalog_position: "",
@@ -275,14 +277,19 @@ export function RechnungForm({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs">Einheit</Label>
-                  <Input
+                  <Select
                     name="position_einheit"
-                    value={row.einheit}
+                    value={row.einheit || "Stück"}
                     onChange={(e) =>
                       updateRow(row.key, { einheit: e.target.value })
                     }
-                    placeholder="Stk, h, …"
-                  />
+                  >
+                    {einheitOptionen(row.einheit).map((e) => (
+                      <option key={e} value={e}>
+                        {e}
+                      </option>
+                    ))}
+                  </Select>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs">

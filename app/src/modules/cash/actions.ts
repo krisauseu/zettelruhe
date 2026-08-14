@@ -65,7 +65,7 @@ export async function festschreibenKassenbuchAction(
 
   revalidatePath("/app/kassenbuch");
   revalidatePath("/app/journal");
-  redirect(`/app/kassenbuch/${id}`);
+  redirect(`/app/kassenbuch/${id}?created=1`);
 }
 
 /** Storno/Gegenbuchung zu einem festgeschriebenen Kassenbuch-Eintrag. */
@@ -94,5 +94,5 @@ export async function storniereKassenbuchAction(
   revalidatePath("/app/kassenbuch");
   revalidatePath("/app/journal");
   revalidatePath(`/app/kassenbuch/${id}`);
-  redirect(`/app/kassenbuch/${stornoId}`);
+  redirect(`/app/kassenbuch/${stornoId}?storniert=1`);
 }
