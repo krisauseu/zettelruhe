@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (BA14 + M1-Nachzug + PDF/Layout 2026-08-14):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Storno-/Firma-Mängel und PDF-Vorschau/Layout light sind nachgezogen. Offen aus dem Test: Nachtest Bank-CSV und E-Rechnung-Empfang (M1-11).
+**Status (BA14 + M1-Nachzug + PDF/Layout 2026-08-14):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Storno-/Firma-Mängel und PDF-Vorschau/Layout light sind nachgezogen (`main` `2ce18d9`). Als Nächstes: **M1-11 nachtesten** (Bank-CSV, E-Rechnung-Empfang), dann M2 mit **UStVA/ELSTER-XML light**.
 
 ### Fundament & Stammdaten
 
@@ -95,7 +95,9 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 ## Meilenstein 2 — Steuer & Compliance vertiefen
 
-- UStVA-Zahlen / ELSTER-XML light (Self-File-Vorbereitung)
+**Einstieg (vereinbart nach M1-11):** UStVA-Zahlen / ELSTER-XML light zuerst, Rest danach.
+
+- UStVA-Zahlen / ELSTER-XML light (Self-File-Vorbereitung) ← **erster Keil**
 - Zusammenfassende Meldung (ZM) Übersicht
 - USt-IdNr.-Validierung (BZSt)
 - E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback)

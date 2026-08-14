@@ -275,7 +275,7 @@ Nicht als Fehler werten:
 - [x] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
 - [x] Backup **und** Restore einmal nachgewiesen
 - [x] Open Decisions verstanden (Zahlung ≠ Journal)
-- [x] **M2 darf starten** — ja / nein: **ja** (nach M1-Nachzug; Layout/Branding bleibt Follow-up)
+- [x] **M2 darf starten** — ja / nein: **ja** (nach M1-Nachzug + PDF/Layout). **Vor M2-Bau:** M1-11 nachtesten (Bank-CSV, E-Rechnung-Empfang). Erster M2-Keil: UStVA/ELSTER-XML light.
 
 Unterschrift / Datum: kf / 2026-08-14
 
@@ -287,4 +287,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach Bauabschnitt 14 (M1 hartbar). Bei Software-Updates Checkliste nachziehen._
+_Stand: nach BA14 + M1-Nachzug + PDF/Layout (`2ce18d9`). Nächster Schritt: Abschnitte 7–8 (M1-11) nachtesten, dann M2. Bei Software-Updates Checkliste nachziehen._

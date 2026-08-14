@@ -20,14 +20,21 @@
 - Kein CSS-Profi-Layout (Roadmap „Später“)
 
 ## Verifikation
-- Unit-Tests + `tsc --noEmit` (Anzahl im Status)
-- Browser/Compose: Rebuild + manuelle Klicks auf Vorschau, Senden/Festschreiben, Original, Firma-Layout
+- 261 Unit-Tests + `tsc --noEmit` grün
+- Compose neu gebaut; Migration `1730001200` an der Firma
+- HTTP gegen lokale Instanz: Vorschau = `%PDF` ohne Nummernverbrauch; Original-Route am Entwurf 409; Vorschau nach Senden/Festschreibung 409; neue Vorschau übernimmt Akzentfarbe. Kein Klick-Browser (localhost von außen nicht erreichbar).
+
+## Git
+- `main` @ `2ce18d9` — `https://github.com/krisauseu/zettelruhe`
 
 ## Explizit nicht
 - Briefpapier-Hintergrund, Font-Upload, Mehrvorlagen
 - GiroCode
-- M1-11 Nachtest Bank/E-Rechnung
+- M1-11 Nachtest Bank/E-Rechnung (folgt als Nächstes, nur testen)
 - M2 / Open Decisions
 
-## Next step
-Nachtest M1-11 oder Meilenstein 2 (UStVA/ELSTER-XML light, ZM, USt-IdNr., E-Rechnungs-Versand).
+## Next step (verbindlich)
+
+1. **M1-11 nachtesten** (Bank-CSV, E-Rechnung-Empfang) — kein Bau.
+2. **M2 starten** mit UStVA/ELSTER-XML light.
+3. Open Decisions (Journal aus Zahlung, Kasse aus Barzahlung, MT940, ZUGFeRD-PDF) getrennt halten.

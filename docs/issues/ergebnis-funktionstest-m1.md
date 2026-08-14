@@ -2,11 +2,16 @@ Bug-Report & Refactoring-Aufgaben (Meilenstein 1)
 
 _Nachzug 2026-08-14: Prio 1–3 sowie Steuer-Modus-Wechsel und Status-Badges umgesetzt. Nachprüfung durch kf: Änderungen i. O._
 
-Umgesetzt 2026-08-14 (M1-13, M1-14, M1-10, M1-12). Offen nur Nachtest:
+Umgesetzt 2026-08-14 (M1-13, M1-14, M1-10, M1-12). Auf `main` (`2ce18d9`).
 
-- **M1-11 Nachtest:** Bank-CSV-Import; E-Rechnung-Empfang (Fixtures vorhanden).
+Offen nur Nachtest, **als Nächstes** (vereinbart, vor M2):
 
-Details Nachzug: `docs/sessions/2026-08-14-m1-funktionstest-nachzug.md`.
+- **M1-11 Nachtest:** Bank-CSV-Import; E-Rechnung-Empfang (Fixtures unter `app/src/modules/einvoice/fixtures/`). Kein Feature-Bau.
+
+Danach M2, erster Keil: UStVA/ELSTER-XML light. Open Decisions nicht vermischen.
+
+Details Nachzug: `docs/sessions/2026-08-14-m1-funktionstest-nachzug.md`.  
+PDF/Layout: `docs/sessions/2026-08-14-m1-pdf-vorschau-layout.md`.
 
 Priorität 1: Kritische Rechenfehler & Datenintegrität (Abschnitt 1 & 6).
 Priorität 2: Daten-Export & Validierung (Abschnitt 2).
