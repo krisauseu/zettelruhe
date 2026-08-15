@@ -157,6 +157,7 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
   revalidatePath("/app");
   revalidatePath("/app/firma");
   revalidatePath("/app/ust");
+  revalidatePath("/app/zm");
   redirect("/app/firma?saved=1");
 }
 

@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-15_
 
-**Last session:** 2026-08-15 — UStVA-Zahlen / ELSTER-XML light (Self-File); 308 Tests; Browser-Nachtest kf; auf `main` gepusht
+**Last session:** 2026-08-15 — ZM-Übersicht (Self-File); 327 Tests; Browser-Nachtest kf, keine Fehler; auf `main` gepusht
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0019
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0020
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -24,6 +24,7 @@ _Last updated: 2026-08-15_
 - **Multi-Firma dünn** (ADR-0018): zweite Firma anlegen + in der Shell wechseln; `users.firma` bleibt 1:1 (zuletzt aktiv); Isolation über `session.firmaId`. Kein Einladen, keine zweite Rolle, Setup unverändert. 277 Unit-Tests grün. Browser-Nachtest durch kf 2026-08-15.
 - **Sidebar:** Gruppen kollabierbar (Default offen), Zustand + Favoriten in localStorage, Auto-Open der aktiven Route, „Alle öffnen/schließen“, „Nur Favoriten“. 291 Unit-Tests.
 - **UStVA / ELSTER-XML light** (ADR-0019): unter Regelbesteuerung Kennzahlen 81/86/66/83 aus dem Journal der aktiven Firma; XML-Download (Mein-Elster-Nutzdaten, kein Versand) für Monat/Quartal. Kleinunternehmerregelung unverändert „nicht relevant“. 308 Unit-Tests. Browser-Nachtest durch kf 2026-08-15: keine Probleme.
+- **ZM-Übersicht** (ADR-0020): unter Regelbesteuerung Kandidaten aus 0-USt-Einnahmen plus Land am Kontakt (`/app/zm`); Art und USt-IdNr. nicht geführt; CSV light, kein Versand. Kleinunternehmerregelung „nicht relevant“. 327 Unit-Tests. Browser-Nachtest durch kf 2026-08-15: keine Fehler.
 
 ## What's next
 
@@ -33,8 +34,9 @@ _Last updated: 2026-08-15_
 2. **Kategorien erledigt** — gemeinsame Liste Beleg + Kasse, CRUD `/app/kategorien` (ADR-0017).
 3. **Multi-Firma dünn erledigt** — Firma anlegen + wechseln (ADR-0018).
 4. **UStVA/ELSTER-XML light erledigt** — Self-File, kein Versand (ADR-0019).
-5. **Als Nächstes: Zusammenfassende Meldung (ZM)** Übersicht. Danach USt-IdNr., E-Rechnungs-Versand.
-6. **Open Decisions** weiter separat. Multi-User später.
+5. **ZM-Übersicht erledigt** — Self-File, kein Versand (ADR-0020).
+6. **Als Nächstes: USt-IdNr.-Validierung (BZSt)**. Danach E-Rechnungs-Versand.
+7. **Open Decisions** weiter separat. Multi-User später.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
 
@@ -72,4 +74,4 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-15-ustva-elster-xml-light.md`](./sessions/2026-08-15-ustva-elster-xml-light.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-15-zm-uebersicht.md`](./sessions/2026-08-15-zm-uebersicht.md)

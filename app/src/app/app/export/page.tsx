@@ -139,6 +139,21 @@ export default async function ExportPage({
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base">Zusammenfassende Meldung</CardTitle>
+          <CardDescription>
+            Kandidaten aus 0-USt-Einnahmen und Kontakt-Land zum Selbst-Eintragen
+            in Mein Elster. Kein Versand, keine Art, keine geprüfte USt-IdNr.
+            Liegt bei der{" "}
+            <Link href={`/app/zm?${q}`} className="text-primary hover:underline">
+              ZM-Übersicht
+            </Link>
+            .
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Weitere Exporte</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3 text-sm">

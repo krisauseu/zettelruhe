@@ -234,7 +234,7 @@ Details: [`docs/betrieb.md`](./betrieb.md).
 
 Nicht als Fehler werten:
 
-- ELSTER-Versand, UStVA-Abgabe, ZM, USt-IdNr.-API  
+- ELSTER-Versand, UStVA-Abgabe, ZM-Abgabe, USt-IdNr.-API  
 - E-Rechnungs-**Versand**  
 - PSD2, OCR, REST-API, Kundenportal, automatischer Mahnlauf  
 - Multi-User, Soll-Versteuerung, Abschlagskette  
@@ -277,7 +277,7 @@ Nicht als Fehler werten:
 - [x] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
 - [x] Backup **und** Restore einmal nachgewiesen
 - [x] Open Decisions verstanden (Zahlung ≠ Journal)
-- [x] **M2 darf starten** — ja / nein: **ja**. M1-11 nachgetestet 2026-08-15. Kategorien, Multi-Firma dünn und UStVA/ELSTER-XML light nachgezogen (2026-08-15). Nächster M2-Keil: ZM-Übersicht.
+- [x] **M2 darf starten** — ja / nein: **ja**. M1-11 nachgetestet 2026-08-15. Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light und ZM-Übersicht nachgezogen (2026-08-15). Nächster M2-Keil: USt-IdNr.-Validierung (BZSt).
 
 Unterschrift / Datum: kf / 2026-08-14 · Nachtest Abschn. 7–8: 2026-08-15
 
@@ -289,4 +289,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach UStVA/ELSTER-XML light 2026-08-15 (Browser-Nachtest kf). Nächster Schritt: ZM-Übersicht. Bei Software-Updates Checkliste nachziehen._
+_Stand: nach ZM-Übersicht 2026-08-15 (Browser-Nachtest kf). Nächster Schritt: USt-IdNr.-Validierung (BZSt). Bei Software-Updates Checkliste nachziehen._

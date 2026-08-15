@@ -9,6 +9,7 @@ import { getJournalEintrag, listJournal } from "@/modules/journal/repository";
 import type { JournalEintrag } from "@/modules/journal/types";
 import { listBelege, getBelegDateiResponse } from "@/modules/expenses/repository";
 import type { Beleg } from "@/modules/expenses/types";
+import { getKontakt } from "@/modules/contacts/repository";
 import { listOffenePosten } from "@/modules/payments/repository";
 import {
   buildDashboard,
@@ -22,6 +23,7 @@ import {
   firmaToUstvaAngaben,
   serializeUstvaXml,
 } from "./ustva";
+import { buildZmUebersicht, serializeZmCsv } from "./zm";
 import { serializeJournalCsv, serializeBelegArchivCsv } from "./export-csv";
 import { datevFilename, serializeDatevCsv } from "./export-datev";
 import { buildZip, type ZipEntry } from "./zip";
@@ -33,6 +35,8 @@ import type {
   EurAuswertung,
   UstUebersicht,
   UstvaDatensatz,
+  ZmKontaktBlick,
+  ZmUebersicht,
   Zeitraum,
 } from "./types";
 
@@ -148,6 +152,53 @@ export async function exportUstvaXml(
 ): Promise<{ bytes: Uint8Array; filename: string; xml: string }> {
   const { ustva } = await getUstvaSeite(firmaId, zeitraum);
   return serializeUstvaXml(ustva, opts);
+}
+
+async function loadKontakteFuerJournal(
+  firmaId: string,
+  items: JournalEintrag[],
+): Promise<Map<string, ZmKontaktBlick>> {
+  const ids = [
+    ...new Set(items.map((e) => e.kontakt).filter((id): id is string => Boolean(id))),
+  ];
+  const map = new Map<string, ZmKontaktBlick>();
+  const loaded = await Promise.all(ids.map((id) => getKontakt(firmaId, id)));
+  for (const k of loaded) {
+    if (!k) continue;
+    map.set(k.id, {
+      id: k.id,
+      name: k.name,
+      land: k.land,
+      notiz: k.notiz,
+    });
+  }
+  return map;
+}
+
+/**
+ * ZM-Übersicht der aktiven Firma (Journal + Kontakt-Land).
+ */
+export async function getZmUebersicht(
+  firmaId: string,
+  zeitraum: Zeitraum,
+): Promise<ZmUebersicht> {
+  const z = validateZeitraum(zeitraum);
+  const [firma, { items, extra }] = await Promise.all([
+    getFirmaById(firmaId),
+    journalMitStornoKontext(firmaId, z),
+  ]);
+  const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
+  const kontakte = await loadKontakteFuerJournal(firmaId, items);
+  return buildZmUebersicht(items, z, steuermodus, kontakte, extra);
+}
+
+export async function exportZmCsv(
+  firmaId: string,
+  zeitraum: Zeitraum,
+): Promise<{ body: string; filename: string }> {
+  const zm = await getZmUebersicht(firmaId, zeitraum);
+  const { csv, filename } = serializeZmCsv(zm);
+  return { body: csv, filename };
 }
 
 export async function getBwaLight(

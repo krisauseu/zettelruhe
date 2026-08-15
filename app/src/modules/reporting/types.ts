@@ -3,7 +3,11 @@
  * Lesend aus Buchungsjournal (+ offene Posten); keine Finanz-Writes.
  */
 
-import type { JournalEintrag, Steuersatz } from "@/modules/journal/types";
+import type {
+  JournalEintrag,
+  QuelleTyp,
+  Steuersatz,
+} from "@/modules/journal/types";
 import type { Steuermodus } from "@/lib/pb";
 
 /** Zeitraum YYYY-MM-DD inklusiv (Europe/Berlin-Kalendertag) */
@@ -115,6 +119,86 @@ export type UstvaFirmaAngaben = {
   plz: string;
   ort: string;
   steuernummer: string;
+};
+
+/** Land-Gruppe für ZM-Kandidaten (ISO-2 am Kontakt, aktueller Stand). */
+export type ZmLandGruppe = "eu_ohne_de" | "de" | "drittland" | "unbekannt";
+
+export type ZmEinordnung = "kandidat" | "andere_nullust";
+
+export type ZmUstIdStatus = "notiz_ungeprueft" | "nicht_gefuehrt";
+
+/** Amtlicher ZM-Meldezeitraum oder nur Auswertungsfenster */
+export type ZmZeitraumArt = "monat" | "quartal" | "kein_meldezeitraum";
+
+export type ZmMeldezeitraum = {
+  art: ZmZeitraumArt;
+  /** Kalenderjahr des Zeitraumanfangs, z. B. "2026" */
+  jahr: string;
+  label: string;
+};
+
+/** Kontakt-Ausschnitt für die ZM (kein eigenes USt-Id-Feld in v1). */
+export type ZmKontaktBlick = {
+  id: string;
+  name: string;
+  land: string;
+  notiz: string;
+};
+
+/** Eine Journal-Zeile in der ZM-Übersicht (0-USt-Einnahme). */
+export type ZmZeile = {
+  einordnung: ZmEinordnung;
+  journal_id: string;
+  laufende_nr: number;
+  buchungsdatum: string;
+  buchungstext: string;
+  quelle_typ: QuelleTyp;
+  quelle_id: string;
+  steuersatz: string;
+  kontakt_id: string | null;
+  kontakt_name: string;
+  land: string;
+  land_gruppe: ZmLandGruppe;
+  ust_id_notiz: string;
+  ust_id_status: ZmUstIdStatus;
+  journal_netto: string;
+  eintrag_euro_ganz: string;
+  ist_storno: boolean;
+};
+
+/** Summe je Kontakt — das, was der ZM-Zeile in Mein Elster am nächsten kommt. */
+export type ZmKontaktSumme = {
+  kontakt_id: string;
+  kontakt_name: string;
+  land: string;
+  ust_id_notiz: string;
+  ust_id_status: ZmUstIdStatus;
+  anzahl_buchungen: number;
+  journal_netto: string;
+  eintrag_euro_ganz: string;
+};
+
+/**
+ * ZM-Übersicht light aus Journal + Kontakt-Land.
+ * Format-ID: zettelruhe-zm-uebersicht-v1
+ */
+export type ZmUebersicht = {
+  format_id: "zettelruhe-zm-uebersicht-v1";
+  steuermodus: Steuermodus;
+  verfuegbar: boolean;
+  zeitraum: Zeitraum;
+  meldezeitraum: ZmMeldezeitraum;
+  kandidaten: ZmKontaktSumme[];
+  kandidaten_zeilen: ZmZeile[];
+  andere_nullust: ZmZeile[];
+  summe_kandidaten_netto: string;
+  summe_kandidaten_euro_ganz: string;
+  summe_andere_netto: string;
+  csv_download_erlaubt: boolean;
+  csv_blockgrund: string;
+  nicht_gefuehrt: { feld: string; bezeichnung: string }[];
+  hinweis: string;
 };
 
 /**

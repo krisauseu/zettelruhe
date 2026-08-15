@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn und **UStVA/ELSTER-XML light** stehen (Browser-Nachtest kf). Als Nächstes **ZM-Übersicht**.
+**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light und **ZM-Übersicht** stehen (Browser-Nachtest kf). Als Nächstes **USt-IdNr.-Validierung (BZSt)**.
 
 ### Fundament & Stammdaten
 
@@ -74,6 +74,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 - Dashboard light: Umsatz, offene Posten, Ausgaben-Trend (ohne USt-Zahllast-Widgets im Kleinunternehmer-Modus)
 - EÜR nach amtlichen Kategorien (beide Steuer-Modi)
 - USt-Übersicht (Monat/Quartal/Jahr) — **nur Regelbesteuerung**; UStVA-Kennzahlen + ELSTER-XML light (Self-File), kein ELSTER-Versand
+- Zusammenfassende Meldung (ZM) Übersicht — **nur Regelbesteuerung**; Kandidaten aus 0-USt-Einnahmen + Kontakt-Land (Self-File), kein ELSTER-Versand
 - BWA light / einfache Einnahmen-Ausgaben-Sicht je Zeitraum
 - DATEV-Export (CSV/EXTF)
 - Vollständiger CSV-Export relevanter Tabellen
@@ -100,8 +101,8 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 1. **Kategorien** — gemeinsame Auswahlliste für Belege und Kassenbuch, CRUD in den Stammdaten (vor M2-Steuerkeilen) ← erledigt
 2. **Multi-Firma dünn** — Firma anlegen + wechseln, eine Eigentümer:in; kein Einladen, keine Rollen-UI (ADR-0018) ← erledigt
 3. **UStVA-Zahlen / ELSTER-XML light** (Self-File-Vorbereitung) ← erledigt (ADR-0019)
-4. Zusammenfassende Meldung (ZM) Übersicht ← nächster Steuer-Keil
-5. USt-IdNr.-Validierung (BZSt)
+4. Zusammenfassende Meldung (ZM) Übersicht ← erledigt (ADR-0020)
+5. USt-IdNr.-Validierung (BZSt) ← nächster Steuer-Keil
 6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback)
 
 Später (nicht vor UStVA): Multi-User / grobe Rechte.

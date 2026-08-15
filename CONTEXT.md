@@ -119,6 +119,10 @@ _Avoid_: Soft delete, überschreiben
 Zusammenstellung der Umsatzsteuer-Zahllast je Zeitraum zur Vorbereitung der eigenen UStVA. Nur im Steuer-Modus Regelbesteuerung relevant; unter Kleinunternehmerregelung entfällt sie als Arbeitsflow. Unter Regelbesteuerung: typische UStVA-Kennzahlen zum Selbst-Eintragen in Mein Elster plus optionaler XML-Download (light, lokal) — kein ELSTER-Versand, keine Abgabe aus der App.
 _Avoid_: UStVA-Abgabe (als Versprechen), ELSTER-Versand
 
+**Zusammenfassende Meldung (ZM)**:
+Übersicht zur Vorbereitung der Zusammenfassenden Meldung in Mein Elster (innergemeinschaftliche Lieferungen/sonstige Leistungen). Nur Regelbesteuerung; Zahlen aus dem Buchungsjournal der aktiven Firma plus aktuellem Land am Kontakt. 0-USt-Einnahmen an Kontakte im übrigen EU-Gebiet erscheinen als Kandidaten — Art (Lieferung/Leistung/Dreieck) und USt-IdNr. werden nicht geraten. Unter Kleinunternehmerregelung typisch nicht relevant. Kein ELSTER-Versand, keine Abgabe aus der App.
+_Avoid_: ZM-Abgabe (als Versprechen), ELSTER-Versand, ig. Lieferung (als festgestellte Buchungsart)
+
 **Bankkonto**:
 Zahlweg der Firma für unbare Zahlungseingänge/-ausgänge; Stammdaten für CSV/MT940-Import. Das Modell erlaubt mehrere Bankkonten; Kassenbuch bleibt davon getrennt.
 _Avoid_: Konto (allein — kollidiert mit SKR-Konto)
@@ -133,6 +137,6 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **v1-Betrieb**: Self-hosted; eine Eigentümer:in; mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
-- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn und UStVA/ELSTER-XML light (erledigt): ZM-Übersicht, USt-IdNr.-Prüfung, E-Rechnungs-Versand vertiefen
+- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
+- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light und ZM-Übersicht (erledigt): USt-IdNr.-Prüfung, E-Rechnungs-Versand vertiefen
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

@@ -13,7 +13,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 |-------|-----------|
 | System | Zettelruhe (Next.js + PocketBase/SQLite) |
 | Nutzerkreis | Eigentümer:in der Instanz |
-| Steuerziel | EÜR; optional USt-Übersicht bei Regelbesteuerung (Ist-Versteuerung) |
+| Steuerziel | EÜR; optional USt-Übersicht und ZM-Übersicht bei Regelbesteuerung (Ist-Versteuerung) |
 | Standort Daten | Volume `zettelruhe_pb_data` (Docker Compose) bzw. konfigurierter PB-Datenpfad |
 
 ## 2. Verantwortlichkeiten
@@ -46,6 +46,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 | EÜR light | Summen aus Journal, Kategorien light | Beide Steuer-Modi |
 | USt-Übersicht | USt/Vorsteuer aus Journal | Nur Regelbesteuerung; kein ELSTER-Versand |
 | UStVA / ELSTER-XML light | Kz 81/86/66/83 aus Journal | Self-File (`zettelruhe-ustva-elster-xml-light-v1`); kein Versand; Monat/Quartal |
+| ZM-Übersicht | 0-USt-Einnahmen + Kontakt-Land | Self-File (`zettelruhe-zm-uebersicht-v1`); Kandidaten, keine Art/USt-Id; kein Versand |
 | DATEV light CSV | Journal-Zeilen EXTF-ähnlich | Format-ID `zettelruhe-datev-csv-light-v1`, **nicht** DATEV-zertifiziert |
 | Journal-CSV | Alle Felder der Journal-Zeilen | Semikolon, UTF-8 BOM |
 | Belegarchiv-ZIP | Metadaten + Dateien festgeschriebener Belege | Zeitraum nach Belegdatum |

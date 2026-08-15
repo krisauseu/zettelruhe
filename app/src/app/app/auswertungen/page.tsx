@@ -142,6 +142,13 @@ export default async function AuswertungenPage({
               >
                 USt-Übersicht
               </Link>
+              {" · "}
+              <Link
+                href={`/app/zm?preset=${encodeURIComponent(preset)}&von=${zeitraum.von}&bis=${zeitraum.bis}`}
+                className="text-primary hover:underline"
+              >
+                ZM-Übersicht
+              </Link>
             </CardContent>
           </Card>
         ) : (

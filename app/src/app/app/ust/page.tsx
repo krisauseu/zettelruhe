@@ -310,6 +310,17 @@ export default async function UstPage({
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>{ustva.hinweis}</p>
               <p>{ust.hinweis}</p>
+              <p>
+                0-USt-Einnahmen an Kontakte im übrigen EU-Gebiet stehen als
+                Kandidaten (ohne Art) in der{" "}
+                <Link
+                  href={`/app/zm?${downloadQs}`}
+                  className="text-primary hover:underline"
+                >
+                  ZM-Übersicht
+                </Link>
+                — nicht als UStVA-Kz 41.
+              </p>
             </CardContent>
           </Card>
         </>

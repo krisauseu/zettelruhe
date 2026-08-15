@@ -188,6 +188,10 @@ export default async function AppHomePage() {
                 <Link href="/app/ust" className="text-primary hover:underline">
                   USt-Übersicht
                 </Link>
+                {" · "}
+                <Link href="/app/zm" className="text-primary hover:underline">
+                  ZM-Übersicht
+                </Link>
               </CardContent>
             </Card>
           ) : (

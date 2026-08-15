@@ -17,6 +17,7 @@ import {
   Contact,
   Download,
   FileCode2,
+  FileSpreadsheet,
   FileText,
   FolderKanban,
   Landmark,
@@ -76,6 +77,7 @@ export type NavIconKey =
   | "auswertungen"
   | "eur"
   | "ust"
+  | "zm"
   | "export"
   | "firma"
   | "kategorien";
@@ -115,6 +117,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   auswertungen: BarChart3,
   eur: Calculator,
   ust: Percent,
+  zm: FileSpreadsheet,
   export: Download,
   firma: Building2,
   kategorien: Tags,

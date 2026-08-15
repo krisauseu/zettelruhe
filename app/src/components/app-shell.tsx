@@ -42,6 +42,7 @@ const NAV: NavItem[] = [
   { href: "/app/auswertungen", label: "Auswertungen", icon: "auswertungen" },
   { href: "/app/eur", label: "EÜR", icon: "eur" },
   { href: "/app/ust", label: "USt-Übersicht", icon: "ust" },
+  { href: "/app/zm", label: "ZM-Übersicht", icon: "zm" },
   { href: "/app/export", label: "Export", icon: "export" },
 ];
 
