@@ -84,7 +84,8 @@ export default async function ERechnungenListPage({
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Empfang: XRechnung/ZUGFeRD hochladen, Original archivieren, Beleg
-            vorbefüllen. Versand folgt später.
+            vorbefüllen. Versand einer E-Rechnung von der festgeschriebenen
+            Rechnung aus.
           </p>
         </div>
         <Link

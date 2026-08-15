@@ -49,6 +49,9 @@ export type FirmaRecord = {
   land?: string;
   steuernummer?: string;
   ust_id?: string;
+  /** Elektronische Adresse (E-Rechnung / XRechnung) */
+  email?: string;
+  telefon?: string;
   /** PB-Dateiname, leer = kein Logo */
   logo?: string;
   dokument_akzentfarbe?: string;
@@ -206,6 +209,8 @@ type PbFirma = {
   land?: string;
   steuernummer?: string;
   ust_id?: string;
+  email?: string;
+  telefon?: string;
   logo?: string;
   dokument_akzentfarbe?: string;
   dokument_kopftext?: string;
@@ -225,6 +230,8 @@ function mapFirma(r: PbFirma): FirmaRecord {
     land: r.land ?? "DE",
     steuernummer: r.steuernummer ?? "",
     ust_id: r.ust_id ?? "",
+    email: r.email ?? "",
+    telefon: r.telefon ?? "",
     logo: r.logo ?? "",
     dokument_akzentfarbe: r.dokument_akzentfarbe ?? "",
     dokument_kopftext: r.dokument_kopftext ?? "",
@@ -286,6 +293,8 @@ export type FirmaStammdatenInput = {
   land?: string;
   steuernummer?: string;
   ust_id?: string;
+  email?: string;
+  telefon?: string;
   nummernkreise?: Nummernkreise;
   dokument_akzentfarbe?: string;
   dokument_kopftext?: string;
@@ -338,6 +347,8 @@ export async function updateFirma(
     land: (input.land ?? "DE").trim() || "DE",
     steuernummer: (input.steuernummer ?? "").trim(),
     ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
+    email: (input.email ?? "").trim(),
+    telefon: (input.telefon ?? "").trim(),
   };
   if (input.skr) {
     scalars.skr = input.skr;

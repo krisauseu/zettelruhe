@@ -130,7 +130,7 @@ LICENSE              AGPL-3.0
 | [`CONTEXT.md`](./CONTEXT.md) | Glossary und Scope |
 | [`docs/feature-roadmap.md`](./docs/feature-roadmap.md) | v1 / M2 / später |
 | [`docs/betrieb.md`](./docs/betrieb.md) | Backup, Secrets, Health, Updates |
-| [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) | Manueller Funktionstest vor M2 |
+| [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) | Manueller Funktionstest Meilenstein 1 |
 | [`docs/verfahrensdokumentation.md`](./docs/verfahrensdokumentation.md) | GoBD-Vorlage |
 | [`docs/adr/`](./docs/adr/) | Architekturentscheidungen |
 | [`docs/90-status.md`](./docs/90-status.md) | Projektstand |
@@ -138,9 +138,22 @@ LICENSE              AGPL-3.0
 ## Status
 
 **v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betrieblich hartbar abgeschlossen  
-(Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).
+(Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).  
+Funktionstest: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) — bestanden mit Mängeln.
 
-Danach erledigt (Meilenstein 2, vor dem Versand): **Kategorien** (Beleg + Kassenbuch), **Multi-Firma dünn** (anlegen + wechseln), **UStVA/ELSTER-XML light** (Self-File auf `/app/ust`, kein Versand), **ZM-Übersicht** (Self-File auf `/app/zm`, kein Versand), **USt-IdNr.-Prüfung (BZSt)** (Schnappschuss, kein Versand; Speichern lokal bestätigt). Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR — lokal unter HTTP nicht nachgetestet. **Server-Nachtest nach Abschluss von Meilenstein 2.**
+**Meilenstein 2 (Steuer & Compliance)** — Keile gebaut:
 
-Details und Follow-ups (HTTPS/Caddy, Setup-`verified`, Dokumenten-Layout, Logo/Favicon): [`docs/90-status.md`](./docs/90-status.md).  
-Nächster Keil (M2): **E-Rechnungs-Versand**.
+| Keil | Ort | Hinweis |
+|------|-----|---------|
+| Kategorien | `/app/kategorien` | gemeinsame Liste Beleg + Kassenbuch |
+| Multi-Firma dünn | Shell + `/app/firma/neu` | eine Eigentümer:in, Session wechselt |
+| UStVA / ELSTER-XML light | `/app/ust` | Self-File, kein Versand |
+| ZM-Übersicht | `/app/zm` | Self-File, kein Versand |
+| USt-IdNr.-Prüfung (BZSt) | Firma + Kontakt | Schnappschuss, kein Dauer-Stempel |
+| E-Rechnungs-Versand | festgeschriebene Rechnung | XRechnung-UBL / ZUGFeRD-CII als XML, kein Hybrid-PDF |
+
+Browser-Nachtest Versand durch kf (2026-08-15): keine Fehler. Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR und steht zusammen mit dem **Server-Nachtest M2** aus.
+
+**Als Nächstes:** Funktionstest-Protokoll für die M2-Keile (analog M1) und **HTTPS auf dem Server** (Caddy im Compose belassen vs. nativ auf dem Host). Follow-ups ohne diese Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
+
+Details: [`docs/90-status.md`](./docs/90-status.md).

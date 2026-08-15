@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-15_
 
-**Last session:** 2026-08-15 — USt-IdNr.-Validierung (BZSt) lokal bestätigt und auf `origin/main`; nächster Chat: E-Rechnungs-Versand
+**Last session:** 2026-08-15 — E-Rechnungs-Versand auf `origin/main`; Browser-Nachtest kf ohne Fehler. Nächster Chat: Funktionstest-Protokoll M2 + HTTPS/Caddy auf dem Server
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0021
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0022
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -25,7 +25,8 @@ _Last updated: 2026-08-15_
 - **Sidebar:** Gruppen kollabierbar (Default offen), Zustand + Favoriten in localStorage, Auto-Open der aktiven Route, „Alle öffnen/schließen“, „Nur Favoriten“. 291 Unit-Tests.
 - **UStVA / ELSTER-XML light** (ADR-0019): unter Regelbesteuerung Kennzahlen 81/86/66/83 aus dem Journal der aktiven Firma; XML-Download (Mein-Elster-Nutzdaten, kein Versand) für Monat/Quartal. Kleinunternehmerregelung unverändert „nicht relevant“. 308 Unit-Tests. Browser-Nachtest durch kf 2026-08-15: keine Probleme.
 - **ZM-Übersicht** (ADR-0020): unter Regelbesteuerung Kandidaten aus 0-USt-Einnahmen plus Land am Kontakt (`/app/zm`); Art nicht geführt; CSV light, kein Versand. Kleinunternehmerregelung „nicht relevant“. Browser-Nachtest durch kf 2026-08-15: keine Fehler.
-- **USt-IdNr.-Validierung (BZSt)** (ADR-0021): `ust_id` am Kontakt; eigene Nummer an der Firma als Anfragende; eVatR-REST einfach/qualifiziert als Schnappschuss, kein Dauer-Stempel. Kleinunternehmerregelung: Nummer erlaubt, USt/ZM unverändert nicht relevant. 348 Unit-Tests. Browser (kf, 2026-08-15, lokal HTTP): Eingabe und Speichern der USt-IdNr. ohne Fehler. Klick-Prüfung beim BZSt lokal nicht prüfbar (kein HTTPS / ausgehender eVatR-Zugang). **Server-Nachtest der Prüfung erst nach Abschluss von Meilenstein 2**, zusammen mit den übrigen M2-Ergänzungen.
+- **USt-IdNr.-Validierung (BZSt)** (ADR-0021): `ust_id` am Kontakt; eigene Nummer an der Firma als Anfragende; eVatR-REST einfach/qualifiziert als Schnappschuss, kein Dauer-Stempel. Kleinunternehmerregelung: Nummer erlaubt, USt/ZM unverändert nicht relevant. Browser (kf, 2026-08-15, lokal HTTP): Eingabe und Speichern der USt-IdNr. ohne Fehler. Klick-Prüfung beim BZSt lokal nicht prüfbar (kein HTTPS / ausgehender eVatR-Zugang).
+- **E-Rechnungs-Versand** (ADR-0022): aus festgeschriebener Rechnung der aktiven Firma XML-Original (Profil XRechnung 3.0 UBL oder ZUGFeRD/Factur-X EN 16931 CII). Pflichtfeld- und Steuer-Modus-Prüfung mit de-DE-Fehlerliste; Kleinunternehmerregelung ohne USt-Zeilen + §-19-Hinweis; Regelbesteuerung mit Ausweis. Archiv in `e_rechnungen_versand`, Rechnungs-PDF unangetastet. Kein Hybrid-PDF/A-3, kein KoSIT-Claim, Empfangspfad unverändert. 362 Unit-Tests. Lokal hinter Caddy (2026-08-15): Prüfung, Erzeugung beider Profile auf R-0004, PDF unverändert, Isolation über `session.firmaId`. **Browser-Nachtest durch kf 2026-08-15: keine Fehler.**
 
 ## What's next
 
@@ -37,9 +38,9 @@ _Last updated: 2026-08-15_
 4. **UStVA/ELSTER-XML light erledigt** — Self-File, kein Versand (ADR-0019).
 5. **ZM-Übersicht erledigt** — Self-File, kein Versand (ADR-0020).
 6. **USt-IdNr.-Validierung (BZSt) erledigt** — Schnappschuss, kein Versand (ADR-0021).
-7. **Als Nächstes: E-Rechnungs-Versand** — neuer Chat, nicht in diesem Keil.
-8. **Open Decisions** weiter separat. Multi-User später.
-9. **Server-Nachtest M2** (inkl. BZSt-Klick) nach dem Versand-Keil, wenn die Instanz HTTPS hat.
+7. **E-Rechnungs-Versand erledigt** — XML-Profile, Validierung, Fehlerfeedback (ADR-0022).
+8. **Als Nächstes: Funktionstest-Protokoll M2** (analog [`funktionstest-m1.md`](./funktionstest-m1.md)) **und HTTPS auf dem Server** (Caddy im Compose vs. nativ). Danach Server-Nachtest inkl. BZSt-Klick.
+9. **Open Decisions** weiter separat. Multi-User später.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
 
@@ -86,4 +87,4 @@ Kein Prio außer **HTTPS auf dem Server** — ohne das bleibt die BZSt-Prüfung 
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-15-ust-idnr-bzst.md`](./sessions/2026-08-15-ust-idnr-bzst.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-15-e-rechnung-versand.md`](./sessions/2026-08-15-e-rechnung-versand.md)

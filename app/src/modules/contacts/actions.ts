@@ -43,6 +43,7 @@ function parseKontaktForm(formData: FormData): KontaktInput {
     iban: formString(formData, "iban"),
     bic: formString(formData, "bic"),
     ust_id: formString(formData, "ust_id"),
+    leitweg_id: formString(formData, "leitweg_id"),
     notiz: formString(formData, "notiz"),
   };
 }

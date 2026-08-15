@@ -5,6 +5,10 @@
 
 import { getKontakt } from "@/modules/contacts";
 import {
+  getERechnungVersandDateiResponse,
+  listERechnungVersandForRechnung,
+} from "@/modules/einvoice";
+import {
   getAngebot,
   getAngebotPdfResponse,
   getRechnung,
@@ -68,6 +72,32 @@ export async function sendeRechnungPerMail(
   );
   const pdf = await pdfBufferFromResponse(response);
 
+  const attachments: Array<{
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }> = [
+    {
+      filename,
+      content: pdf,
+      contentType: "application/pdf",
+    },
+  ];
+
+  const versand = await listERechnungVersandForRechnung(firmaId, rechnungId);
+  for (const v of versand) {
+    try {
+      const file = await getERechnungVersandDateiResponse(firmaId, v.id);
+      attachments.push({
+        filename: file.filename,
+        content: await pdfBufferFromResponse(file.response),
+        contentType: "application/xml",
+      });
+    } catch {
+      /* PDF bleibt der Pflichtanhang */
+    }
+  }
+
   const nummer = rechnung.rechnungsnummer || "Rechnung";
   const subject = `Rechnung ${nummer}`;
   const text = [
@@ -78,6 +108,9 @@ export async function sendeRechnungPerMail(
       ? `Fällig am: ${formatDateDe(rechnung.faellig_am)}.`
       : "",
     `Betrag: ${formatMoneyDe(rechnung.betrag_brutto, { currency: true })}.`,
+    versand.length
+      ? "Im Anhang außerdem die strukturierte E-Rechnung (XML)."
+      : "",
     "",
     "Mit freundlichen Grüßen",
   ]
@@ -88,13 +121,7 @@ export async function sendeRechnungPerMail(
     to,
     subject,
     text,
-    attachments: [
-      {
-        filename,
-        content: pdf,
-        contentType: "application/pdf",
-      },
-    ],
+    attachments,
   });
 
   return { to, messageId: result.messageId };

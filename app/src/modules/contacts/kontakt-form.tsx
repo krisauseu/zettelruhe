@@ -108,6 +108,19 @@ export function KontaktForm({ action, kontakt, submitLabel, error }: Props) {
             — kein Dauer-„gültig“, festgeschriebene Belege bleiben unverändert.
           </p>
         </div>
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <Label htmlFor="leitweg_id">Leitweg-ID / Käuferreferenz</Label>
+          <Input
+            id="leitweg_id"
+            name="leitweg_id"
+            defaultValue={kontakt?.leitweg_id ?? ""}
+            autoComplete="off"
+          />
+          <p className="text-xs text-muted-foreground">
+            Für XRechnung Pflicht (Behörde: Leitweg-ID; sonst Käuferreferenz).
+            Bei ZUGFeRD-CII optional.
+          </p>
+        </div>
       </fieldset>
 
       <fieldset className="grid gap-3 sm:grid-cols-2">

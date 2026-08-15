@@ -1,7 +1,7 @@
 /**
  * Domain-Typen: E-Rechnung Empfang
  * Stabiles DTO (ADR-0015) + Persistenz-Typen für Inbox.
- * Kein Parser-Lib-Lock-in; Versand ist nicht Teil von BA12.
+ * Kein Parser-Lib-Lock-in. Versand-Typen: outbound-types.ts (ADR-0022).
  */
 
 import type { BelegInput, Steuersatz } from "@/modules/expenses/types";

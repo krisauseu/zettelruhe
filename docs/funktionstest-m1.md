@@ -289,4 +289,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach USt-IdNr.-Prüfung (BZSt) 2026-08-15. Nächster Schritt: E-Rechnungs-Versand. Bei Software-Updates Checkliste nachziehen._
+_Stand: nach E-Rechnungs-Versand 2026-08-15 (Browser kf: keine Fehler). Nächster Schritt: Funktionstest-Protokoll M2 + HTTPS auf dem Server. Bei Software-Updates Checkliste nachziehen._

@@ -138,6 +138,8 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
       land: formString(formData, "land") || "DE",
       steuernummer: formString(formData, "steuernummer"),
       ust_id: formString(formData, "ust_id"),
+      email: formString(formData, "email"),
+      telefon: formString(formData, "telefon"),
       nummernkreise,
       dokument_akzentfarbe,
       dokument_kopftext: kopftext,

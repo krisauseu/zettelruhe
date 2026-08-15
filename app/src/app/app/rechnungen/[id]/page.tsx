@@ -31,6 +31,12 @@ import {
 import { ConfirmForm } from "@/components/ui/confirm-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { listBankkonten } from "@/modules/banking";
+import {
+  ERechnungVersandCard,
+  listERechnungVersandForRechnung,
+  parseSendProfil,
+} from "@/modules/einvoice";
 import {
   isSmtpConfigured,
   sendeRechnungMailAction,
@@ -69,6 +75,9 @@ type SearchParams = Promise<{
   mailTo?: string;
   erinnerung?: string;
   storniert?: string;
+  erechnung?: string;
+  erechnungOk?: string;
+  erechnungProfil?: string;
 }>;
 
 function statusBadgeVariant(
@@ -114,13 +123,20 @@ export default async function RechnungDetailPage({
       : rechnung.steuermodus;
   const showUst = rechnung.steuermodus === "regelbesteuerung_ist";
 
-  const [kundenResult, katalogResult, zahlungsstand] = await Promise.all([
-    listKontakte(session.firmaId, { rolle: "kunde" }, 1, 200),
-    listKatalog(session.firmaId, { nurAktiv: true }, 1, 200),
-    rechnung.status !== "entwurf"
-      ? getZahlungsstand(session.firmaId, id)
-      : Promise.resolve(null),
-  ]);
+  const [kundenResult, katalogResult, zahlungsstand, bankkontenResult, versand] =
+    await Promise.all([
+      listKontakte(session.firmaId, { rolle: "kunde" }, 1, 200),
+      listKatalog(session.firmaId, { nurAktiv: true }, 1, 200),
+      rechnung.status !== "entwurf"
+        ? getZahlungsstand(session.firmaId, id)
+        : Promise.resolve(null),
+      rechnung.status !== "entwurf"
+        ? listBankkonten(session.firmaId, { aktiv: true }, 1, 50)
+        : Promise.resolve({ items: [] }),
+      rechnung.status !== "entwurf"
+        ? listERechnungVersandForRechnung(session.firmaId, id)
+        : Promise.resolve([]),
+    ]);
 
   const kunden = kundenResult.items.map((k) => ({
     id: k.id,
@@ -225,6 +241,11 @@ export default async function RechnungDetailPage({
         {sp.storniert ? (
           <p className="mt-2 text-sm text-success">
             Rechnung storniert. Gegenbuchung im Journal erzeugt.
+          </p>
+        ) : null}
+        {sp.erechnung ? (
+          <p className="mt-2 text-sm text-green-700 dark:text-green-400">
+            E-Rechnung erzeugt und unveränderbar archiviert.
           </p>
         ) : null}
       </div>
@@ -438,12 +459,20 @@ export default async function RechnungDetailPage({
             </CardContent>
           </Card>
 
+          <ERechnungVersandCard
+            rechnungId={id}
+            versand={versand}
+            bankkonten={bankkontenResult.items}
+            defaultProfil={parseSendProfil(sp.erechnungProfil ?? "")}
+            geprueft={Boolean(sp.erechnungOk)}
+          />
+
           <Card>
             <CardHeader>
               <CardTitle>E-Mail (optional)</CardTitle>
               <CardDescription>
-                Zusätzlich zum Original-PDF. Für Postweg reicht „PDF ansehen /
-                drucken“.
+                Zusätzlich zum Original-PDF und ggf. erzeugter E-Rechnung. Für
+                Postweg reicht „PDF ansehen / drucken“.
                 {isSmtpConfigured()
                   ? " Versand an die Kontakt-E-Mail."
                   : " SMTP ist nicht konfiguriert (SMTP_HOST) — kein Mailversand."}{" "}
@@ -701,7 +730,8 @@ export default async function RechnungDetailPage({
                 Vergibt die Rechnungsnummer aus dem Nummernkreis, erzeugt das
                 Original-PDF (ohne Wasserzeichen), schreibt eine Einnahme ins
                 Buchungsjournal und sperrt danach Dokument und Metadaten
-                (GoBD-Mindeststandard).
+                (GoBD-Mindeststandard). Die E-Rechnung (XML) kommt danach auf
+                der festgeschriebenen Rechnung — sie ersetzt das PDF nicht.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">

@@ -15,6 +15,8 @@ export type Kontakt = {
   iban: string;
   bic: string;
   ust_id: string;
+  /** Leitweg-ID (Behörde) oder Käuferreferenz (B2B) — XRechnung BT-10 */
+  leitweg_id: string;
   notiz: string;
   created?: string;
   updated?: string;
@@ -33,6 +35,7 @@ export type KontaktInput = {
   iban?: string;
   bic?: string;
   ust_id?: string;
+  leitweg_id?: string;
   notiz?: string;
 };
 

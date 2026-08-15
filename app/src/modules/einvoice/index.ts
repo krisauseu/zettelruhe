@@ -1,7 +1,7 @@
 /**
- * Modul: einvoice — E-Rechnung Empfang
- * Bauabschnitt 12: Upload/Archiv Original, Parse → ParsedEInvoice (ADR-0015),
- * Beleg-Entwurf über expenses. Kein Versand, kein Mustang-Sidecar (ADR-0003/0015).
+ * Modul: einvoice — E-Rechnung Empfang und Versand
+ * Empfang: Upload/Archiv Original, Parse → ParsedEInvoice, Beleg-Entwurf.
+ * Versand: XML aus festgeschriebener Rechnung (ADR-0022). Kein Mustang-Sidecar.
  */
 
 export const MODULE_ID = "einvoice" as const;
@@ -20,6 +20,15 @@ export type {
   ParsedEInvoiceParty,
   ParseEInvoiceResult,
 } from "./types";
+
+export type {
+  EInvoiceOutbound,
+  EInvoiceOutboundLine,
+  EInvoicePrepareResult,
+  EInvoiceSendProfil,
+  EInvoiceValidationIssue,
+  ERechnungVersand,
+} from "./outbound-types";
 
 export {
   assertCanCreateBeleg,
@@ -64,3 +73,43 @@ export {
   createBelegFromERechnungAction,
   uploadERechnungAction,
 } from "./actions";
+
+export {
+  buildEInvoiceOutbound,
+  mapEinheitToUnece,
+  parseSendProfil,
+  XRECHNUNG_CUSTOMIZATION_ID,
+  ZUGFERD_EN16931_GUIDELINE_ID,
+} from "./outbound";
+
+export {
+  EInvoiceValidationError,
+  formatValidationIssues,
+  prepareEInvoiceOutbound,
+  validateEInvoiceOutbound,
+} from "./validate-outbound";
+
+export { renderXRechnungUbl } from "./render-ubl";
+export { renderZugferdCii } from "./render-cii";
+
+export {
+  assertCanErzeugenVersand,
+  renderEInvoiceXml,
+  VERSAND_BEREITS_ERROR,
+  versandDateiname,
+} from "./send-invariants";
+
+export {
+  erzeugeERechnungVersand,
+  getERechnungVersand,
+  getERechnungVersandDateiResponse,
+  listERechnungVersandForRechnung,
+  pruefeERechnungVersand,
+} from "./send-repository";
+
+export {
+  erzeugeERechnungVersandAction,
+  pruefeERechnungVersandAction,
+} from "./send-actions";
+
+export { ERechnungVersandCard } from "./e-rechnung-versand-card";

@@ -63,6 +63,12 @@ describe("parseKontakteCsv", () => {
     expect(result.items[0].ust_id).toBe("FR12345678901");
   });
 
+  it("liest Leitweg-ID / Käuferreferenz", () => {
+    const csv = "name;leitweg_id\nBehörde X;99-TEST-0000-00\n";
+    const result = parseKontakteCsv(csv);
+    expect(result.items[0].leitweg_id).toBe("99-TEST-0000-00");
+  });
+
   it("akzeptiert Alias Firma als name", () => {
     const csv = "Firma;Kunde\nTestfirma;ja\n";
     const result = parseKontakteCsv(csv);
@@ -98,6 +104,7 @@ describe("serializeKontakteCsv", () => {
         ort: "Köln",
         land: "DE",
         ust_id: "ATU12345678",
+        leitweg_id: "",
         email: "t@example.de",
         telefon: "",
         iban: "DE89370400440532013000",
@@ -127,6 +134,7 @@ describe("serializeKontakteCsv", () => {
         ort: "",
         land: "DE",
         ust_id: "",
+        leitweg_id: "",
         email: "",
         telefon: "",
         iban: "",

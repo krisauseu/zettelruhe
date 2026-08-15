@@ -79,7 +79,7 @@ Manuell erzeugtes Mahn-Dokument bei überfälliger Rechnung; kein automatischer 
 _Avoid_: Mahnlauf (als v1-Automatik)
 
 **E-Rechnung**:
-Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang und revisionssicheres Archiv haben Vorrang vor dem Versand.
+Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang archiviert das Original unverändert. Versand erzeugt XML-Originale (XRechnung-UBL / ZUGFeRD-CII) aus der festgeschriebenen Rechnung — kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim.
 _Avoid_: PDF-Rechnung (als Synonym — PDF allein ist keine E-Rechnung)
 
 **Beleg**:
@@ -146,5 +146,5 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht und USt-IdNr.-Prüfung (erledigt): E-Rechnungs-Versand vertiefen
+- **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand (erledigt). Danach Server-Nachtest, sobald HTTPS steht.
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

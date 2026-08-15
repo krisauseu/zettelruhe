@@ -109,6 +109,15 @@ export const E_RECHNUNG_FORMAT_LABELS: Record<EInvoiceFormat, string> = {
   unbekannt: "Unbekannt",
 };
 
+/** E-Rechnung Versand: wählbare Profile (XML, kein Hybrid-PDF) */
+export const E_RECHNUNG_PROFIL_LABELS: Record<
+  Exclude<EInvoiceFormat, "unbekannt">,
+  string
+> = {
+  xrechnung_ubl: "XRechnung 3.0 (UBL-XML)",
+  zugferd_cii: "ZUGFeRD EN 16931 (CII-XML)",
+};
+
 export const ANGEBOT_STATUS_LABELS: Record<AngebotStatus, string> = {
   entwurf: "Entwurf",
   gesendet: "Gesendet",

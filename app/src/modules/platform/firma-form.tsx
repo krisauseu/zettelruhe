@@ -98,6 +98,31 @@ export function FirmaForm({
             damit ausländische Nummern — nicht diese DE-Nummer isoliert.
           </p>
         </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">E-Mail (E-Rechnung)</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              defaultValue={firma.email ?? ""}
+              autoComplete="email"
+            />
+            <p className="text-xs text-muted-foreground">
+              Elektronische Adresse der Firma. Für XRechnung Pflicht.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="telefon">Telefon (optional)</Label>
+            <Input
+              id="telefon"
+              name="telefon"
+              type="tel"
+              defaultValue={firma.telefon ?? ""}
+              autoComplete="tel"
+            />
+          </div>
+        </div>
       </fieldset>
 
       <fieldset className="flex flex-col gap-4">

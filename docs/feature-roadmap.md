@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht und **USt-IdNr.-Prüfung (BZSt)** stehen. Als Nächstes **E-Rechnungs-Versand**.
+**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und **E-Rechnungs-Versand** stehen (Browser kf: keine Fehler). Als Nächstes **Funktionstest-Protokoll M2** und **HTTPS auf dem Server**.
 
 ### Fundament & Stammdaten
 
@@ -67,7 +67,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 - **Empfang**: XRechnung / ZUGFeRD parsen → Beleg vorbefüllen
 - Revisionssicheres Ablegen der Originaldatei
-- Versand (ZUGFeRD/XRechnung-Export) eng nachziehen, aber Empfang ist v1-Pflichtkeil
+- **Versand**: XRechnung-UBL / ZUGFeRD-CII als XML-Original aus festgeschriebener Rechnung; Validierung mit Fehlerliste; kein Hybrid-PDF/A-3
 
 ### Auswertungen & Export
 
@@ -103,8 +103,8 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 3. **UStVA-Zahlen / ELSTER-XML light** (Self-File-Vorbereitung) ← erledigt (ADR-0019)
 4. Zusammenfassende Meldung (ZM) Übersicht ← erledigt (ADR-0020)
 5. USt-IdNr.-Validierung (BZSt) ← erledigt (ADR-0021)
-6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback) ← nächster Keil
-7. Server-Nachtest der M2-Keile (inkl. BZSt-Klick) — erst mit HTTPS auf der Instanz
+6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback) ← erledigt (ADR-0022); Browser kf 2026-08-15 ohne Fehler
+7. Funktionstest-Protokoll M2 (analog M1) + HTTPS auf dem Server; danach Server-Nachtest inkl. BZSt-Klick
 
 Später (nicht vor UStVA): Multi-User / grobe Rechte. Follow-ups ohne M2-Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon; **HTTPS/Caddy** vor dem BZSt-Servertest.
 

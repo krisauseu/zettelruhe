@@ -38,6 +38,7 @@ type PbKontakt = {
   iban?: string;
   bic?: string;
   ust_id?: string;
+  leitweg_id?: string;
   notiz?: string;
   created?: string;
   updated?: string;
@@ -69,6 +70,7 @@ function mapKontakt(r: PbKontakt): Kontakt {
     iban: r.iban ?? "",
     bic: r.bic ?? "",
     ust_id: r.ust_id ?? "",
+    leitweg_id: r.leitweg_id ?? "",
     notiz: r.notiz ?? "",
     created: r.created,
     updated: r.updated,
@@ -102,6 +104,7 @@ function toPbBody(input: KontaktInput, firmaId: string): Record<string, unknown>
     iban: (input.iban ?? "").trim().replace(/\s+/g, "").toUpperCase(),
     bic: (input.bic ?? "").trim().toUpperCase(),
     ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
+    leitweg_id: (input.leitweg_id ?? "").trim(),
     notiz: (input.notiz ?? "").trim(),
   };
 }
