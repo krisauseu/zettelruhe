@@ -76,7 +76,7 @@ Wiederherstellung nur aus geprüften Backups; nach Restore Login und Stichprobe 
 - Authentifizierung über PocketBase-Nutzer; Next.js Session (httpOnly Cookie, `SameSite=Lax`).
 - Finanz-Writes nur serverseitig über Next (nicht Client-direkt an PB für Finanzaggregate).
 - Superuser-Zugangsdaten und `SESSION_SECRET` nur in `.env` / Host-Secret — nicht im Git.
-- Production: HTTPS, keine Default-Secrets, PocketBase-Admin `/_/` nicht öffentlich exponieren.
+- Production: HTTPS, keine Default-Secrets. PocketBase-Admin `/_/` auf dieser Instanz über denselben Host erreichbar (ADR-0023, explizit); Superuser stark, nicht mit dem App-Login der Eigentümer:in verwechseln.
 - Details: [`docs/betrieb.md`](./betrieb.md) Abschnitte Secrets und Session.
 
 ## 8. Individuell zu ergänzen

@@ -130,9 +130,30 @@ openssl rand -base64 48   # SESSION_SECRET
 
 **Empfehlungen Self-hosted**
 
-- Produktion hinter HTTPS (Caddy reverse_proxy + TLS am Host oder vorangestelltes TLS). Offen: Caddy nativ auf dem Server statt im Compose, oder Compose belassen und nur den Eingang auf HTTPS heben. Next↔PocketBase intern im Docker-Netz. Ohne ausgehendes HTTPS ist die BZSt-Prüfung (eVatR) nicht ehrlich testbar.
-- PocketBase-Admin `/_/` nicht öffentlich im Internet freigeben (Firewall / VPN / IP-Allowlist)
-- Starke Passwörter für Eigentümer:in und Superuser
+- Produktion hinter HTTPS. `APP_URL` ohne trailing slash; beginnt sie mit `https://`, setzt die App das Secure-Cookie.
+- Next↔PocketBase intern im Docker-Netz (`PB_URL=http://pocketbase:8090`). Das ist unabhängig vom öffentlichen Eingang.
+- Eingehendes TLS (Browser → App) ist **nicht** dasselbe wie ausgehendes HTTPS zum BZSt (eVatR). Ohne ausgehenden Zugang ist die Klick-Prüfung nicht ehrlich testbar.
+- Starke Passwörter für Eigentümer:in und Superuser. Superuser ≠ App-Login.
+
+**HTTPS / Caddy (ADR-0023)**
+
+Lokal: Caddy im Compose, HTTP Port 80, Repo-`Caddyfile` ohne TLS. Unverändert `docker compose up`.
+
+Server: **Caddy nativ auf dem Host**. Let’s Encrypt (ACME), Host `app.zettelruhe.de`. Host-Caddy terminiert TLS und proxied auf `127.0.0.1:3000` (Next) und `127.0.0.1:8090` (PocketBase). Compose-Caddy startet dort nicht. Overlay: `docker-compose.server.yml`. Site-Block: `deploy/Caddyfile.host`.
+
+`/_/` bleibt über denselben Host erreichbar (explizit). Wer den Admin nicht im Netz will, muss das am Host nachziehen (VPN / Allowlist) — dieser Schnitt tut das nicht.
+
+Schritte auf dem Server:
+
+1. DNS `app.zettelruhe.de` → dieser Rechner. Ports 80 und 443 frei (kein anderes Caddy/nginx auf 80).
+2. Caddy auf dem Host installieren; `deploy/Caddyfile.host` als Site-Block (oder ganze Datei, wenn Caddy nur diese Instanz bedient). Optional ACME-Mail im globalen Block.
+3. `.env`: `APP_URL=https://app.zettelruhe.de` (kein Slash am Ende). `PB_URL=http://pocketbase:8090`. Next **neu bauen** (Build-Arg `APP_URL` für Server Actions).
+4. `docker compose -f docker-compose.yml -f docker-compose.server.yml up -d --build`  
+   (Compose-Plugin ≥ 2.24 wegen `!override` auf den Next-Ports; sonst bliebe `:3000` öffentlich.)
+5. `sudo systemctl reload caddy` (oder Äquivalent)
+6. Smoke: `curl -sSI https://app.zettelruhe.de/health` — Zertifikat ohne Browser-Ausnahme. Login: Cookie `Secure`.
+
+TLS-Zertifikate liegen bei Host-Caddy (nicht im PB-Volume) — separat sichern bzw. ACME neu ausstellen lassen.
 
 ---
 
@@ -145,6 +166,7 @@ openssl rand -base64 48   # SESSION_SECRET
 
 ```bash
 curl -sS http://localhost/health
+# Server: curl -sSI https://app.zettelruhe.de/health
 # {"ok":true,"service":"zettelruhe",...}
 ```
 
@@ -177,10 +199,11 @@ Compose: Services `next` und `pocketbase` haben Healthchecks (siehe `docker-comp
 - DATEV light / Journal-CSV / Belegarchiv: UI **Export** (`/app/export`)
 - Keine GoBD- oder DATEV-Zertifizierung (ADR-0004)
 
-## 10. Funktionstest vor M2
+## 10. Funktionstests
 
-Manuelle Checkliste (Happy Path + Backup/Restore): [`funktionstest-m1.md`](./funktionstest-m1.md).
+- Meilenstein 1 (Happy Path + Backup/Restore): [`funktionstest-m1.md`](./funktionstest-m1.md)
+- Meilenstein 2 (M2-Keile + Server-Nachtest): [`funktionstest-m2.md`](./funktionstest-m2.md)
 
 ---
 
-_Stand: Bauabschnitt 14 (Härten)._
+_Stand: 2026-08-15 (M2-Protokoll; HTTPS Host-Caddy, ADR-0023)._

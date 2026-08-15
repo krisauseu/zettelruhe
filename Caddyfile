@@ -1,6 +1,6 @@
-# Reverse proxy: App (Next) + PocketBase Admin/API
+# Reverse proxy lokal: App (Next) + PocketBase Admin/API (HTTP :80, kein TLS).
 # Intern spricht Next PocketBase über den Service-Namen (PB_URL), nicht über Caddy.
-# Security-Header light (BA14) — TLS endet oft vor Caddy; hier nur HTTP-Header.
+# Server: Host-Caddy mit TLS — deploy/Caddyfile.host (ADR-0023), nicht diese Datei.
 
 :80 {
 	encode gzip

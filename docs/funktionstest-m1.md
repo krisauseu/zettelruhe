@@ -4,6 +4,8 @@ Checkliste vor **Meilenstein 2**. Ableitung: v1-Happy-Path (`CONTEXT.md`), Featu
 
 **Ziel:** Manuell verifizieren, dass die self-hosted Solo-Instanz im Alltag trägt — nicht Feature-Parität, nicht M2.
 
+M2-Keile: eigene Checkliste [`funktionstest-m2.md`](./funktionstest-m2.md) — diese M1-Liste nicht zur M2-Liste umbauen.
+
 | Feld | Eintrag |
 |------|---------|
 | Instanz / Host | lokal (self-hosted) |
@@ -289,4 +291,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach E-Rechnungs-Versand 2026-08-15 (Browser kf: keine Fehler). Nächster Schritt: Funktionstest-Protokoll M2 + HTTPS auf dem Server. Bei Software-Updates Checkliste nachziehen._
+_Stand: nach E-Rechnungs-Versand 2026-08-15. M2-Checkliste: [`funktionstest-m2.md`](./funktionstest-m2.md). Bei Software-Updates diese M1-Liste nachziehen, nicht ersetzen._

@@ -1,3 +1,5 @@
+# Lokal: docker compose up --build
+# Server (Host-Caddy, kein öffentliches Compose-Caddy): siehe docker-compose.server.yml
 services:
   caddy:
     image: caddy:2.10-alpine

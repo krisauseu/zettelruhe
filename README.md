@@ -13,8 +13,8 @@ Lizenz: [AGPL-3.0](./LICENSE)
 |------------|--------|
 | **Next.js 16** (App Router, Server Actions) | UI + Domain + Session-Gate |
 | **PocketBase** (SQLite) | Auth-Quelle, Daten, Dateien |
-| **Caddy** | Reverse Proxy + Security-Header light |
-| **Docker Compose** | Caddy + Next + PocketBase, Volume `zettelruhe_pb_data` |
+| **Caddy** | Reverse Proxy + Security-Header light (lokal im Compose; Server nativ auf dem Host, ADR-0023) |
+| **Docker Compose** | Caddy + Next + PocketBase lokal; auf dem Server Next + PocketBase hinter Host-Caddy, Volume `zettelruhe_pb_data` |
 
 Finanz-Writes laufen nur über Next (nicht per Client-PB-SDK). Details: `docs/adr/`.  
 Betrieb (Backup, Secrets, Health): [`docs/betrieb.md`](./docs/betrieb.md).
@@ -31,13 +31,21 @@ cp .env.example .env
 # Pflicht setzen:
 #   SESSION_SECRET  → openssl rand -base64 48  (≥ 32 Zeichen)
 #   PB_SUPERUSER_EMAIL / PB_SUPERUSER_PASSWORD  → starke, einzigartige Werte
-# Optional Prod: APP_URL=https://dein-host
+# Server: APP_URL=https://app.zettelruhe.de  (ADR-0023)
 
 docker compose up --build
 ```
 
 App: [http://localhost](http://localhost) (Caddy Port `CADDY_HTTP_PORT`, default 80)  
 Health: [http://localhost/health](http://localhost/health)
+
+**Server** (Host-Caddy, Let’s Encrypt, `app.zettelruhe.de`): Site-Block [`deploy/Caddyfile.host`](./deploy/Caddyfile.host), Stack mit Overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.server.yml up -d --build
+```
+
+Details: [`docs/betrieb.md`](./docs/betrieb.md) Abschnitt 5, ADR-0023.
 
 Beim ersten Start:
 
@@ -46,7 +54,7 @@ Beim ersten Start:
 3. Danach Login/Logout über httpOnly Session-Cookie; weitere Firmen unter `/app/firma/neu`, Wechsel in der Shell
 
 PocketBase-Admin (Betrieb/Schema, **nicht** App-Login): [http://localhost/_/](http://localhost/_/)  
-In Produktion Admin-UI nicht öffentlich freigeben (Firewall/VPN).
+Auf `app.zettelruhe.de` bewusst über denselben Host (`/_/`). Superuser stark halten.
 
 ### Umgebungsvariablen
 
@@ -113,14 +121,16 @@ Details und Empfehlungen: [`docs/betrieb.md`](./docs/betrieb.md).
 ## Repo-Layout
 
 ```
-app/                 Next.js (src/modules/*, src/lib/*)
-pocketbase/          Dockerfile, pb_migrations/
-Caddyfile
+app/                      Next.js (src/modules/*, src/lib/*)
+pocketbase/               Dockerfile, pb_migrations/
+Caddyfile                 lokal (HTTP :80)
 docker-compose.yml
+docker-compose.server.yml Server-Overlay (kein Compose-Caddy)
+deploy/Caddyfile.host     Host-Caddy + TLS
 .env.example
-docs/                Roadmap, ADRs, Status, Betrieb, Verfahrensdoku
-CONTEXT.md           Domain-Sprache
-LICENSE              AGPL-3.0
+docs/                     Roadmap, ADRs, Status, Betrieb, Verfahrensdoku
+CONTEXT.md                Domain-Sprache
+LICENSE                   AGPL-3.0
 ```
 
 ## Dokumentation
@@ -131,6 +141,7 @@ LICENSE              AGPL-3.0
 | [`docs/feature-roadmap.md`](./docs/feature-roadmap.md) | v1 / M2 / später |
 | [`docs/betrieb.md`](./docs/betrieb.md) | Backup, Secrets, Health, Updates |
 | [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) | Manueller Funktionstest Meilenstein 1 |
+| [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md) | Manueller Funktionstest Meilenstein 2 (M2-Keile) |
 | [`docs/verfahrensdokumentation.md`](./docs/verfahrensdokumentation.md) | GoBD-Vorlage |
 | [`docs/adr/`](./docs/adr/) | Architekturentscheidungen |
 | [`docs/90-status.md`](./docs/90-status.md) | Projektstand |
@@ -154,6 +165,8 @@ Funktionstest: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) — best
 
 Browser-Nachtest Versand durch kf (2026-08-15): keine Fehler. Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR und steht zusammen mit dem **Server-Nachtest M2** aus.
 
-**Als Nächstes:** Funktionstest-Protokoll für die M2-Keile (analog M1) und **HTTPS auf dem Server** (Caddy im Compose belassen vs. nativ auf dem Host). Follow-ups ohne diese Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
+Manuelle Checkliste: [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md) (M1 bleibt [`funktionstest-m1.md`](./docs/funktionstest-m1.md)).
+
+**Als Nächstes:** Host-Caddy auf dem Server aktivieren (`app.zettelruhe.de`, Overlay + `deploy/Caddyfile.host`), dann **Server-Nachtest** inkl. BZSt-Klick ([`funktionstest-m2.md`](./docs/funktionstest-m2.md) Abschnitt 8). Follow-ups ohne diese Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
 
 Details: [`docs/90-status.md`](./docs/90-status.md).

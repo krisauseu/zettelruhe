@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-15_
 
-**Last session:** 2026-08-15 — E-Rechnungs-Versand auf `origin/main`; Browser-Nachtest kf ohne Fehler. Nächster Chat: Funktionstest-Protokoll M2 + HTTPS/Caddy auf dem Server
+**Last session:** 2026-08-15 — Funktionstest-Protokoll M2; HTTPS-Schnitt: Host-Caddy, `app.zettelruhe.de`, Let’s Encrypt, `/_/` über denselben Host (ADR-0023). Compose lokal unverändert.
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0022
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0023
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -27,6 +27,8 @@ _Last updated: 2026-08-15_
 - **ZM-Übersicht** (ADR-0020): unter Regelbesteuerung Kandidaten aus 0-USt-Einnahmen plus Land am Kontakt (`/app/zm`); Art nicht geführt; CSV light, kein Versand. Kleinunternehmerregelung „nicht relevant“. Browser-Nachtest durch kf 2026-08-15: keine Fehler.
 - **USt-IdNr.-Validierung (BZSt)** (ADR-0021): `ust_id` am Kontakt; eigene Nummer an der Firma als Anfragende; eVatR-REST einfach/qualifiziert als Schnappschuss, kein Dauer-Stempel. Kleinunternehmerregelung: Nummer erlaubt, USt/ZM unverändert nicht relevant. Browser (kf, 2026-08-15, lokal HTTP): Eingabe und Speichern der USt-IdNr. ohne Fehler. Klick-Prüfung beim BZSt lokal nicht prüfbar (kein HTTPS / ausgehender eVatR-Zugang).
 - **E-Rechnungs-Versand** (ADR-0022): aus festgeschriebener Rechnung der aktiven Firma XML-Original (Profil XRechnung 3.0 UBL oder ZUGFeRD/Factur-X EN 16931 CII). Pflichtfeld- und Steuer-Modus-Prüfung mit de-DE-Fehlerliste; Kleinunternehmerregelung ohne USt-Zeilen + §-19-Hinweis; Regelbesteuerung mit Ausweis. Archiv in `e_rechnungen_versand`, Rechnungs-PDF unangetastet. Kein Hybrid-PDF/A-3, kein KoSIT-Claim, Empfangspfad unverändert. 362 Unit-Tests. Lokal hinter Caddy (2026-08-15): Prüfung, Erzeugung beider Profile auf R-0004, PDF unverändert, Isolation über `session.firmaId`. **Browser-Nachtest durch kf 2026-08-15: keine Fehler.**
+- **Funktionstest-Protokoll M2:** [`funktionstest-m2.md`](./funktionstest-m2.md) (Vorlage M1; nur M2-Keile plus gezielte Regression und Server-Nachtest). M1-Checkliste nicht umgebaut.
+- **HTTPS / Caddy (ADR-0023):** Caddy nativ auf dem Server (`app.zettelruhe.de`, Let’s Encrypt). Compose-Caddy nur lokal (HTTP:80). Overlay `docker-compose.server.yml`, Site-Block `deploy/Caddyfile.host`. `/_/` über denselben Host (explizit). Next↔PocketBase intern. Auf dem Host noch Caddy + DNS + `APP_URL` setzen, dann Server-Nachtest.
 
 ## What's next
 
@@ -39,16 +41,17 @@ _Last updated: 2026-08-15_
 5. **ZM-Übersicht erledigt** — Self-File, kein Versand (ADR-0020).
 6. **USt-IdNr.-Validierung (BZSt) erledigt** — Schnappschuss, kein Versand (ADR-0021).
 7. **E-Rechnungs-Versand erledigt** — XML-Profile, Validierung, Fehlerfeedback (ADR-0022).
-8. **Als Nächstes: Funktionstest-Protokoll M2** (analog [`funktionstest-m1.md`](./funktionstest-m1.md)) **und HTTPS auf dem Server** (Caddy im Compose vs. nativ). Danach Server-Nachtest inkl. BZSt-Klick.
-9. **Open Decisions** weiter separat. Multi-User später.
+8. **Funktionstest-Protokoll M2** liegt unter [`funktionstest-m2.md`](./funktionstest-m2.md). M1-Checkliste unverändert.
+9. **HTTPS-Schnitt entschieden** (ADR-0023). Auf dem Server: Host-Caddy + Overlay + `APP_URL=https://app.zettelruhe.de`. Danach Server-Nachtest inkl. BZSt-Klick (Protokoll Abschnitt 8).
+10. **Open Decisions** weiter separat. Multi-User später.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
 
 ## Follow-up (nicht M2-Keil)
 
-Kein Prio außer **HTTPS auf dem Server** — ohne das bleibt die BZSt-Prüfung später nicht ehrlich testbar.
+Kein Prio außer **Host-Caddy auf dem Server einschalten** — ohne eingehendes TLS und ausgehendes eVatR bleibt der BZSt-Klick nicht ehrlich testbar.
 
-- **HTTPS / Caddy (Prio vor BZSt-Servertest):** Zurzeit nur HTTP. Entweder Caddy aus Compose nehmen (nativ auf dem Server) oder im Compose belassen und Frontend — optional auch PocketBase-Admin — von außen über HTTPS erreichbar machen. Interne Next↔PocketBase-Kommunikation bleibt im Docker-Netz.
+- **HTTPS / Caddy:** Schnitt ADR-0023. Repo ist vorbereitet; DNS + Host-Caddy + Server-Compose fehlen noch auf der Maschine. Details: [`betrieb.md`](./betrieb.md) Abschnitt 5.
 - **Setup: User nicht verifiziert:** Nach initialem Registrieren/Firma-Anlegen ist Login oft gesperrt, bis `users.verified` in PocketBase manuell `true` ist. Final: automatisch verifizieren (eine Eigentümer:in, self-hosted) oder E-Mail-Bestätigung, wenn SMTP steht.
 - **Dokumenten-Layout:** Angebote und Rechnungen überarbeiten (über das heutige light: Logo, Akzent, Kopf-/Fußtext hinaus).
 - **Marke:** Zettelruhe-Logo und Favicon entwerfen, oben links in der Shell einsetzen.
@@ -87,4 +90,4 @@ Kein Prio außer **HTTPS auf dem Server** — ohne das bleibt die BZSt-Prüfung 
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-15-e-rechnung-versand.md`](./sessions/2026-08-15-e-rechnung-versand.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-15-funktionstest-m2-https.md`](./sessions/2026-08-15-funktionstest-m2-https.md)
