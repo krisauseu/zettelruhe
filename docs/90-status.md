@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-15_
 
-**Last session:** 2026-08-15 — Kategorien + Multi-Firma dünn; Browser-Nachtest durch kf; auf `main` gepusht
+**Last session:** 2026-08-15 — Sidebar kollabierbar + Favoriten; 291 Tests; Browser-Verifikation; auf `main` gepusht
 
 ## What's done
 
@@ -22,6 +22,7 @@ _Last updated: 2026-08-15_
 - **M1-11 nachgetestet** (2026-08-15): Bank-CSV de-DE inkl. Idempotenz und Match gegen offene Rechnung; E-Rechnung-Empfang mit beiden Fixtures. Zahlung erzeugt kein Journal. Mangel M1-15 (`NEXT_REDIRECT` nach Import / Beleg-Entwurf) — nicht blockierend
 - **Kategorien** (ADR-0017): gemeinsame Auswahlliste für Belege und Kassenbuch, CRUD unter `/app/kategorien`
 - **Multi-Firma dünn** (ADR-0018): zweite Firma anlegen + in der Shell wechseln; `users.firma` bleibt 1:1 (zuletzt aktiv); Isolation über `session.firmaId`. Kein Einladen, keine zweite Rolle, Setup unverändert. 277 Unit-Tests grün. Browser-Nachtest durch kf 2026-08-15.
+- **Sidebar:** Gruppen kollabierbar (Default offen), Zustand + Favoriten in localStorage, Auto-Open der aktiven Route, „Alle öffnen/schließen“, „Nur Favoriten“. 291 Unit-Tests.
 
 ## What's next
 
@@ -69,4 +70,4 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-15-multi-firma-duenn.md`](./sessions/2026-08-15-multi-firma-duenn.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-15-sidebar-kollabierbar.md`](./sessions/2026-08-15-sidebar-kollabierbar.md)

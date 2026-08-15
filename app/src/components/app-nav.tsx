@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
   Banknote,
   BarChart3,
@@ -10,6 +11,7 @@ import {
   Calculator,
   Tags,
   Car,
+  ChevronRight,
   ClipboardList,
   Clock,
   Contact,
@@ -25,10 +27,32 @@ import {
   RefreshCw,
   ScrollText,
   Search,
+  Star,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_NAV_PREFS,
+  NAV_STORAGE_EVENT,
+  NAV_STORAGE_KEY,
+  findActiveSectionId,
+  groupNavItems,
+  groupedSectionIds,
+  isFavorite,
+  isLinkActive,
+  itemsToRender,
+  parseNavPrefs,
+  prefsEqual,
+  serializeNavPrefs,
+  setAllCollapsed,
+  setFavoritesOnly,
+  shouldRenderSection,
+  toggleCollapsed,
+  toggleFavorite,
+  withAutoOpen,
+  type NavPrefs,
+} from "@/components/app-nav-state";
 
 /** Icon keys only — never pass component functions from Server Components. */
 export type NavIconKey =
@@ -96,52 +120,206 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   kategorien: Tags,
 };
 
+let cachedRaw: string | null | undefined;
+let cachedPrefs: NavPrefs = DEFAULT_NAV_PREFS;
+
+function readPrefs(): NavPrefs {
+  if (typeof window === "undefined") return DEFAULT_NAV_PREFS;
+  const raw = window.localStorage.getItem(NAV_STORAGE_KEY);
+  if (raw === cachedRaw) return cachedPrefs;
+  cachedRaw = raw;
+  cachedPrefs = parseNavPrefs(raw);
+  return cachedPrefs;
+}
+
+function writePrefs(next: NavPrefs) {
+  const raw = serializeNavPrefs(next);
+  window.localStorage.setItem(NAV_STORAGE_KEY, raw);
+  cachedRaw = raw;
+  cachedPrefs = next;
+  window.dispatchEvent(new Event(NAV_STORAGE_EVENT));
+}
+
+function subscribe(onChange: () => void) {
+  const handler = () => onChange();
+  window.addEventListener("storage", handler);
+  window.addEventListener(NAV_STORAGE_EVENT, handler);
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener(NAV_STORAGE_EVENT, handler);
+  };
+}
+
 export function AppNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
+  const sections = useMemo(() => groupNavItems(items), [items]);
+  const sectionIds = useMemo(() => groupedSectionIds(sections), [sections]);
+  const prefs = useSyncExternalStore(subscribe, readPrefs, () => DEFAULT_NAV_PREFS);
+  const activeSectionId = findActiveSectionId(sections, pathname);
+  const viewPrefs = withAutoOpen(prefs, activeSectionId);
+
+  useEffect(() => {
+    if (!prefsEqual(viewPrefs, prefs)) writePrefs(viewPrefs);
+  }, [prefs, viewPrefs]);
+
+  const update = useCallback((next: NavPrefs) => {
+    if (!prefsEqual(next, prefs)) writePrefs(next);
+  }, [prefs]);
 
   return (
     <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3">
-      {items.map((item, idx) => {
-        if (item.type === "group") {
-          return (
-            <div
-              key={`group-${item.label}-${idx}`}
-              className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground first:pt-1"
-            >
-              {item.label}
-            </div>
-          );
-        }
+      <div className="mb-0.5 flex flex-col gap-0.5 px-3 pb-1 text-[10px] leading-4">
+        <div className="flex flex-wrap items-center gap-x-1.5">
+          <button
+            type="button"
+            className="cursor-pointer text-muted-foreground hover:text-sidebar-foreground"
+            onClick={() => update(setAllCollapsed(prefs, sectionIds, false))}
+          >
+            Alle öffnen
+          </button>
+          <span className="text-muted-foreground/40" aria-hidden>
+            |
+          </span>
+          <button
+            type="button"
+            className="cursor-pointer text-muted-foreground hover:text-sidebar-foreground"
+            onClick={() => update(setAllCollapsed(prefs, sectionIds, true))}
+          >
+            Alle schließen
+          </button>
+        </div>
+        <button
+          type="button"
+          aria-pressed={viewPrefs.favoritesOnly}
+          className={cn(
+            "w-fit cursor-pointer hover:text-sidebar-foreground",
+            viewPrefs.favoritesOnly
+              ? "font-semibold text-sidebar-primary"
+              : "text-muted-foreground",
+          )}
+          onClick={() =>
+            update(setFavoritesOnly(prefs, !viewPrefs.favoritesOnly))
+          }
+        >
+          Nur Favoriten
+        </button>
+      </div>
 
-        const Icon = ICONS[item.icon];
-        const active =
-          item.href === "/app"
-            ? pathname === "/app"
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
+      {viewPrefs.favoritesOnly && viewPrefs.favorites.length === 0 ? (
+        <p className="px-3 pb-1 text-[10px] leading-4 text-muted-foreground">
+          Keine Favoriten. Stern an einem Eintrag setzen.
+        </p>
+      ) : null}
+
+      {sections.map((section) => {
+        if (!shouldRenderSection(section, viewPrefs, pathname)) return null;
+        const collapsed = Boolean(
+          section.id && viewPrefs.collapsed.includes(section.id),
+        );
+        const visible = itemsToRender(section, viewPrefs, pathname);
+        const headingId = section.id ? `nav-heading-${section.id}` : undefined;
+        const panelId = section.id ? `nav-section-${section.id}` : undefined;
 
         return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-              active
-                ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-            )}
-            aria-current={active ? "page" : undefined}
-          >
-            <Icon
-              className={cn(
-                "h-4 w-4 shrink-0",
-                active ? "text-sidebar-primary" : "opacity-70",
-              )}
-              aria-hidden
-            />
-            <span className="truncate">{item.label}</span>
-          </Link>
+          <div key={section.id || "top"} className="flex flex-col gap-0.5">
+            {section.label ? (
+              <button
+                type="button"
+                id={headingId}
+                aria-expanded={!collapsed}
+                aria-controls={panelId}
+                className="flex w-full cursor-pointer items-center gap-1 px-3 pb-1 pt-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-sidebar-foreground"
+                onClick={() => update(toggleCollapsed(prefs, section.id))}
+              >
+                <ChevronRight
+                  className={cn(
+                    "h-3 w-3 shrink-0 transition-transform",
+                    !collapsed && "rotate-90",
+                  )}
+                  aria-hidden
+                />
+                {section.label}
+              </button>
+            ) : null}
+
+            <div id={panelId} role={section.label ? "group" : undefined}>
+              {visible.map((item) => (
+                <NavLinkRow
+                  key={item.href}
+                  item={item}
+                  pathname={pathname}
+                  favorite={isFavorite(viewPrefs, item.href)}
+                  onToggleFavorite={() =>
+                    update(toggleFavorite(prefs, item.href))
+                  }
+                />
+              ))}
+            </div>
+          </div>
         );
       })}
     </nav>
+  );
+}
+
+function NavLinkRow({
+  item,
+  pathname,
+  favorite,
+  onToggleFavorite,
+}: {
+  item: NavLinkItem;
+  pathname: string;
+  favorite: boolean;
+  onToggleFavorite: () => void;
+}) {
+  const Icon = ICONS[item.icon];
+  const active = isLinkActive(pathname, item.href);
+
+  return (
+    <div
+      className={cn(
+        "group flex items-center rounded-lg",
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+      )}
+    >
+      <Link
+        href={item.href}
+        className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-1.5 text-sm font-medium"
+        aria-current={active ? "page" : undefined}
+      >
+        <Icon
+          className={cn(
+            "h-4 w-4 shrink-0",
+            active ? "text-sidebar-primary" : "opacity-70",
+          )}
+          aria-hidden
+        />
+        <span className="truncate">{item.label}</span>
+      </Link>
+      <button
+        type="button"
+        aria-label={
+          favorite
+            ? `${item.label} aus Favoriten entfernen`
+            : `${item.label} als Favorit markieren`
+        }
+        aria-pressed={favorite}
+        onClick={onToggleFavorite}
+        className={cn(
+          "mr-0.5 shrink-0 rounded-md p-1 text-muted-foreground hover:text-sidebar-foreground",
+          favorite
+            ? "opacity-100 text-sidebar-primary"
+            : "opacity-70 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
+        )}
+      >
+        <Star
+          className={cn("h-3.5 w-3.5", favorite && "fill-current")}
+          aria-hidden
+        />
+      </button>
+    </div>
   );
 }

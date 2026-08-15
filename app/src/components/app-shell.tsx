@@ -9,7 +9,7 @@ import { AppNav, type NavItem } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { FlashToast } from "@/components/ui/flash-toast";
 
-/** Serializable nav config (icon keys, not React components). Gruppen light BA14. */
+/** Serializable nav config (icon keys, not React components). Gruppen kollabierbar. */
 const NAV: NavItem[] = [
   { href: "/app", label: "Übersicht", icon: "dashboard" },
   { href: "/app/suche", label: "Suche", icon: "suche" },
