@@ -10,7 +10,7 @@ M1-11 **nachgetestet 2026-08-15** (kein Feature-Bau). Fachlich ok; Mangel M1-15 
 
 1. Gemeinsame Kategorien für Belege und Kassenbuch — erledigt (ADR-0017)
 2. Multi-Firma dünn — erledigt (ADR-0018); Browser-Nachtest kf 2026-08-15
-3. M2 erster Keil: UStVA/ELSTER-XML light (Self-File, kein Versand)
+3. M2: UStVA/ELSTER-XML light — erledigt (ADR-0019). Als Nächstes ZM-Übersicht.
 
 Open Decisions nicht vermischen. Multi-User nicht vor UStVA.
 

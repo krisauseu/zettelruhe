@@ -45,6 +45,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 |--------|--------|---------|
 | EÜR light | Summen aus Journal, Kategorien light | Beide Steuer-Modi |
 | USt-Übersicht | USt/Vorsteuer aus Journal | Nur Regelbesteuerung; kein ELSTER-Versand |
+| UStVA / ELSTER-XML light | Kz 81/86/66/83 aus Journal | Self-File (`zettelruhe-ustva-elster-xml-light-v1`); kein Versand; Monat/Quartal |
 | DATEV light CSV | Journal-Zeilen EXTF-ähnlich | Format-ID `zettelruhe-datev-csv-light-v1`, **nicht** DATEV-zertifiziert |
 | Journal-CSV | Alle Felder der Journal-Zeilen | Semikolon, UTF-8 BOM |
 | Belegarchiv-ZIP | Metadaten + Dateien festgeschriebener Belege | Zeitraum nach Belegdatum |

@@ -125,6 +125,20 @@ export default async function ExportPage({
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base">UStVA / ELSTER-XML light</CardTitle>
+          <CardDescription>
+            Kennzahlen zum Selbst-Eintragen in Mein Elster und optionaler
+            XML-Download. Nur Regelbesteuerung; kein Versand. Liegt bei der{" "}
+            <Link href={`/app/ust?${q}`} className="text-primary hover:underline">
+              USt-Übersicht
+            </Link>
+            .
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Weitere Exporte</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3 text-sm">

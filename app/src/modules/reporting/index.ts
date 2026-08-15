@@ -1,6 +1,7 @@
 /**
  * Modul: reporting — Auswertungen & Export
  * Bauabschnitt 13: EÜR, USt-Übersicht, Dashboard, DATEV/CSV, Belegarchiv-ZIP
+ * M2: UStVA-Kennzahlen + ELSTER-XML light (Self-File, kein Versand)
  * Read-only + Download-Artefakte; Journal = Source of Truth.
  */
 
@@ -16,6 +17,10 @@ export type {
   EurKategorieZeile,
   UstSatzZeile,
   UstUebersicht,
+  UstvaDatensatz,
+  UstvaFirmaAngaben,
+  UstvaKennzahlZeile,
+  UstvaVoranmeldung,
   Zeitraum,
   ZeitraumPreset,
 } from "./types";
@@ -63,6 +68,17 @@ export {
   serializeDatevCsv,
 } from "./export-datev";
 
+export {
+  USTVA_FORMAT_ID,
+  USTVA_HINWEIS,
+  USTVA_NICHT_GEFUEHRT,
+  buildUstvaDatensatz,
+  detectUstvaVoranmeldung,
+  firmaToUstvaAngaben,
+  serializeUstvaXml,
+  ustvaXmlFilename,
+} from "./ustva";
+
 export { buildZip } from "./zip";
 export type { ZipEntry } from "./zip";
 
@@ -70,10 +86,12 @@ export {
   exportBelegArchivZip,
   exportDatevCsv,
   exportJournalCsv,
+  exportUstvaXml,
   getBwaLight,
   getDashboardKennzahlen,
   getEurAuswertung,
   getUstUebersicht,
+  getUstvaSeite,
   listFestgeschriebeneBelegeInZeitraum,
   listJournalInZeitraum,
 } from "./repository";

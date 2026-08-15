@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien (Beleg + Kasse) und **Multi-Firma dünn** stehen. Als Nächstes M2 mit **UStVA/ELSTER-XML light**.
+**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn und **UStVA/ELSTER-XML light** stehen (Browser-Nachtest kf). Als Nächstes **ZM-Übersicht**.
 
 ### Fundament & Stammdaten
 
@@ -73,7 +73,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 - Dashboard light: Umsatz, offene Posten, Ausgaben-Trend (ohne USt-Zahllast-Widgets im Kleinunternehmer-Modus)
 - EÜR nach amtlichen Kategorien (beide Steuer-Modi)
-- USt-Übersicht (Monat/Quartal/Jahr) — **nur Regelbesteuerung**; Vorbereitung Mein Elster, kein ELSTER-Versand
+- USt-Übersicht (Monat/Quartal/Jahr) — **nur Regelbesteuerung**; UStVA-Kennzahlen + ELSTER-XML light (Self-File), kein ELSTER-Versand
 - BWA light / einfache Einnahmen-Ausgaben-Sicht je Zeitraum
 - DATEV-Export (CSV/EXTF)
 - Vollständiger CSV-Export relevanter Tabellen
@@ -99,8 +99,8 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 1. **Kategorien** — gemeinsame Auswahlliste für Belege und Kassenbuch, CRUD in den Stammdaten (vor M2-Steuerkeilen) ← erledigt
 2. **Multi-Firma dünn** — Firma anlegen + wechseln, eine Eigentümer:in; kein Einladen, keine Rollen-UI (ADR-0018) ← erledigt
-3. **UStVA-Zahlen / ELSTER-XML light** (Self-File-Vorbereitung) ← nächster Steuer-Keil
-4. Zusammenfassende Meldung (ZM) Übersicht
+3. **UStVA-Zahlen / ELSTER-XML light** (Self-File-Vorbereitung) ← erledigt (ADR-0019)
+4. Zusammenfassende Meldung (ZM) Übersicht ← nächster Steuer-Keil
 5. USt-IdNr.-Validierung (BZSt)
 6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback)
 

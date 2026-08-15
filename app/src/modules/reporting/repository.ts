@@ -17,6 +17,11 @@ import {
   buildUstUebersicht,
   sumOffenePosten,
 } from "./aggregate";
+import {
+  buildUstvaDatensatz,
+  firmaToUstvaAngaben,
+  serializeUstvaXml,
+} from "./ustva";
 import { serializeJournalCsv, serializeBelegArchivCsv } from "./export-csv";
 import { datevFilename, serializeDatevCsv } from "./export-datev";
 import { buildZip, type ZipEntry } from "./zip";
@@ -27,6 +32,7 @@ import type {
   DashboardKennzahlen,
   EurAuswertung,
   UstUebersicht,
+  UstvaDatensatz,
   Zeitraum,
 } from "./types";
 
@@ -115,6 +121,33 @@ export async function getUstUebersicht(
   const steuermodus = await loadSteuermodus(firmaId);
   const { items, extra } = await journalMitStornoKontext(firmaId, zeitraum);
   return buildUstUebersicht(items, validateZeitraum(zeitraum), steuermodus, extra);
+}
+
+/**
+ * USt-Übersicht + UStVA-Kennzahlen der aktiven Firma (ein Journal-Lauf).
+ */
+export async function getUstvaSeite(
+  firmaId: string,
+  zeitraum: Zeitraum,
+): Promise<{ ust: UstUebersicht; ustva: UstvaDatensatz }> {
+  const z = validateZeitraum(zeitraum);
+  const [firma, { items, extra }] = await Promise.all([
+    getFirmaById(firmaId),
+    journalMitStornoKontext(firmaId, z),
+  ]);
+  const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
+  const ust = buildUstUebersicht(items, z, steuermodus, extra);
+  const ustva = buildUstvaDatensatz(ust, firmaToUstvaAngaben(firma));
+  return { ust, ustva };
+}
+
+export async function exportUstvaXml(
+  firmaId: string,
+  zeitraum: Zeitraum,
+  opts?: { erstellungsdatum?: string },
+): Promise<{ bytes: Uint8Array; filename: string; xml: string }> {
+  const { ustva } = await getUstvaSeite(firmaId, zeitraum);
+  return serializeUstvaXml(ustva, opts);
 }
 
 export async function getBwaLight(

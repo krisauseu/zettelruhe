@@ -277,7 +277,7 @@ Nicht als Fehler werten:
 - [x] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
 - [x] Backup **und** Restore einmal nachgewiesen
 - [x] Open Decisions verstanden (Zahlung ≠ Journal)
-- [x] **M2 darf starten** — ja / nein: **ja**. M1-11 nachgetestet 2026-08-15. Kategorien und Multi-Firma dünn nachgezogen (2026-08-15). Erster M2-Keil: UStVA/ELSTER-XML light.
+- [x] **M2 darf starten** — ja / nein: **ja**. M1-11 nachgetestet 2026-08-15. Kategorien, Multi-Firma dünn und UStVA/ELSTER-XML light nachgezogen (2026-08-15). Nächster M2-Keil: ZM-Übersicht.
 
 Unterschrift / Datum: kf / 2026-08-14 · Nachtest Abschn. 7–8: 2026-08-15
 
@@ -289,4 +289,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach Kategorien + Multi-Firma dünn 2026-08-15 (Browser-Nachtest kf). Nächster Schritt: UStVA/ELSTER-XML light. Bei Software-Updates Checkliste nachziehen._
+_Stand: nach UStVA/ELSTER-XML light 2026-08-15 (Browser-Nachtest kf). Nächster Schritt: ZM-Übersicht. Bei Software-Updates Checkliste nachziehen._

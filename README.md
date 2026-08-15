@@ -139,7 +139,7 @@ LICENSE              AGPL-3.0
 
 **v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betrieblich hartbar abgeschlossen  
 (Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).  
-Danach: gemeinsame **Kategorien** (Beleg + Kassenbuch) und **Multi-Firma dünn** (anlegen + wechseln).  
+Danach: **Kategorien** (Beleg + Kassenbuch), **Multi-Firma dünn** (anlegen + wechseln), **UStVA/ELSTER-XML light** (Self-File auf `/app/ust`, kein Versand; Browser-Nachtest 2026-08-15).  
 
 Details: [`docs/90-status.md`](./docs/90-status.md).  
-Nächster Keil (M2): UStVA-Zahlen / ELSTER-XML light (Self-File, kein Versand).
+Nächster Keil (M2): Zusammenfassende Meldung (ZM) Übersicht.

@@ -116,8 +116,8 @@ Zeitpunkt, ab dem eine Buchung oder ein Beleg nicht mehr still geändert werden 
 _Avoid_: Soft delete, überschreiben
 
 **USt-Übersicht**:
-Zusammenstellung der Umsatzsteuer-Zahllast je Zeitraum zur Vorbereitung der eigenen UStVA (ohne ELSTER-Versand in v1). Nur im Steuer-Modus Regelbesteuerung relevant; unter Kleinunternehmerregelung entfällt sie als Arbeitsflow.
-_Avoid_: UStVA-Abgabe (als v1-Versprechen)
+Zusammenstellung der Umsatzsteuer-Zahllast je Zeitraum zur Vorbereitung der eigenen UStVA. Nur im Steuer-Modus Regelbesteuerung relevant; unter Kleinunternehmerregelung entfällt sie als Arbeitsflow. Unter Regelbesteuerung: typische UStVA-Kennzahlen zum Selbst-Eintragen in Mein Elster plus optionaler XML-Download (light, lokal) — kein ELSTER-Versand, keine Abgabe aus der App.
+_Avoid_: UStVA-Abgabe (als Versprechen), ELSTER-Versand
 
 **Bankkonto**:
 Zahlweg der Firma für unbare Zahlungseingänge/-ausgänge; Stammdaten für CSV/MT940-Import. Das Modell erlaubt mehrere Bankkonten; Kassenbuch bleibt davon getrennt.
@@ -134,5 +134,5 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: nach Kategorien (Beleg+Kasse) und Multi-Firma dünn (erledigt): UStVA-Zahlen/ELSTER-XML light, USt-IdNr.-Prüfung, ZM-Übersicht, E-Rechnungs-Versand vertiefen
+- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn und UStVA/ELSTER-XML light (erledigt): ZM-Übersicht, USt-IdNr.-Prüfung, E-Rechnungs-Versand vertiefen
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

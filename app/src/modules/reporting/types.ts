@@ -80,6 +80,64 @@ export type UstUebersicht = {
   hinweis: string;
 };
 
+/** Amtlicher UStVA-Zeitraum oder nur Auswertungsfenster */
+export type UstvaZeitraumArt = "monat" | "quartal" | "kein_voranmeldungszeitraum";
+
+export type UstvaVoranmeldung = {
+  art: UstvaZeitraumArt;
+  /** Kalenderjahr des Zeitraumanfangs, z. B. "2026" */
+  jahr: string;
+  /** "01"–"12" Monat, "41"–"44" Quartal, sonst null */
+  zeitraum_code: string | null;
+  label: string;
+};
+
+export type UstvaKennzahlStatus = "befuellt" | "nicht_gefuehrt";
+
+export type UstvaKennzahlEinheit = "euro_ganz" | "euro_cent";
+
+/** Eine UStVA-Kennzahl light (Self-File, kein Versand) */
+export type UstvaKennzahlZeile = {
+  kz: string;
+  bezeichnung: string;
+  status: UstvaKennzahlStatus;
+  /** Wert für Mein Elster; null wenn nicht geführt */
+  eintrag: string | null;
+  eintrag_einheit: UstvaKennzahlEinheit;
+  journal_netto: string | null;
+  journal_ust: string | null;
+  hinweis: string;
+};
+
+export type UstvaFirmaAngaben = {
+  name: string;
+  strasse: string;
+  plz: string;
+  ort: string;
+  steuernummer: string;
+};
+
+/**
+ * UStVA-Datensatz light aus der USt-Übersicht.
+ * Format-ID: zettelruhe-ustva-elster-xml-light-v1
+ */
+export type UstvaDatensatz = {
+  format_id: "zettelruhe-ustva-elster-xml-light-v1";
+  steuermodus: Steuermodus;
+  verfuegbar: boolean;
+  zeitraum: Zeitraum;
+  voranmeldung: UstvaVoranmeldung;
+  firma: UstvaFirmaAngaben;
+  kennzahlen: UstvaKennzahlZeile[];
+  nicht_gefuehrt: { kz: string; bezeichnung: string }[];
+  /** Errechnetes Kz 83 (19 % × 81 + 7 % × 86 − 66), 2 Stellen */
+  kz83: string;
+  zahllast_journal: string;
+  xml_download_erlaubt: boolean;
+  xml_blockgrund: string;
+  hinweis: string;
+};
+
 export type DashboardKennzahlen = {
   zeitraum: Zeitraum;
   steuermodus: Steuermodus;
