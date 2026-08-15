@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import {
   ANGEBOT_STATUS_LABELS,
@@ -90,7 +90,7 @@ export default async function AngebotDetailPage({
   const angebot = await getAngebotMitPositionen(session.firmaId, id);
   if (!angebot) notFound();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus =
     angebot.status === "entwurf"
       ? (firma?.steuermodus ?? angebot.steuermodus)

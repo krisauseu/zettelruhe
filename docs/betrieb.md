@@ -1,6 +1,6 @@
 # Betrieb — Zettelruhe (self-hosted Solo)
 
-Praxishinweise für eine Instanz mit **einer Firma** und **einer:m Eigentümer:in**.  
+Praxishinweise für eine Instanz mit **einer:m Eigentümer:in** und einer oder mehreren Firmen (Session wechselt die aktive Firma).  
 Stack: Caddy + Next.js + PocketBase (SQLite), Named Volume `zettelruhe_pb_data` (ADR-0007).
 
 ---

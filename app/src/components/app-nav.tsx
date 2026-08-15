@@ -8,6 +8,7 @@ import {
   BookOpen,
   Building2,
   Calculator,
+  Tags,
   Car,
   ClipboardList,
   Clock,
@@ -52,7 +53,8 @@ export type NavIconKey =
   | "eur"
   | "ust"
   | "export"
-  | "firma";
+  | "firma"
+  | "kategorien";
 
 export type NavLinkItem = {
   type?: "link";
@@ -91,6 +93,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   ust: Percent,
   export: Download,
   firma: Building2,
+  kategorien: Tags,
 };
 
 export function AppNav({ items }: { items: NavItem[] }) {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { listKontakte } from "@/modules/contacts";
 import { listKatalog } from "@/modules/catalog";
 import { createRechnungAction } from "@/modules/sales";
@@ -24,7 +24,7 @@ export default async function RechnungNeuPage({
 }) {
   const session = await requireFirmaSession();
   const sp = await searchParams;
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   const [kundenResult, katalogResult] = await Promise.all([

@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Steuermodus } from "@/lib/pb";
+import { KategorieSelect } from "@/modules/categories/kategorie-select";
 import { todayBerlin } from "./invariants";
 
 type KontaktOption = { id: string; name: string };
@@ -11,6 +12,8 @@ type Props = {
   action: (formData: FormData) => Promise<void>;
   steuermodus: Steuermodus;
   kontakte: KontaktOption[];
+  /** Aktive Kategorienamen */
+  kategorien: string[];
   error?: string | null;
   defaultDatum?: string;
   /** Voreingestellte Richtung (z. B. aus Query) */
@@ -21,6 +24,7 @@ export function KassenbuchForm({
   action,
   steuermodus,
   kontakte,
+  kategorien,
   error,
   defaultDatum,
   defaultRichtung = "einnahme",
@@ -80,12 +84,7 @@ export function KassenbuchForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kategorie">Kategorie</Label>
-          <Input
-            id="kategorie"
-            name="kategorie"
-            maxLength={120}
-            placeholder="optional"
-          />
+          <KategorieSelect namen={kategorien} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kontakt">Kontakt</Label>

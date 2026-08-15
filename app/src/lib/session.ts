@@ -58,22 +58,34 @@ export async function requireSession(): Promise<SessionPayload> {
 }
 
 /**
- * Session + aktive Firma (v1: eine Firma).
- * Falls Session ohne firmaId (ältere Setups / Schema-Nachzug), Fallback auf erste Firma.
+ * Session + aktive Firma.
+ * firmaId kommt aus der Session; ungültig/leer fällt auf die erste Firma zurück.
  */
 export async function requireFirmaSession(): Promise<
   SessionPayload & { firmaId: string }
 > {
   const session = await requireSession();
-  if (session.firmaId) {
-    return session as SessionPayload & { firmaId: string };
-  }
-
   // lazy import um Zirkel mit pb↔session zu vermeiden
-  const { getFirstFirma } = await import("./pb");
-  const firma = await getFirstFirma();
-  if (!firma) {
+  const { resolveAktiveFirmaId } = await import("./pb");
+  const firmaId = await resolveAktiveFirmaId(session.firmaId);
+  if (!firmaId) {
     throw new Error("Keine Firma vorhanden.");
   }
-  return { ...session, firmaId: firma.id };
+  return { ...session, firmaId };
+}
+
+/** Aktive Firma in der Session setzen und als users.firma merken. */
+export async function activateFirma(
+  session: SessionPayload,
+  firmaId: string,
+): Promise<void> {
+  await setSessionCookie({
+    userId: session.userId,
+    email: session.email,
+    name: session.name,
+    role: session.role,
+    firmaId,
+  });
+  const { setUserFirma } = await import("./pb");
+  await setUserFirma(session.userId, firmaId);
 }

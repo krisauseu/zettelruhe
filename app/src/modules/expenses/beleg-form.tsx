@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Steuermodus } from "@/lib/pb";
+import { KategorieSelect } from "@/modules/categories/kategorie-select";
 import type { Beleg } from "./types";
 import { todayBerlin } from "./invariants";
 
@@ -12,6 +13,8 @@ type Props = {
   action: (formData: FormData) => Promise<void>;
   steuermodus: Steuermodus;
   lieferanten: LieferantOption[];
+  /** Aktive Kategorienamen (+ ggf. aktueller Schnappschuss) */
+  kategorien: string[];
   error?: string | null;
   beleg?: Beleg | null;
   /** true = Entwurf speichern; false = neu anlegen */
@@ -22,6 +25,7 @@ export function BelegForm({
   action,
   steuermodus,
   lieferanten,
+  kategorien,
   error,
   beleg,
   mode,
@@ -100,11 +104,8 @@ export function BelegForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kategorie">Kategorie</Label>
-          <Input
-            id="kategorie"
-            name="kategorie"
-            maxLength={120}
-            placeholder="z. B. Büromaterial"
+          <KategorieSelect
+            namen={kategorien}
             defaultValue={beleg?.kategorie ?? ""}
           />
         </div>

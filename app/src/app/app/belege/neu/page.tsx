@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
+import {
+  kategorieNamenFuerSelect,
+  listAllKategorien,
+} from "@/modules/categories";
 import { listKontakte } from "@/modules/contacts";
 import { createBelegAction } from "@/modules/expenses";
 import { BelegForm } from "@/modules/expenses/beleg-form";
@@ -23,7 +27,7 @@ export default async function BelegNeuPage({
 }) {
   const session = await requireFirmaSession();
   const sp = await searchParams;
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   const lieferantenResult = await listKontakte(
@@ -36,6 +40,11 @@ export default async function BelegNeuPage({
     id: k.id,
     name: k.name,
   }));
+  const kategorien = kategorieNamenFuerSelect(
+    (await listAllKategorien(session.firmaId, { nurAktiv: true })).map(
+      (k) => k.name,
+    ),
+  );
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -70,6 +79,7 @@ export default async function BelegNeuPage({
             action={createBelegAction}
             steuermodus={steuermodus}
             lieferanten={lieferanten}
+            kategorien={kategorien}
             error={sp.error ?? null}
             mode="create"
           />

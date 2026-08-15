@@ -243,6 +243,39 @@ export async function getFirstFirma(): Promise<FirmaRecord | null> {
   return mapFirma(list.items[0]);
 }
 
+/** Alle Firmen der Instanz (eine Eigentümer:in sieht alle). */
+export async function listFirmen(): Promise<FirmaRecord[]> {
+  const token = await getAdminToken();
+  const list = await pbFetch<PbList<PbFirma>>(
+    "/api/collections/firmen/records?page=1&perPage=200&sort=name",
+    { token },
+  );
+  return list.items.map(mapFirma);
+}
+
+/**
+ * Bevorzugte Firma, sonst erste vorhandene.
+ * users.firma bleibt 1:1 und speichert die zuletzt aktive Firma.
+ */
+export async function resolveAktiveFirmaId(
+  preferredId: string | null,
+): Promise<string | null> {
+  if (preferredId) {
+    const existing = await getFirmaById(preferredId);
+    if (existing) return existing.id;
+  }
+  const first = await getFirstFirma();
+  return first?.id ?? null;
+}
+
+/** Zuletzt aktive Firma der Eigentümer:in (Login-Landung). */
+export async function setUserFirma(
+  userId: string,
+  firmaId: string,
+): Promise<void> {
+  await updateRecord("users", userId, { firma: firmaId });
+}
+
 export type FirmaStammdatenInput = {
   name: string;
   steuermodus: Steuermodus;

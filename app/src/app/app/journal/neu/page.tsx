@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { festschreibenManuelleBuchungAction } from "@/modules/journal";
 import { BuchungForm } from "@/modules/journal/buchung-form";
 import {
@@ -20,9 +20,9 @@ export default async function JournalNeuPage({
 }: {
   searchParams: SearchParams;
 }) {
-  await requireFirmaSession();
+  const session = await requireFirmaSession();
   const sp = await searchParams;
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   return (

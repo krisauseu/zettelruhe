@@ -18,6 +18,7 @@ const FLASH_KEYS = [
   "mail",
   "erinnerung",
   "success",
+  "firma",
 ] as const;
 
 const FLASH_MESSAGES: Record<(typeof FLASH_KEYS)[number], string> = {
@@ -34,6 +35,7 @@ const FLASH_MESSAGES: Record<(typeof FLASH_KEYS)[number], string> = {
   mail: "E-Mail gesendet.",
   erinnerung: "Zahlungserinnerung gesendet.",
   success: "Erfolgreich.",
+  firma: "Firma gewechselt.",
 };
 
 function resolveFlash(params: URLSearchParams): {

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
+import { requireFirmaSession } from "@/lib/session";
 import { createKatalogAction } from "@/modules/catalog";
 import { KatalogForm } from "@/modules/catalog/katalog-form";
 import {
@@ -19,8 +20,9 @@ export default async function KatalogNeuPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const session = await requireFirmaSession();
   const sp = await searchParams;
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   return (

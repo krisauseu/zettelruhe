@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSession, requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import {
   formatDateDe,
@@ -34,11 +34,12 @@ const QUICK_LINKS = [
 
 export default async function AppHomePage() {
   const session = await getSession();
-  const firma = await getFirstFirma();
 
+  let firma: Awaited<ReturnType<typeof getFirmaById>> = null;
   let dash: Awaited<ReturnType<typeof getDashboardKennzahlen>> | null = null;
   try {
     const s = await requireFirmaSession();
+    firma = await getFirmaById(s.firmaId);
     dash = await getDashboardKennzahlen(s.firmaId, periodMonth());
   } catch {
     dash = null;

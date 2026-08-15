@@ -10,12 +10,18 @@ import {
   type Nummernkreise,
   type Steuermodus,
 } from "@/lib/pb";
-import { requireFirmaSession } from "@/lib/session";
+import { requireFirmaSession, requireSession } from "@/lib/session";
 import {
   assertLogoUpload,
   validateDokumentAkzentfarbe,
   validateDokumentTexte,
 } from "@/modules/sales/pdf-layout";
+import {
+  FIRMA_NAME_DOPPELT_ERROR,
+  isDuplicateFirmaNameError,
+  validateNeueFirmaInput,
+} from "./firma-invariants";
+import { createAndActivateFirma, switchActiveFirma } from "./firma-write";
 
 function formString(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -140,7 +146,11 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
       logo_entfernen: logo_entfernen && !logo,
     });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Speichern fehlgeschlagen.";
+    const msg = isDuplicateFirmaNameError(e)
+      ? FIRMA_NAME_DOPPELT_ERROR
+      : e instanceof Error
+        ? e.message
+        : "Speichern fehlgeschlagen.";
     redirect(`/app/firma?error=${encodeURIComponent(msg)}`);
   }
 
@@ -148,4 +158,49 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
   revalidatePath("/app/firma");
   revalidatePath("/app/ust");
   redirect("/app/firma?saved=1");
+}
+
+export async function switchFirmaAction(formData: FormData): Promise<void> {
+  const session = await requireSession();
+  try {
+    await switchActiveFirma(session, formString(formData, "firmaId"));
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Wechsel fehlgeschlagen.";
+    redirect(`/app/firma?error=${encodeURIComponent(msg)}`);
+  }
+
+  revalidatePath("/app", "layout");
+  redirect("/app?firma=1");
+}
+
+export async function createFirmaAction(formData: FormData): Promise<void> {
+  const session = await requireSession();
+
+  let input;
+  try {
+    input = validateNeueFirmaInput({
+      name: formString(formData, "name"),
+      steuermodus: formString(formData, "steuermodus"),
+      skr: formString(formData, "skr"),
+      strasse: formString(formData, "strasse"),
+      plz: formString(formData, "plz"),
+      ort: formString(formData, "ort"),
+      land: formString(formData, "land"),
+      steuernummer: formString(formData, "steuernummer"),
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Angaben ungültig.";
+    redirect(`/app/firma/neu?error=${encodeURIComponent(msg)}`);
+  }
+
+  try {
+    await createAndActivateFirma(session, input);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Anlegen fehlgeschlagen.";
+    redirect(`/app/firma/neu?error=${encodeURIComponent(msg)}`);
+  }
+
+  revalidatePath("/app", "layout");
+  revalidatePath("/app/firma");
+  redirect("/app/firma?created=1");
 }

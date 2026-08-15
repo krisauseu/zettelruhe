@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma, type Steuermodus } from "@/lib/pb";
+import { getFirmaById, type Steuermodus } from "@/lib/pb";
 import { parseKatalogCsv } from "./csv";
 import {
   createKatalogPosition,
@@ -30,7 +30,8 @@ async function requireFirmaId(): Promise<string> {
 }
 
 async function getSteuermodus(): Promise<Steuermodus> {
-  const firma = await getFirstFirma();
+  const session = await requireFirmaSession();
+  const firma = await getFirmaById(session.firmaId);
   return firma?.steuermodus ?? "kleinunternehmer";
 }
 

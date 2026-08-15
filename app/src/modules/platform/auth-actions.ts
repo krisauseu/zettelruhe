@@ -17,6 +17,7 @@ import {
   createEigentuemer,
   createFirma,
   isSetupRequired,
+  resolveAktiveFirmaId,
   type SkrWahl,
   type Steuermodus,
 } from "@/lib/pb";
@@ -47,7 +48,7 @@ export async function loginAction(formData: FormData): Promise<void> {
       email: user.email,
       name: user.name,
       role: user.role,
-      firmaId: user.firma,
+      firmaId: await resolveAktiveFirmaId(user.firma),
     };
     await setSessionCookie(payload);
   } catch {

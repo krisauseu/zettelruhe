@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { LogOut } from "lucide-react";
 import type { SessionPayload } from "@/lib/session";
 import { logoutAction } from "@/modules/platform/auth-actions";
+import { FirmaSwitcher } from "@/modules/platform/firma-switcher";
 import { Button } from "@/components/ui/button";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -17,6 +18,7 @@ const NAV: NavItem[] = [
   { href: "/app/katalog", label: "Katalog", icon: "katalog" },
   { href: "/app/projekte", label: "Projekte", icon: "projekte" },
   { href: "/app/firma", label: "Firma", icon: "firma" },
+  { href: "/app/kategorien", label: "Kategorien", icon: "kategorien" },
   { type: "group", label: "Zeit & Fahrten" },
   { href: "/app/zeiten", label: "Zeiten", icon: "zeiten" },
   { href: "/app/fahrten", label: "Fahrten", icon: "fahrten" },
@@ -45,9 +47,11 @@ const NAV: NavItem[] = [
 
 export function AppShell({
   session,
+  firmen,
   children,
 }: {
   session: SessionPayload;
+  firmen: { id: string; name: string }[];
   children: React.ReactNode;
 }) {
   return (
@@ -67,6 +71,7 @@ export function AppShell({
           <p className="mt-1 truncate text-xs text-muted-foreground">
             {session.name}
           </p>
+          <FirmaSwitcher firmen={firmen} activeFirmaId={session.firmaId} />
         </div>
 
         <AppNav items={NAV} />

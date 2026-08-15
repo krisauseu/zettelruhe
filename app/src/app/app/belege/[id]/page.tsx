@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import {
   BELEG_STATUS_LABELS,
@@ -10,6 +10,10 @@ import {
   formatDateTimeDe,
   STEUERSATZ_LABELS,
 } from "@/lib/labels";
+import {
+  kategorieNamenFuerSelect,
+  listAllKategorien,
+} from "@/modules/categories";
 import { listKontakte, getKontakt } from "@/modules/contacts";
 import {
   deleteBelegAction,
@@ -53,7 +57,7 @@ export default async function BelegDetailPage({
   const beleg = await getBeleg(session.firmaId, id);
   if (!beleg) notFound();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   const lieferantenResult = await listKontakte(
@@ -66,6 +70,12 @@ export default async function BelegDetailPage({
     id: k.id,
     name: k.name,
   }));
+  const kategorien = kategorieNamenFuerSelect(
+    (await listAllKategorien(session.firmaId, { nurAktiv: true })).map(
+      (k) => k.name,
+    ),
+    beleg.kategorie,
+  );
 
   let lieferantName: string | null = null;
   if (beleg.lieferant) {
@@ -273,6 +283,7 @@ export default async function BelegDetailPage({
                 action={updateBelegAction}
                 steuermodus={steuermodus}
                 lieferanten={lieferanten}
+                kategorien={kategorien}
                 error={sp.error ?? null}
                 beleg={beleg}
                 mode="edit"

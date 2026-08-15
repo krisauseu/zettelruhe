@@ -9,11 +9,11 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (BA14 + M1-Nachzug + PDF/Layout 2026-08-14):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Storno-/Firma-Mängel und PDF-Vorschau/Layout light sind nachgezogen (`main` `2ce18d9`). Als Nächstes: **M1-11 nachtesten** (Bank-CSV, E-Rechnung-Empfang), dann M2 mit **UStVA/ELSTER-XML light**.
+**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien (Beleg + Kasse) und **Multi-Firma dünn** stehen. Als Nächstes M2 mit **UStVA/ELSTER-XML light**.
 
 ### Fundament & Stammdaten
 
-- Eine Firma betreiben (Schema bereits multi-firma-fähig)
+- Mehrere Firmen in einer Instanz betreiben (anlegen + Session-Wechsel; Schema firma-gebunden)
 - Eine:n Eigentümer:in (Schema multi-user-fähig, UI ohne Einladen/Rollen)
 - Unternehmensdaten, Logo
 - Nummernkreise: Angebot, Rechnung, Gutschrift/Storno, optional Beleg, Kassenbuch-Belegnr.
@@ -55,7 +55,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 ### Belege, Kasse, Bank
 
-- Manuelle Belegerfassung (Datum, Lieferant/Kategorie, Beträge; USt/Vorsteuer nur unter Regelbesteuerung sinnvoll erfassbar)
+- Manuelle Belegerfassung (Datum, Lieferant, Kategorie aus gemeinsamer Stammliste, Beträge; USt/Vorsteuer nur unter Regelbesteuerung sinnvoll erfassbar)
 - Datei-Upload am Beleg (PDF/Bild)
 - Filterbare Belegübersicht + CSV
 - **Kassenbuch**: Bareinnahmen/-ausgaben, fortlaufender Saldo, Belegnummern
@@ -95,14 +95,16 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 ## Meilenstein 2 — Steuer & Compliance vertiefen
 
-**Einstieg (vereinbart nach M1-11):** UStVA-Zahlen / ELSTER-XML light zuerst, Rest danach.
+**Einstieg (vereinbart 2026-08-15, nach M1-11):** nicht mit UStVA starten.
 
-- UStVA-Zahlen / ELSTER-XML light (Self-File-Vorbereitung) ← **erster Keil**
-- Zusammenfassende Meldung (ZM) Übersicht
-- USt-IdNr.-Validierung (BZSt)
-- E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback)
-- Multi-Firma-UI (Anlegen/Wechsel), falls Schema schon trägt
-- Optional: einfache weitere Nutzer:in mit groben Rechten
+1. **Kategorien** — gemeinsame Auswahlliste für Belege und Kassenbuch, CRUD in den Stammdaten (vor M2-Steuerkeilen) ← erledigt
+2. **Multi-Firma dünn** — Firma anlegen + wechseln, eine Eigentümer:in; kein Einladen, keine Rollen-UI (ADR-0018) ← erledigt
+3. **UStVA-Zahlen / ELSTER-XML light** (Self-File-Vorbereitung) ← nächster Steuer-Keil
+4. Zusammenfassende Meldung (ZM) Übersicht
+5. USt-IdNr.-Validierung (BZSt)
+6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback)
+
+Später (nicht vor UStVA): Multi-User / grobe Rechte.
 
 ---
 

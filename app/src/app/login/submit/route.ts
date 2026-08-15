@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { authWithPassword, isSetupRequired } from "@/lib/pb";
+import {
+  authWithPassword,
+  isSetupRequired,
+  resolveAktiveFirmaId,
+} from "@/lib/pb";
 import { setSessionCookie } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
       email: user.email,
       name: user.name,
       role: user.role,
-      firmaId: user.firma,
+      firmaId: await resolveAktiveFirmaId(user.firma),
     });
   } catch {
     return NextResponse.redirect(

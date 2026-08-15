@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe, money } from "@/lib/money";
 import {
   RECHNUNG_STATUS_LABELS,
@@ -107,7 +107,7 @@ export default async function RechnungDetailPage({
   const rechnung = await getRechnungMitPositionen(session.firmaId, id);
   if (!rechnung) notFound();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus =
     rechnung.status === "entwurf"
       ? (firma?.steuermodus ?? rechnung.steuermodus)

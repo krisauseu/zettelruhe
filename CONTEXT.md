@@ -7,7 +7,7 @@ Open-Source-Webanwendung unter [zettelruhe.de](https://zettelruhe.de) für die B
 ### Akteure & Organisation
 
 **Firma**:
-Die rechtliche Wirtschaftseinheit, deren Bücher und Belege geführt werden. Das Datenmodell unterstützt mehrere Firmen; die erste nutzbare Version betreibt faktisch eine. In den Firmeneinstellungen ist der Steuer-Modus zentral (u. a. umsatzsteuerfrei über Kleinunternehmerregelung — typisch auch für Kleingewerbe am Anfang).
+Die rechtliche Wirtschaftseinheit, deren Bücher und Belege geführt werden. Das Datenmodell ist firma-gebunden. Eine Eigentümer:in kann mehrere Firmen anlegen und in der Session wechseln. In den Firmeneinstellungen ist der Steuer-Modus zentral (u. a. umsatzsteuerfrei über Kleinunternehmerregelung — typisch auch für Kleingewerbe am Anfang).
 _Avoid_: Account, Tenant, Workspace (im Fachvokabular)
 
 **Steuer-Modus**:
@@ -86,6 +86,10 @@ _Avoid_: PDF-Rechnung (als Synonym — PDF allein ist keine E-Rechnung)
 Nachweis einer Ausgabe oder Einnahme (Datei + Metadaten), der ins Buchungsjournal eingeht.
 _Avoid_: Receipt (im UI), Dokument (allein zu unscharf)
 
+**Kategorie**:
+Firma-gebundene Auswahlliste für Belege und Kassenbuch (`/app/kategorien`). Am Beleg und am Kassenbuch-Eintrag bleibt `kategorie` ein Text-Schnappschuss; Umbenennen ändert nicht die Historie.
+_Avoid_: Tag, Label (im UI)
+
 **Zahlung**:
 Ausgleich einer offenen Rechnung; manuell markierbar (inkl. Teilzahlung) oder per Kontoauszugs-Import (CSV/MT940) gematcht.
 _Avoid_: Transaction (allein)
@@ -126,9 +130,9 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 ## Scope-Grenzen (bewusst)
 
 - **Produkt**: Zettelruhe / zettelruhe.de
-- **v1-Betrieb**: Self-hosted; eine aktive Firma und eine:n Eigentümer:in; Schema multi-fähig
+- **v1-Betrieb**: Self-hosted; eine Eigentümer:in; mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
-- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: UStVA-Zahlen/ELSTER-XML light, USt-IdNr.-Prüfung, ZM-Übersicht, E-Rechnungs-Versand vertiefen
+- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
+- **Meilenstein 2**: nach Kategorien (Beleg+Kasse) und Multi-Firma dünn (erledigt): UStVA-Zahlen/ELSTER-XML light, USt-IdNr.-Prüfung, ZM-Übersicht, E-Rechnungs-Versand vertiefen
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

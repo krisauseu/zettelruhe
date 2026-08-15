@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
+import {
+  kategorieNamenFuerSelect,
+  listAllKategorien,
+} from "@/modules/categories";
 import { listKontakte } from "@/modules/contacts";
 import {
   festschreibenKassenbuchAction,
@@ -28,7 +32,7 @@ export default async function KassenbuchNeuPage({
 }) {
   const session = await requireFirmaSession();
   const sp = await searchParams;
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   const kontakteResult = await listKontakte(session.firmaId, {}, 1, 200).catch(
@@ -37,6 +41,11 @@ export default async function KassenbuchNeuPage({
 
   const defaultRichtung =
     sp.richtung === "ausgabe" ? "ausgabe" : "einnahme";
+  const kategorien = kategorieNamenFuerSelect(
+    (await listAllKategorien(session.firmaId, { nurAktiv: true })).map(
+      (k) => k.name,
+    ),
+  );
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -75,6 +84,7 @@ export default async function KassenbuchNeuPage({
               id: k.id,
               name: k.name,
             }))}
+            kategorien={kategorien}
             error={sp.error ?? null}
             defaultRichtung={defaultRichtung}
           />

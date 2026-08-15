@@ -4,11 +4,15 @@ _Nachzug 2026-08-14: Prio 1–3 sowie Steuer-Modus-Wechsel und Status-Badges umg
 
 Umgesetzt 2026-08-14 (M1-13, M1-14, M1-10, M1-12). Auf `main` (`2ce18d9`).
 
-Offen nur Nachtest, **als Nächstes** (vereinbart, vor M2):
+M1-11 **nachgetestet 2026-08-15** (kein Feature-Bau). Fachlich ok; Mangel M1-15 (false `NEXT_REDIRECT` nach Import bzw. Beleg-Entwurf). Details: [`funktionstest-m1.md`](../funktionstest-m1.md) Abschnitte 7–8, Session [`sessions/2026-08-15-m1-11-nachtest.md`](../sessions/2026-08-15-m1-11-nachtest.md).
 
-- **M1-11 Nachtest:** Bank-CSV-Import; E-Rechnung-Empfang (Fixtures unter `app/src/modules/einvoice/fixtures/`). Kein Feature-Bau.
+**Als Nächstes** (vereinbart 2026-08-15, nicht vermischen):
 
-Danach M2, erster Keil: UStVA/ELSTER-XML light. Open Decisions nicht vermischen.
+1. Gemeinsame Kategorien für Belege und Kassenbuch — erledigt (ADR-0017)
+2. Multi-Firma dünn — erledigt (ADR-0018); Browser-Nachtest kf 2026-08-15
+3. M2 erster Keil: UStVA/ELSTER-XML light (Self-File, kein Versand)
+
+Open Decisions nicht vermischen. Multi-User nicht vor UStVA.
 
 Details Nachzug: `docs/sessions/2026-08-14-m1-funktionstest-nachzug.md`.  
 PDF/Layout: `docs/sessions/2026-08-14-m1-pdf-vorschau-layout.md`.
@@ -54,9 +58,9 @@ Priorität 4: Feature-Erweiterungen (Einstellungen, Layouts, Steuermodus-Wechsel
 ⚬	Sicherheitsabfrage: Vor dem Ausführen einer Stornobuchung muss ein Bestätigungs-Modal (Pop-up) erscheinen.
 ⚬	Erfolgsmeldung: Nach erfolgreichem Storno fehlt eine explizite Bestätigungsmeldung.
 7. Bank & Matching
-⚬	Status: Kontoanlage erfolgreich. (CSV-Import steht noch aus).
+⚬	Status: Nachtest 2026-08-15 OK. CSV de-DE, Idempotenz, Match → Zahlung auf R-0004, kein Journal. Hinweis M1-15 (Erfolgs-Redirect).
 8. E-Rechnung Empfang
-⚬	Status: Offen (Mangels XML-Dateien noch nicht manuell verifiziert).
+⚬	Status: Nachtest 2026-08-15 OK. Beide Fixtures geparst, Originale bytegleich, Beleg-Entwurf unter Kleinunternehmer ohne Vorsteuer. Regelbesteuerung auf dieser Instanz nicht nachgetestet. Hinweis M1-15 beim Beleg-Anlegen.
 9. Auswertungen, Export, Suche
 ⚬	Status: Funktional i. O., hängt jedoch direkt an der Korrektur der Storno-Logik aus Punkt 6.
 10. GoBD / Immutability

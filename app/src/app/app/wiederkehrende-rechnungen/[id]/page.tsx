@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import {
   STEUERMODUS_LABELS,
@@ -67,7 +67,7 @@ export default async function WiederkehrDetailPage({
   );
   if (!vorlage) notFound();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? vorlage.steuermodus;
   const showUst = vorlage.steuermodus === "regelbesteuerung_ist";
   const heute = todayBerlin();

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import { STEUERSATZ_LABELS } from "@/lib/labels";
 import { listKatalog } from "@/modules/catalog";
@@ -40,7 +40,7 @@ export default async function KatalogPage({
 }) {
   const session = await requireFirmaSession();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const showUst = firma?.steuermodus === "regelbesteuerung_ist";
 
   const sp = await searchParams;

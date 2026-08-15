@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
-import { getFirstFirma } from "@/lib/pb";
+import { getFirmaById } from "@/lib/pb";
 import {
   deleteKatalogAction,
   getKatalogPosition,
@@ -36,7 +36,7 @@ export default async function KatalogDetailPage({
   const position = await getKatalogPosition(session.firmaId, id);
   if (!position) notFound();
 
-  const firma = await getFirstFirma();
+  const firma = await getFirmaById(session.firmaId);
   const steuermodus = firma?.steuermodus ?? "kleinunternehmer";
 
   return (

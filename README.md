@@ -3,7 +3,7 @@
 Self-hosted Open-Source-Buchhaltung für Solo-Selbstständige in Deutschland  
 Website: [zettelruhe.de](https://zettelruhe.de)
 
-Papierkram-Alternative mit 80%-Fokus (EÜR, DE, eine Firma / eine:n Eigentümer:in in v1).
+Papierkram-Alternative mit 80%-Fokus (EÜR, DE; eine Eigentümer:in, mehrere Firmen in einer Instanz).
 
 Lizenz: [AGPL-3.0](./LICENSE)
 
@@ -42,8 +42,8 @@ Health: [http://localhost/health](http://localhost/health)
 Beim ersten Start:
 
 1. PocketBase wendet `pocketbase/pb_migrations` an und legt den Superuser an
-2. Die leere Instanz zeigt den **Setup-Wizard** (Eigentümer:in, Firma, Steuer-Modus)
-3. Danach Login/Logout über httpOnly Session-Cookie
+2. Die leere Instanz zeigt den **Setup-Wizard** (Eigentümer:in, erste Firma, Steuer-Modus)
+3. Danach Login/Logout über httpOnly Session-Cookie; weitere Firmen unter `/app/firma/neu`, Wechsel in der Shell
 
 PocketBase-Admin (Betrieb/Schema, **nicht** App-Login): [http://localhost/_/](http://localhost/_/)  
 In Produktion Admin-UI nicht öffentlich freigeben (Firewall/VPN).
@@ -137,6 +137,9 @@ LICENSE              AGPL-3.0
 
 ## Status
 
-**v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betriebich hartbar abgeschlossen  
+**v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betrieblich hartbar abgeschlossen  
 (Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).  
-Details: [`docs/90-status.md`](./docs/90-status.md). Meilenstein 2: Steuer/Compliance vertiefen (Roadmap).
+Danach: gemeinsame **Kategorien** (Beleg + Kassenbuch) und **Multi-Firma dünn** (anlegen + wechseln).  
+
+Details: [`docs/90-status.md`](./docs/90-status.md).  
+Nächster Keil (M2): UStVA-Zahlen / ELSTER-XML light (Self-File, kein Versand).

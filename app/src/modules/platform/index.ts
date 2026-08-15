@@ -4,3 +4,8 @@
  */
 export const MODULE_ID = "platform" as const;
 export { loginAction, logoutAction, setupAction } from "./auth-actions";
+export {
+  createFirmaAction,
+  switchFirmaAction,
+  updateFirmaAction,
+} from "./firma-actions";

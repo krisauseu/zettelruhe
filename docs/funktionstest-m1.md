@@ -152,21 +152,21 @@ curl -sSI http://localhost/app   # erwartet 307 → /login
 
 ## 7. Bank & Matching
 
-- [ ] Bankkonto anlegen
-- [ ] CSV-Import (de-DE) → Bewegungen sichtbar; Idempotenz (gleicher Import erneut ohne Duplikat-Chaos)
-- [ ] Match-Vorschlag gegen offene Rechnung → Matching erzeugt Zahlung (Status Rechnung)
-- [ ] **Kein** Journal allein durch Match
-- [ ] MT940: nicht als v1-Pflicht erwarten (Follow-up)
+- [x] Bankkonto anlegen — Nachtest 2026-08-15: Sparkasse aus dem Funktionstest vorhanden und sichtbar
+- [x] CSV-Import (de-DE) → Bewegungen sichtbar; Idempotenz (gleicher Import erneut ohne Duplikat-Chaos) — 2 Zeilen neu, Re-Import 0 neu / 2 Duplikat; Bestand bleibt 2. Hinweis M1-15: Erfolgsseite zeigt `NEXT_REDIRECT`, Daten sind korrekt
+- [x] Match-Vorschlag gegen offene Rechnung → Matching erzeugt Zahlung (Status Rechnung) — R-0004, Score 100, Status **bezahlt**
+- [x] **Kein** Journal allein durch Match — Journal 9 → 9
+- [x] MT940: nicht als v1-Pflicht erwarten (Follow-up)
 
 ---
 
 ## 8. E-Rechnung Empfang
 
-- [ ] Upload Fixture XRechnung (`fixtures/xrechnung-minimal.xml`) → Original archiviert
-- [ ] Parse-Vorschau; optional Beleg-Entwurf
-- [ ] Kleinunternehmer: keine Vorsteuer-Vorbefüllung; Regelbesteuerung: USt wo geparst
-- [ ] Original-Download
-- [ ] Optional ZUGFeRD-CII-Fixture; bei PDF-only light: Fehler/Hinweis ok, Original bleibt
+- [x] Upload Fixture XRechnung (`fixtures/xrechnung-minimal.xml`) → Original archiviert — Nachtest 2026-08-15, Download bytegleich
+- [x] Parse-Vorschau; optional Beleg-Entwurf — XR-2026-0042 geparst; Entwurf ohne Journal. Hinweis M1-15: Anlegen-Redirect zeigt `NEXT_REDIRECT`, Entwurf existiert
+- [~] Kleinunternehmer: keine Vorsteuer-Vorbefüllung; Regelbesteuerung: USt wo geparst — Kleinunternehmer geprüft (Beleg USt 0,00 / Netto = Brutto). Regelbesteuerung auf dieser Instanz nicht nachgetestet
+- [x] Original-Download — `xrechnung-minimal.xml`, `text/xml`
+- [x] Optional ZUGFeRD-CII-Fixture; bei PDF-only light: Fehler/Hinweis ok, Original bleibt — `zugferd-cii-minimal.xml` Parse ok, Original bytegleich
 
 ---
 
@@ -237,7 +237,8 @@ Nicht als Fehler werten:
 - ELSTER-Versand, UStVA-Abgabe, ZM, USt-IdNr.-API  
 - E-Rechnungs-**Versand**  
 - PSD2, OCR, REST-API, Kundenportal, automatischer Mahnlauf  
-- Multi-Firma-UI, Soll-Versteuerung, Abschlagskette  
+- Multi-User, Soll-Versteuerung, Abschlagskette  
+  (Multi-Firma dünn ist nach M1 gebaut, ADR-0018 — nicht Teil dieser M1-Checkliste)  
 - GoBD-/DATEV-**Zertifikat**  
 - Journal-Eintrag **nur** durch Zahlung (Open Decision)  
 - MT940 als Pflicht
@@ -265,7 +266,8 @@ Nicht als Fehler werten:
 | M1-08 | Katalog-Einheiten-Dropdown — **behoben**. |
 | M1-09 | Steuer-Modus-Wechsel nachträglich — **behoben** (`/app/firma`, mit Bestätigung). |
 | M1-10 | Dokumenten-Layout & Branding (Logo, Farben, Textbausteine) — **behoben** (`/app/firma`, gilt für neue PDFs). |
-| M1-11 | Bank-CSV-Import und E-Rechnung-Empfang im Test nicht verifiziert. |
+| M1-11 | Bank-CSV-Import und E-Rechnung-Empfang — **nachgetestet 2026-08-15**, fachlich ok (siehe Abschn. 7–8). |
+| M1-15 | Erfolgs-Redirect nach Bank-CSV-Import bzw. Beleg-Entwurf aus E-Rechnung erscheint als `error=NEXT_REDIRECT` (`redirect()` im `try/catch`). Daten sind geschrieben. Nicht blockierend. |
 | M1-12 | UI weiter modernisieren (Akzente) — **light nachgezogen** (Badges, Primärfarbe, Abstände; kein CSS-Profi). |
 | M1-13 | Angebot: PDF erzeugen/drucken ohne E-Mail — **behoben** (Vorschau am Entwurf; Original beim Senden, SMTP optional). |
 | M1-14 | Rechnung: PDF-Vorschau vor Festschreibung — **behoben** (Wasserzeichen „Entwurf“, kein Nummernkreis, kein Journal). |
@@ -275,9 +277,9 @@ Nicht als Fehler werten:
 - [x] Happy Path (Abschnitte 1–9) im gewählten Steuer-Modus grün oder nur mit dokumentierten Mängeln
 - [x] Backup **und** Restore einmal nachgewiesen
 - [x] Open Decisions verstanden (Zahlung ≠ Journal)
-- [x] **M2 darf starten** — ja / nein: **ja** (nach M1-Nachzug + PDF/Layout). **Vor M2-Bau:** M1-11 nachtesten (Bank-CSV, E-Rechnung-Empfang). Erster M2-Keil: UStVA/ELSTER-XML light.
+- [x] **M2 darf starten** — ja / nein: **ja**. M1-11 nachgetestet 2026-08-15. Kategorien und Multi-Firma dünn nachgezogen (2026-08-15). Erster M2-Keil: UStVA/ELSTER-XML light.
 
-Unterschrift / Datum: kf / 2026-08-14
+Unterschrift / Datum: kf / 2026-08-14 · Nachtest Abschn. 7–8: 2026-08-15
 
 ---
 
@@ -287,4 +289,4 @@ Wenn Zeit knapp: 0 → Setup/Login → Kontakt + Katalog → Rechnung festschrei
 
 ---
 
-_Stand: nach BA14 + M1-Nachzug + PDF/Layout (`2ce18d9`). Nächster Schritt: Abschnitte 7–8 (M1-11) nachtesten, dann M2. Bei Software-Updates Checkliste nachziehen._
+_Stand: nach Kategorien + Multi-Firma dünn 2026-08-15 (Browser-Nachtest kf). Nächster Schritt: UStVA/ELSTER-XML light. Bei Software-Updates Checkliste nachziehen._
