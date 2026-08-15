@@ -138,8 +138,9 @@ LICENSE              AGPL-3.0
 ## Status
 
 **v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betrieblich hartbar abgeschlossen  
-(Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).  
-Danach: **Kategorien** (Beleg + Kassenbuch), **Multi-Firma dünn** (anlegen + wechseln), **UStVA/ELSTER-XML light** (Self-File auf `/app/ust`, kein Versand), **ZM-Übersicht** (Self-File auf `/app/zm`, kein Versand; Browser-Nachtest 2026-08-15).  
+(Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).
 
-Details: [`docs/90-status.md`](./docs/90-status.md).  
-Nächster Keil (M2): USt-IdNr.-Validierung (BZSt).
+Danach erledigt (Meilenstein 2, vor dem Versand): **Kategorien** (Beleg + Kassenbuch), **Multi-Firma dünn** (anlegen + wechseln), **UStVA/ELSTER-XML light** (Self-File auf `/app/ust`, kein Versand), **ZM-Übersicht** (Self-File auf `/app/zm`, kein Versand), **USt-IdNr.-Prüfung (BZSt)** (Schnappschuss, kein Versand; Speichern lokal bestätigt). Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR — lokal unter HTTP nicht nachgetestet. **Server-Nachtest nach Abschluss von Meilenstein 2.**
+
+Details und Follow-ups (HTTPS/Caddy, Setup-`verified`, Dokumenten-Layout, Logo/Favicon): [`docs/90-status.md`](./docs/90-status.md).  
+Nächster Keil (M2): **E-Rechnungs-Versand**.

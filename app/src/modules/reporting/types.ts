@@ -126,7 +126,11 @@ export type ZmLandGruppe = "eu_ohne_de" | "de" | "drittland" | "unbekannt";
 
 export type ZmEinordnung = "kandidat" | "andere_nullust";
 
-export type ZmUstIdStatus = "notiz_ungeprueft" | "nicht_gefuehrt";
+export type ZmUstIdStatus =
+  | "notiz_ungeprueft"
+  | "nicht_gefuehrt"
+  | "stamm_ungeprueft"
+  | "pruefung_snapshot";
 
 /** Amtlicher ZM-Meldezeitraum oder nur Auswertungsfenster */
 export type ZmZeitraumArt = "monat" | "quartal" | "kein_meldezeitraum";
@@ -138,12 +142,19 @@ export type ZmMeldezeitraum = {
   label: string;
 };
 
-/** Kontakt-Ausschnitt für die ZM (kein eigenes USt-Id-Feld in v1). */
+/** Kontakt-Ausschnitt für die ZM (aktueller Stamm, kein Historien-Schnappschuss des Landes). */
 export type ZmKontaktBlick = {
   id: string;
   name: string;
   land: string;
   notiz: string;
+  ust_id: string;
+  letzte_pruefung?: {
+    anfrage_zeitpunkt: string;
+    status: string;
+    status_meldung: string;
+    abgefragte_ust_id: string;
+  };
 };
 
 /** Eine Journal-Zeile in der ZM-Übersicht (0-USt-Einnahme). */
@@ -160,8 +171,11 @@ export type ZmZeile = {
   kontakt_name: string;
   land: string;
   land_gruppe: ZmLandGruppe;
+  ust_id: string;
   ust_id_notiz: string;
   ust_id_status: ZmUstIdStatus;
+  ust_id_pruefung_am: string;
+  ust_id_pruefung_status: string;
   journal_netto: string;
   eintrag_euro_ganz: string;
   ist_storno: boolean;
@@ -172,19 +186,22 @@ export type ZmKontaktSumme = {
   kontakt_id: string;
   kontakt_name: string;
   land: string;
+  ust_id: string;
   ust_id_notiz: string;
   ust_id_status: ZmUstIdStatus;
+  ust_id_pruefung_am: string;
+  ust_id_pruefung_status: string;
   anzahl_buchungen: number;
   journal_netto: string;
   eintrag_euro_ganz: string;
 };
 
 /**
- * ZM-Übersicht light aus Journal + Kontakt-Land.
- * Format-ID: zettelruhe-zm-uebersicht-v1
+ * ZM-Übersicht light aus Journal + Kontakt-Land + Stamm-USt-Id.
+ * Format-ID: zettelruhe-zm-uebersicht-v2
  */
 export type ZmUebersicht = {
-  format_id: "zettelruhe-zm-uebersicht-v1";
+  format_id: "zettelruhe-zm-uebersicht-v2";
   steuermodus: Steuermodus;
   verfuegbar: boolean;
   zeitraum: Zeitraum;

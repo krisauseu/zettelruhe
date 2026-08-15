@@ -120,8 +120,16 @@ Zusammenstellung der Umsatzsteuer-Zahllast je Zeitraum zur Vorbereitung der eige
 _Avoid_: UStVA-Abgabe (als Versprechen), ELSTER-Versand
 
 **Zusammenfassende Meldung (ZM)**:
-Übersicht zur Vorbereitung der Zusammenfassenden Meldung in Mein Elster (innergemeinschaftliche Lieferungen/sonstige Leistungen). Nur Regelbesteuerung; Zahlen aus dem Buchungsjournal der aktiven Firma plus aktuellem Land am Kontakt. 0-USt-Einnahmen an Kontakte im übrigen EU-Gebiet erscheinen als Kandidaten — Art (Lieferung/Leistung/Dreieck) und USt-IdNr. werden nicht geraten. Unter Kleinunternehmerregelung typisch nicht relevant. Kein ELSTER-Versand, keine Abgabe aus der App.
+Übersicht zur Vorbereitung der Zusammenfassenden Meldung in Mein Elster (innergemeinschaftliche Lieferungen/sonstige Leistungen). Nur Regelbesteuerung; Zahlen aus dem Buchungsjournal der aktiven Firma plus aktuellem Land am Kontakt. 0-USt-Einnahmen an Kontakte im übrigen EU-Gebiet erscheinen als Kandidaten — Art (Lieferung/Leistung/Dreieck) wird nicht geraten. Die USt-IdNr. kommt aus dem Kontakt-Stamm (Notiz nur Fallback); ein BZSt-Schnappschuss gilt nur für den Anfragezeitpunkt, nicht für den Umsatz. Unter Kleinunternehmerregelung typisch nicht relevant. Kein ELSTER-Versand, keine Abgabe aus der App.
 _Avoid_: ZM-Abgabe (als Versprechen), ELSTER-Versand, ig. Lieferung (als festgestellte Buchungsart)
+
+**USt-IdNr.**:
+Umsatzsteuer-Identifikationsnummer. Die eigene steht an der Firma, die fremde am Kontakt. Optional in beiden Steuer-Modi — unter der Kleinunternehmerregelung kann sie vorkommen, macht USt- und ZM-Übersicht nicht relevant.
+_Avoid_: VAT ID (im UI), UID (allein, außer als Import-Alias)
+
+**BZSt-Bestätigung**:
+Punktuelle Abfrage des BZSt-Auslandsverfahrens (eVatR REST) zur fremden EU-USt-IdNr. gegenüber der eigenen DE-Nummer. Ergebnis ist ein Schnappschuss zum Anfragezeitpunkt (einfach oder qualifiziert), kein Dauer-„gültig“-Stempel und keine Abgabe. DE→DE und eine isolierte Bestätigung der eigenen DE-Nummer gibt das Verfahren nicht her.
+_Avoid_: USt-Id gültig (als Stammdaten-Flag), VIES (als Produktname), ELSTER-Versand
 
 **Bankkonto**:
 Zahlweg der Firma für unbare Zahlungseingänge/-ausgänge; Stammdaten für CSV/MT940-Import. Das Modell erlaubt mehrere Bankkonten; Kassenbuch bleibt davon getrennt.
@@ -138,5 +146,5 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light und ZM-Übersicht (erledigt): USt-IdNr.-Prüfung, E-Rechnungs-Versand vertiefen
+- **Meilenstein 2**: nach Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht und USt-IdNr.-Prüfung (erledigt): E-Rechnungs-Versand vertiefen
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

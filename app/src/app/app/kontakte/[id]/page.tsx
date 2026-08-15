@@ -10,6 +10,17 @@ import {
   updateKontaktAction,
 } from "@/modules/contacts";
 import { KontaktForm } from "@/modules/contacts/kontakt-form";
+import {
+  SCHNAPPSCHUSS_NICHT_LESBAR,
+  getAktuellePruefung,
+  kannBzstAbfrage,
+  pruefeKontaktUstIdAction,
+} from "@/modules/ustid";
+import { getFirmaById } from "@/lib/pb";
+import {
+  KontaktPruefungForm,
+  PruefungAnzeige,
+} from "@/modules/ustid/pruefung-anzeige";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +35,11 @@ import {
 export const dynamic = "force-dynamic";
 
 type Params = Promise<{ id: string }>;
-type SearchParams = Promise<{ error?: string; saved?: string }>;
+type SearchParams = Promise<{
+  error?: string;
+  saved?: string;
+  success?: string;
+}>;
 
 export default async function KontaktDetailPage({
   params,
@@ -41,6 +56,22 @@ export default async function KontaktDetailPage({
   if (!kontakt) notFound();
 
   const ansprechpartner = await listAnsprechpartner(session.firmaId, id);
+  const firma = await getFirmaById(session.firmaId);
+  const gate = kannBzstAbfrage(firma?.ust_id, kontakt.ust_id);
+  let aktuelle = null;
+  let schnappschussHinweis: string | null = null;
+  if (kontakt.ust_id) {
+    try {
+      aktuelle = await getAktuellePruefung(
+        session.firmaId,
+        "kontakt",
+        kontakt.id,
+        kontakt.ust_id,
+      );
+    } catch {
+      schnappschussHinweis = SCHNAPPSCHUSS_NICHT_LESBAR;
+    }
+  }
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -59,6 +90,14 @@ export default async function KontaktDetailPage({
         {sp.saved ? (
           <p className="mt-1 text-sm text-success">Gespeichert.</p>
         ) : null}
+        {sp.success ? (
+          <p className="mt-1 text-sm text-success">{sp.success}</p>
+        ) : null}
+        {sp.error ? (
+          <p className="mt-1 text-sm text-destructive" role="alert">
+            {sp.error}
+          </p>
+        ) : null}
       </div>
 
       <Card>
@@ -73,6 +112,63 @@ export default async function KontaktDetailPage({
             submitLabel="Speichern"
             error={sp.error ?? null}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>USt-IdNr. beim BZSt prüfen</CardTitle>
+          <CardDescription>
+            Bestätigt die gespeicherte fremde Nummer gegenüber der eigenen
+            DE-USt-IdNr. der aktiven Firma. Nur Anfragezeitpunkt, kein
+            Dauer-Stempel, festgeschriebene Belege bleiben unverändert.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {kontakt.ust_id ? (
+            <p className="text-sm">
+              Gespeichert:{" "}
+              <span className="font-mono tabular-nums">{kontakt.ust_id}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Keine USt-IdNr. gespeichert. Oben eintragen, speichern, dann
+              prüfen.
+            </p>
+          )}
+          {schnappschussHinweis ? (
+            <p className="text-sm text-muted-foreground" role="status">
+              {schnappschussHinweis}
+            </p>
+          ) : aktuelle ? (
+            <PruefungAnzeige
+              pruefung={aktuelle}
+              title="Letzter Schnappschuss zu dieser Nummer"
+            />
+          ) : kontakt.ust_id ? (
+            <p className="text-sm text-muted-foreground">
+              Noch kein BZSt-Schnappschuss zu dieser gespeicherten Nummer.
+            </p>
+          ) : null}
+          {gate.ok ? (
+            <KontaktPruefungForm
+              action={pruefeKontaktUstIdAction}
+              kontaktId={id}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {gate.grund}{" "}
+              {gate.grund.includes("Firma") ||
+              gate.grund.includes("eigene USt-IdNr.") ? (
+                <Link
+                  href="/app/firma"
+                  className="text-primary hover:underline"
+                >
+                  Zur Firma
+                </Link>
+              ) : null}
+            </p>
+          )}
         </CardContent>
       </Card>
 

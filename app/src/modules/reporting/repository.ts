@@ -10,6 +10,7 @@ import type { JournalEintrag } from "@/modules/journal/types";
 import { listBelege, getBelegDateiResponse } from "@/modules/expenses/repository";
 import type { Beleg } from "@/modules/expenses/types";
 import { getKontakt } from "@/modules/contacts/repository";
+import { getAktuellePruefungenFuerKontakte } from "@/modules/ustid";
 import { listOffenePosten } from "@/modules/payments/repository";
 import {
   buildDashboard,
@@ -163,13 +164,27 @@ async function loadKontakteFuerJournal(
   ];
   const map = new Map<string, ZmKontaktBlick>();
   const loaded = await Promise.all(ids.map((id) => getKontakt(firmaId, id)));
-  for (const k of loaded) {
-    if (!k) continue;
+  const vorhanden = loaded.filter((k): k is NonNullable<typeof k> => Boolean(k));
+  const pruefungen = await getAktuellePruefungenFuerKontakte(
+    firmaId,
+    vorhanden.map((k) => ({ id: k.id, ust_id: k.ust_id })),
+  );
+  for (const k of vorhanden) {
+    const p = pruefungen.get(k.id);
     map.set(k.id, {
       id: k.id,
       name: k.name,
       land: k.land,
       notiz: k.notiz,
+      ust_id: k.ust_id,
+      letzte_pruefung: p
+        ? {
+            anfrage_zeitpunkt: p.anfrage_zeitpunkt || p.created || "",
+            status: p.status,
+            status_meldung: p.status_meldung,
+            abgefragte_ust_id: p.abgefragte_ust_id,
+          }
+        : undefined,
     });
   }
   return map;

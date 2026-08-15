@@ -95,6 +95,19 @@ export function KontaktForm({ action, kontakt, submitLabel, error }: Props) {
             autoComplete="country"
           />
         </div>
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <Label htmlFor="ust_id">USt-IdNr. (optional)</Label>
+          <Input
+            id="ust_id"
+            name="ust_id"
+            defaultValue={kontakt?.ust_id ?? ""}
+            autoComplete="off"
+          />
+          <p className="text-xs text-muted-foreground">
+            Fremde Nummer als Stammdatum. Nach dem Speichern beim BZSt prüfbar
+            — kein Dauer-„gültig“, festgeschriebene Belege bleiben unverändert.
+          </p>
+        </div>
       </fieldset>
 
       <fieldset className="grid gap-3 sm:grid-cols-2">

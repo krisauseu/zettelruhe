@@ -305,7 +305,14 @@ export default async function ERechnungDetailPage({
                 </select>
                 {vorschlag ? (
                   <p className="text-xs text-muted-foreground">
-                    Vorschlag per Name/USt-Id light: {vorschlag.name}
+                    Vorschlag per Name/USt-IdNr. (Stamm, sonst Notiz):{" "}
+                    {vorschlag.name}
+                  </p>
+                ) : null}
+                {dto?.lieferant.ust_id ? (
+                  <p className="text-xs text-muted-foreground">
+                    USt-IdNr. der E-Rechnung ({dto.lieferant.ust_id}) wird in
+                    die Beleg-Notiz geschrieben, nicht still auf den Kontakt.
                   </p>
                 ) : null}
               </div>

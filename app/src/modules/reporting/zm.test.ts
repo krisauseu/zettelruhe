@@ -44,6 +44,8 @@ function k(
     name: partial.name ?? "Kontakt",
     land: partial.land ?? "DE",
     notiz: partial.notiz ?? "",
+    ust_id: partial.ust_id ?? "",
+    letzte_pruefung: partial.letzte_pruefung,
   };
 }
 
@@ -304,6 +306,65 @@ describe("buildZmUebersicht", () => {
     expect(zm.kandidaten[0]?.journal_netto).toBe("150.50");
     expect(zm.kandidaten[0]?.eintrag_euro_ganz).toBe("151");
     expect(zm.summe_kandidaten_euro_ganz).toBe("151");
+  });
+
+  it("bevorzugt Stamm-USt-Id vor der Notiz", () => {
+    const zm = buildZmUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "90.00",
+          kontakt: "at1",
+        }),
+      ],
+      MONAT,
+      "regelbesteuerung_ist",
+      kontakte(
+        k({
+          id: "at1",
+          land: "AT",
+          name: "Wien GmbH",
+          ust_id: "ATU12345678",
+          notiz: "USt-IdNr.: ATU99999999",
+        }),
+      ),
+    );
+    expect(zm.kandidaten[0]?.ust_id).toBe("ATU12345678");
+    expect(zm.kandidaten[0]?.ust_id_status).toBe("stamm_ungeprueft");
+    expect(zm.kandidaten[0]?.ust_id_notiz).toBe("ATU99999999");
+  });
+
+  it("zeigt BZSt-Schnappschuss ohne Dauer-gültig", () => {
+    const zm = buildZmUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "90.00",
+          kontakt: "at1",
+        }),
+      ],
+      MONAT,
+      "regelbesteuerung_ist",
+      kontakte(
+        k({
+          id: "at1",
+          land: "AT",
+          name: "Wien GmbH",
+          ust_id: "ATU12345678",
+          letzte_pruefung: {
+            anfrage_zeitpunkt: "2026-08-15T10:00:00.000Z",
+            status: "evatr-0000",
+            status_meldung: "gültig zum Anfragezeitpunkt",
+            abgefragte_ust_id: "ATU12345678",
+          },
+        }),
+      ),
+    );
+    expect(zm.kandidaten[0]?.ust_id_status).toBe("pruefung_snapshot");
+    expect(zm.kandidaten[0]?.ust_id_pruefung_status).toBe("evatr-0000");
+    expect(zm.nicht_gefuehrt.some((n) => n.feld === "Gültigkeit zum Umsatz")).toBe(
+      true,
+    );
   });
 
   it("zeigt USt-Id aus Notiz als ungeprüft", () => {

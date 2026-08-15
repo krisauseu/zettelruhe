@@ -319,7 +319,7 @@ export async function createFirma(input: {
       ort: (input.ort ?? "").trim(),
       land: (input.land ?? "DE").trim() || "DE",
       steuernummer: (input.steuernummer ?? "").trim(),
-      ust_id: (input.ust_id ?? "").trim(),
+      ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
     }),
   });
   return mapFirma(r);
@@ -337,7 +337,7 @@ export async function updateFirma(
     ort: (input.ort ?? "").trim(),
     land: (input.land ?? "DE").trim() || "DE",
     steuernummer: (input.steuernummer ?? "").trim(),
-    ust_id: (input.ust_id ?? "").trim(),
+    ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
   };
   if (input.skr) {
     scalars.skr = input.skr;

@@ -92,6 +92,11 @@ export function FirmaForm({
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="ust_id">USt-IdNr. (optional)</Label>
           <Input id="ust_id" name="ust_id" defaultValue={firma.ust_id ?? ""} />
+          <p className="text-xs text-muted-foreground">
+            Eigene Nummer der Firma. Unter der Kleinunternehmerregelung
+            zulässig, ändert USt- und ZM-Übersicht nicht. Das BZSt bestätigt
+            damit ausländische Nummern — nicht diese DE-Nummer isoliert.
+          </p>
         </div>
       </fieldset>
 

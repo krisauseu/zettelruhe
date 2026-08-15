@@ -202,7 +202,24 @@ export default async function ZmPage({
                         </TableCell>
                         <TableCell className="tabular-nums">{k.land}</TableCell>
                         <TableCell>
-                          {k.ust_id_status === "notiz_ungeprueft" ? (
+                          {k.ust_id_status === "pruefung_snapshot" ? (
+                            <>
+                              <span className="tabular-nums">
+                                {k.ust_id || k.ust_id_notiz}
+                              </span>
+                              <Badge variant="secondary" className="ml-2">
+                                {k.ust_id_pruefung_status} zum
+                                Anfragezeitpunkt
+                              </Badge>
+                            </>
+                          ) : k.ust_id_status === "stamm_ungeprueft" ? (
+                            <>
+                              <span className="tabular-nums">{k.ust_id}</span>
+                              <Badge variant="warning" className="ml-2">
+                                Stamm, ungeprüft
+                              </Badge>
+                            </>
+                          ) : k.ust_id_status === "notiz_ungeprueft" ? (
                             <>
                               <span className="tabular-nums">
                                 {k.ust_id_notiz}
@@ -385,11 +402,12 @@ export default async function ZmPage({
                 >
                   USt-Übersicht
                 </Link>
-                . Land und Notiz am{" "}
+                . Land und USt-IdNr. am{" "}
                 <Link href="/app/kontakte" className="text-primary hover:underline">
                   Kontakt
                 </Link>{" "}
-                ändern die Kandidaten (aktueller Stand, kein Schnappschuss).
+                ändern die Kandidaten (aktueller Stamm). BZSt-Prüfung am
+                Kontakt, nicht hier.
               </p>
             </CardContent>
           </Card>

@@ -37,6 +37,7 @@ type PbKontakt = {
   telefon?: string;
   iban?: string;
   bic?: string;
+  ust_id?: string;
   notiz?: string;
   created?: string;
   updated?: string;
@@ -67,6 +68,7 @@ function mapKontakt(r: PbKontakt): Kontakt {
     telefon: r.telefon ?? "",
     iban: r.iban ?? "",
     bic: r.bic ?? "",
+    ust_id: r.ust_id ?? "",
     notiz: r.notiz ?? "",
     created: r.created,
     updated: r.updated,
@@ -99,6 +101,7 @@ function toPbBody(input: KontaktInput, firmaId: string): Record<string, unknown>
     telefon: (input.telefon ?? "").trim(),
     iban: (input.iban ?? "").trim().replace(/\s+/g, "").toUpperCase(),
     bic: (input.bic ?? "").trim().toUpperCase(),
+    ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
     notiz: (input.notiz ?? "").trim(),
   };
 }
@@ -120,7 +123,7 @@ export async function listKontakte(
   const q = filter.q?.trim();
   if (q) {
     parts.push(
-      `(${pbLike("name", q)} || ${pbLike("email", q)} || ${pbLike("ort", q)} || ${pbLike("telefon", q)})`,
+      `(${pbLike("name", q)} || ${pbLike("email", q)} || ${pbLike("ort", q)} || ${pbLike("telefon", q)} || ${pbLike("ust_id", q)})`,
     );
   }
 

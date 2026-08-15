@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-15_
 
-**Last session:** 2026-08-15 — ZM-Übersicht (Self-File); 327 Tests; Browser-Nachtest kf, keine Fehler; auf `main` gepusht
+**Last session:** 2026-08-15 — USt-IdNr.-Validierung (BZSt) lokal bestätigt und auf `origin/main`; nächster Chat: E-Rechnungs-Versand
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0020
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0021
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -24,7 +24,8 @@ _Last updated: 2026-08-15_
 - **Multi-Firma dünn** (ADR-0018): zweite Firma anlegen + in der Shell wechseln; `users.firma` bleibt 1:1 (zuletzt aktiv); Isolation über `session.firmaId`. Kein Einladen, keine zweite Rolle, Setup unverändert. 277 Unit-Tests grün. Browser-Nachtest durch kf 2026-08-15.
 - **Sidebar:** Gruppen kollabierbar (Default offen), Zustand + Favoriten in localStorage, Auto-Open der aktiven Route, „Alle öffnen/schließen“, „Nur Favoriten“. 291 Unit-Tests.
 - **UStVA / ELSTER-XML light** (ADR-0019): unter Regelbesteuerung Kennzahlen 81/86/66/83 aus dem Journal der aktiven Firma; XML-Download (Mein-Elster-Nutzdaten, kein Versand) für Monat/Quartal. Kleinunternehmerregelung unverändert „nicht relevant“. 308 Unit-Tests. Browser-Nachtest durch kf 2026-08-15: keine Probleme.
-- **ZM-Übersicht** (ADR-0020): unter Regelbesteuerung Kandidaten aus 0-USt-Einnahmen plus Land am Kontakt (`/app/zm`); Art und USt-IdNr. nicht geführt; CSV light, kein Versand. Kleinunternehmerregelung „nicht relevant“. 327 Unit-Tests. Browser-Nachtest durch kf 2026-08-15: keine Fehler.
+- **ZM-Übersicht** (ADR-0020): unter Regelbesteuerung Kandidaten aus 0-USt-Einnahmen plus Land am Kontakt (`/app/zm`); Art nicht geführt; CSV light, kein Versand. Kleinunternehmerregelung „nicht relevant“. Browser-Nachtest durch kf 2026-08-15: keine Fehler.
+- **USt-IdNr.-Validierung (BZSt)** (ADR-0021): `ust_id` am Kontakt; eigene Nummer an der Firma als Anfragende; eVatR-REST einfach/qualifiziert als Schnappschuss, kein Dauer-Stempel. Kleinunternehmerregelung: Nummer erlaubt, USt/ZM unverändert nicht relevant. 348 Unit-Tests. Browser (kf, 2026-08-15, lokal HTTP): Eingabe und Speichern der USt-IdNr. ohne Fehler. Klick-Prüfung beim BZSt lokal nicht prüfbar (kein HTTPS / ausgehender eVatR-Zugang). **Server-Nachtest der Prüfung erst nach Abschluss von Meilenstein 2**, zusammen mit den übrigen M2-Ergänzungen.
 
 ## What's next
 
@@ -35,10 +36,21 @@ _Last updated: 2026-08-15_
 3. **Multi-Firma dünn erledigt** — Firma anlegen + wechseln (ADR-0018).
 4. **UStVA/ELSTER-XML light erledigt** — Self-File, kein Versand (ADR-0019).
 5. **ZM-Übersicht erledigt** — Self-File, kein Versand (ADR-0020).
-6. **Als Nächstes: USt-IdNr.-Validierung (BZSt)**. Danach E-Rechnungs-Versand.
-7. **Open Decisions** weiter separat. Multi-User später.
+6. **USt-IdNr.-Validierung (BZSt) erledigt** — Schnappschuss, kein Versand (ADR-0021).
+7. **Als Nächstes: E-Rechnungs-Versand** — neuer Chat, nicht in diesem Keil.
+8. **Open Decisions** weiter separat. Multi-User später.
+9. **Server-Nachtest M2** (inkl. BZSt-Klick) nach dem Versand-Keil, wenn die Instanz HTTPS hat.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
+
+## Follow-up (nicht M2-Keil)
+
+Kein Prio außer **HTTPS auf dem Server** — ohne das bleibt die BZSt-Prüfung später nicht ehrlich testbar.
+
+- **HTTPS / Caddy (Prio vor BZSt-Servertest):** Zurzeit nur HTTP. Entweder Caddy aus Compose nehmen (nativ auf dem Server) oder im Compose belassen und Frontend — optional auch PocketBase-Admin — von außen über HTTPS erreichbar machen. Interne Next↔PocketBase-Kommunikation bleibt im Docker-Netz.
+- **Setup: User nicht verifiziert:** Nach initialem Registrieren/Firma-Anlegen ist Login oft gesperrt, bis `users.verified` in PocketBase manuell `true` ist. Final: automatisch verifizieren (eine Eigentümer:in, self-hosted) oder E-Mail-Bestätigung, wenn SMTP steht.
+- **Dokumenten-Layout:** Angebote und Rechnungen überarbeiten (über das heutige light: Logo, Akzent, Kopf-/Fußtext hinaus).
+- **Marke:** Zettelruhe-Logo und Favicon entwerfen, oben links in der Shell einsetzen.
 
 ## Open decisions
 
@@ -74,4 +86,4 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-15-zm-uebersicht.md`](./sessions/2026-08-15-zm-uebersicht.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-15-ust-idnr-bzst.md`](./sessions/2026-08-15-ust-idnr-bzst.md)

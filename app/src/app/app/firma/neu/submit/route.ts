@@ -31,6 +31,7 @@ export async function POST(request: Request) {
       ort: str(formData, "ort"),
       land: str(formData, "land"),
       steuernummer: str(formData, "steuernummer"),
+      ust_id: str(formData, "ust_id"),
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Angaben ungültig.";

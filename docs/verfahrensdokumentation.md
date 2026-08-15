@@ -32,6 +32,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 6. **Storno**: Gegenbuchung mit Verweis `storno_von`; Original bleibt erhalten.
 7. **Zahlungen**: Manuell oder per Bank-Match; **erzeugen in v1 kein Journal** (Open Decision Ist-Versteuerung).
 8. **E-Rechnung Empfang**: Original archivieren → optional Beleg-Entwurf → Festschreibung wie Beleg.
+9. **USt-IdNr.**: eigene an der Firma, fremde am Kontakt; BZSt-Bestätigung auf Klick als unveränderlicher Schnappschuss (kein Stamm-Stempel, keine Änderung festgeschriebener Belege).
 
 ## 4. Unveränderbarkeit und Korrekturen
 
@@ -46,7 +47,8 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 | EÜR light | Summen aus Journal, Kategorien light | Beide Steuer-Modi |
 | USt-Übersicht | USt/Vorsteuer aus Journal | Nur Regelbesteuerung; kein ELSTER-Versand |
 | UStVA / ELSTER-XML light | Kz 81/86/66/83 aus Journal | Self-File (`zettelruhe-ustva-elster-xml-light-v1`); kein Versand; Monat/Quartal |
-| ZM-Übersicht | 0-USt-Einnahmen + Kontakt-Land | Self-File (`zettelruhe-zm-uebersicht-v1`); Kandidaten, keine Art/USt-Id; kein Versand |
+| ZM-Übersicht | 0-USt-Einnahmen + Kontakt-Land + Stamm-USt-Id | Self-File (`zettelruhe-zm-uebersicht-v2`); Kandidaten, keine Art; USt-Id Stamm/Notiz/Schnappschuss, kein Versand |
+| USt-IdNr. / BZSt | Eigene Nummer an der Firma, fremde am Kontakt | eVatR-REST-Schnappschuss (`ust_id_pruefungen`); kein Dauer-Stempel, kein Versand |
 | DATEV light CSV | Journal-Zeilen EXTF-ähnlich | Format-ID `zettelruhe-datev-csv-light-v1`, **nicht** DATEV-zertifiziert |
 | Journal-CSV | Alle Felder der Journal-Zeilen | Semikolon, UTF-8 BOM |
 | Belegarchiv-ZIP | Metadaten + Dateien festgeschriebener Belege | Zeitraum nach Belegdatum |

@@ -39,6 +39,13 @@ export function FirmaAnlegenForm({ error }: { error?: string | null }) {
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
+        <Label htmlFor="ust_id">USt-IdNr. (optional)</Label>
+        <Input id="ust_id" name="ust_id" />
+        <p className="text-xs text-muted-foreground">
+          Eigene DE-Nummer der Firma. Später an der Firma änderbar.
+        </p>
+      </div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="steuermodus">Steuer-Modus</Label>
         <Select
           id="steuermodus"

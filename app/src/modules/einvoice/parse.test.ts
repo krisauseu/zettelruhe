@@ -232,6 +232,16 @@ describe("Lieferant:in Match light", () => {
     });
     expect(score).toBeGreaterThanOrEqual(50);
   });
+
+  it("USt-Id am Stamm scoret, ohne die Notiz zu brauchen", () => {
+    const score = scoreLieferantMatch(dto, {
+      id: "3",
+      name: "Andere Firma",
+      ust_id: "DE123456789",
+      ist_lieferant: true,
+    });
+    expect(score).toBeGreaterThanOrEqual(50);
+  });
 });
 
 describe("invariants", () => {

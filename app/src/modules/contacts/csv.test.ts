@@ -57,6 +57,12 @@ describe("parseKontakteCsv", () => {
     expect(result.items[0].ist_lieferant).toBe(false);
   });
 
+  it("liest USt-IdNr. aus ust_id", () => {
+    const csv = "name;ust_id\nParis SARL;FR12345678901\n";
+    const result = parseKontakteCsv(csv);
+    expect(result.items[0].ust_id).toBe("FR12345678901");
+  });
+
   it("akzeptiert Alias Firma als name", () => {
     const csv = "Firma;Kunde\nTestfirma;ja\n";
     const result = parseKontakteCsv(csv);
@@ -91,6 +97,7 @@ describe("serializeKontakteCsv", () => {
         plz: "12345",
         ort: "Köln",
         land: "DE",
+        ust_id: "ATU12345678",
         email: "t@example.de",
         telefon: "",
         iban: "DE89370400440532013000",
@@ -103,6 +110,7 @@ describe("serializeKontakteCsv", () => {
     const result = parseKontakteCsv(body);
     expect(result.items[0].name).toBe("Test; Firma");
     expect(result.items[0].iban).toBe("DE89370400440532013000");
+    expect(result.items[0].ust_id).toBe("ATU12345678");
     expect(result.items[0].notiz).toBe('Zeile "eins"');
   });
 
@@ -118,6 +126,7 @@ describe("serializeKontakteCsv", () => {
         plz: "",
         ort: "",
         land: "DE",
+        ust_id: "",
         email: "",
         telefon: "",
         iban: "",

@@ -18,6 +18,7 @@ export type NeueFirmaInput = {
   ort: string;
   land: string;
   steuernummer: string;
+  ust_id: string;
 };
 
 export function normalizeFirmaName(raw: string): string {
@@ -38,6 +39,7 @@ export function validateNeueFirmaInput(input: {
   ort?: string;
   land?: string;
   steuernummer?: string;
+  ust_id?: string;
 }): NeueFirmaInput {
   const name = normalizeFirmaName(input.name);
   if (!name) {
@@ -72,6 +74,7 @@ export function validateNeueFirmaInput(input: {
     ort: (input.ort ?? "").trim(),
     land,
     steuernummer: (input.steuernummer ?? "").trim(),
+    ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
   };
 }
 

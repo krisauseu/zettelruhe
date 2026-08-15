@@ -9,9 +9,11 @@
  * an einen Kontakt im übrigen EU-Gebiet. Rechnungsbuchungen speichern oft
  * keinen Steuersatz — maßgeblich ist die USt, nicht der Satz.
  *
- * Nicht raten: Art (Lieferung / sonstige Leistung / Dreieck), USt-IdNr. als
- * Stammdatum, Unterscheidung ig. Lieferung vs. Ausfuhr vs. andere Steuerfreiheit.
- * USt-Id nur aus explizit beschrifteter Kontakt-Notiz, ungeprüft.
+ * Nicht raten: Art (Lieferung / sonstige Leistung / Dreieck),
+ * Unterscheidung ig. Lieferung vs. Ausfuhr vs. andere Steuerfreiheit,
+ * Gültigkeit der USt-IdNr. zum Umsatzzeitpunkt.
+ * USt-IdNr. kommt aus dem Kontakt-Stamm; Notiz nur Fallback, ungeprüft.
+ * Ein BZSt-Schnappschuss ist kein Dauer-Stempel.
  *
  * Kein ELSTER-Versand, kein XML.
  */
@@ -38,12 +40,13 @@ import type {
   ZmZeile,
 } from "./types";
 
-export const ZM_FORMAT_ID = "zettelruhe-zm-uebersicht-v1" as const;
+export const ZM_FORMAT_ID = "zettelruhe-zm-uebersicht-v2" as const;
 
 export const ZM_HINWEIS =
   "ZM light aus 0-USt-Einnahmen im Buchungsjournal (Buchungsdatum) und dem aktuellen Land am Kontakt. " +
   "Kandidaten sind keine festgestellten innergemeinschaftlichen Lieferungen oder sonstigen Leistungen. " +
-  "Art und USt-IdNr. werden nicht geführt (USt-Id höchstens ungeprüft aus der Kontakt-Notiz). " +
+  "Art wird nicht geführt. USt-IdNr. kommt aus dem Kontakt-Stamm (Notiz nur Fallback). " +
+  "Ein BZSt-Schnappschuss gilt nur für den Anfragezeitpunkt, nicht für den Umsatz. " +
   "Werte selbst in Mein Elster eintragen — kein ELSTER-Versand, keine Abgabe aus der App. " +
   "Rechnungsbuchungen speichern oft keinen Steuersatz; maßgeblich ist USt 0,00 €. " +
   "Zahlungen erzeugen in v1 kein Journal. Land ist der Stammdaten-Stand, kein Historien-Schnappschuss.";
@@ -105,9 +108,9 @@ export const ZM_NICHT_GEFUEHRT: { feld: string; bezeichnung: string }[] = [
       "Art der Leistung (1 innergemeinschaftliche Lieferung / 2 Dreiecksgeschäft / 3 sonstige Leistung)",
   },
   {
-    feld: "USt-IdNr.",
+    feld: "Gültigkeit zum Umsatz",
     bezeichnung:
-      "USt-IdNr. als Stammdatum am Kontakt (Prüfung beim BZSt folgt später; Notiz höchstens ungeprüft)",
+      "Ob die USt-IdNr. im Leistungszeitpunkt gültig war — der BZSt-Schnappschuss gilt nur für den Anfragezeitpunkt",
   },
   {
     feld: "Unterscheidung",
@@ -139,7 +142,7 @@ export function landGruppe(land: string | null | undefined): ZmLandGruppe {
 }
 
 function normalizeUstIdToken(raw: string): string {
-  return raw.replace(/[\s.-]/g, "").toUpperCase();
+  return raw.replace(/[\s.\-/]/g, "").toUpperCase();
 }
 
 /**
@@ -212,14 +215,51 @@ export function isNullUstEinnahme(
 }
 
 function ustIdAusKontakt(kontakt: ZmKontaktBlick | undefined): {
+  ust_id: string;
   ust_id_notiz: string;
   ust_id_status: ZmUstIdStatus;
+  ust_id_pruefung_am: string;
+  ust_id_pruefung_status: string;
 } {
-  const found = extractUstIdAusNotiz(kontakt?.notiz);
-  if (found) {
-    return { ust_id_notiz: found, ust_id_status: "notiz_ungeprueft" };
+  const stamm = normalizeUstIdToken(kontakt?.ust_id ?? "");
+  const notiz = extractUstIdAusNotiz(kontakt?.notiz);
+  if (stamm) {
+    const p = kontakt?.letzte_pruefung;
+    const passend =
+      p && normalizeUstIdToken(p.abgefragte_ust_id) === stamm ? p : undefined;
+    if (passend) {
+      return {
+        ust_id: stamm,
+        ust_id_notiz: notiz,
+        ust_id_status: "pruefung_snapshot",
+        ust_id_pruefung_am: passend.anfrage_zeitpunkt,
+        ust_id_pruefung_status: passend.status,
+      };
+    }
+    return {
+      ust_id: stamm,
+      ust_id_notiz: notiz,
+      ust_id_status: "stamm_ungeprueft",
+      ust_id_pruefung_am: "",
+      ust_id_pruefung_status: "",
+    };
   }
-  return { ust_id_notiz: "", ust_id_status: "nicht_gefuehrt" };
+  if (notiz) {
+    return {
+      ust_id: "",
+      ust_id_notiz: notiz,
+      ust_id_status: "notiz_ungeprueft",
+      ust_id_pruefung_am: "",
+      ust_id_pruefung_status: "",
+    };
+  }
+  return {
+    ust_id: "",
+    ust_id_notiz: "",
+    ust_id_status: "nicht_gefuehrt",
+    ust_id_pruefung_am: "",
+    ust_id_pruefung_status: "",
+  };
 }
 
 function toZeile(
@@ -253,8 +293,11 @@ function toZeile(
     kontakt_name: kontakt?.name ?? (e.kontakt ? "Kontakt nicht gefunden" : "—"),
     land: normalizeLand(land),
     land_gruppe: gruppe,
+    ust_id: ust.ust_id,
     ust_id_notiz: ust.ust_id_notiz,
     ust_id_status: ust.ust_id_status,
+    ust_id_pruefung_am: ust.ust_id_pruefung_am,
+    ust_id_pruefung_status: ust.ust_id_pruefung_status,
     journal_netto: moneyToString(netto),
     eintrag_euro_ganz: roundEuroGanz(netto).toFixed(0),
     ist_storno: isStornoEintrag(e),
@@ -268,8 +311,11 @@ function summeKontakt(zeilen: ZmZeile[]): ZmKontaktSumme {
     kontakt_id: first.kontakt_id ?? "",
     kontakt_name: first.kontakt_name,
     land: first.land,
+    ust_id: first.ust_id,
     ust_id_notiz: first.ust_id_notiz,
     ust_id_status: first.ust_id_status,
+    ust_id_pruefung_am: first.ust_id_pruefung_am,
+    ust_id_pruefung_status: first.ust_id_pruefung_status,
     anzahl_buchungen: zeilen.length,
     journal_netto: moneyToString(netto),
     eintrag_euro_ganz: roundEuroGanz(netto).toFixed(0),
@@ -404,8 +450,11 @@ export const ZM_CSV_HEADERS = [
   "einordnung",
   "kontakt_name",
   "land",
+  "ust_id",
   "ust_id_notiz",
   "ust_id_status",
+  "ust_id_pruefung_am",
+  "ust_id_pruefung_status",
   "art",
   "journal_netto",
   "eintrag_euro_ganz",
@@ -435,8 +484,11 @@ export function serializeZmCsv(
         "kandidat",
         k.kontakt_name,
         k.land,
+        k.ust_id,
         k.ust_id_notiz,
         k.ust_id_status,
+        k.ust_id_pruefung_am,
+        k.ust_id_pruefung_status,
         "nicht_gefuehrt",
         moneyDe(k.journal_netto),
         k.eintrag_euro_ganz,
@@ -455,8 +507,11 @@ export function serializeZmCsv(
         "kandidat",
         z.kontakt_name,
         z.land,
+        z.ust_id,
         z.ust_id_notiz,
         z.ust_id_status,
+        z.ust_id_pruefung_am,
+        z.ust_id_pruefung_status,
         "nicht_gefuehrt",
         moneyDe(z.journal_netto),
         z.eintrag_euro_ganz,
@@ -475,8 +530,11 @@ export function serializeZmCsv(
         "andere_nullust",
         z.kontakt_name,
         z.land,
+        z.ust_id,
         z.ust_id_notiz,
         z.ust_id_status,
+        z.ust_id_pruefung_am,
+        z.ust_id_pruefung_status,
         "nicht_gefuehrt",
         moneyDe(z.journal_netto),
         z.eintrag_euro_ganz,

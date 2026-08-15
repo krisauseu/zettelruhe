@@ -14,6 +14,7 @@ export type Kontakt = {
   telefon: string;
   iban: string;
   bic: string;
+  ust_id: string;
   notiz: string;
   created?: string;
   updated?: string;
@@ -31,6 +32,7 @@ export type KontaktInput = {
   telefon?: string;
   iban?: string;
   bic?: string;
+  ust_id?: string;
   notiz?: string;
 };
 

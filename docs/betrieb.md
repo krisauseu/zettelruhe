@@ -107,6 +107,7 @@ Siehe `.env.example`. **Niemals** Beispielwerte in Produktion belassen.
 | `APP_URL` | Öffentliche URL **ohne** trailing slash (`https://buchhaltung.example.de`) |
 | `PB_URL` | In Compose: `http://pocketbase:8090` (intern) |
 | `SMTP_*` | Optional; ohne Host läuft die App, Versand meldet de-DE-Hinweis |
+| `EVATR_URL` | Optional; Default `https://api.evatr.vies.bzst.de/app`. USt-IdNr.-Prüfung braucht ausgehenden HTTPS-Zugang zum BZSt. Kein API-Key, kein Zertifikat. |
 
 Erzeugen z. B.:
 
@@ -129,7 +130,7 @@ openssl rand -base64 48   # SESSION_SECRET
 
 **Empfehlungen Self-hosted**
 
-- Produktion hinter HTTPS (Caddy reverse_proxy + TLS am Host oder vorangestelltes TLS)
+- Produktion hinter HTTPS (Caddy reverse_proxy + TLS am Host oder vorangestelltes TLS). Offen: Caddy nativ auf dem Server statt im Compose, oder Compose belassen und nur den Eingang auf HTTPS heben. Next↔PocketBase intern im Docker-Netz. Ohne ausgehendes HTTPS ist die BZSt-Prüfung (eVatR) nicht ehrlich testbar.
 - PocketBase-Admin `/_/` nicht öffentlich im Internet freigeben (Firewall / VPN / IP-Allowlist)
 - Starke Passwörter für Eigentümer:in und Superuser
 

@@ -32,6 +32,7 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       JOB_TICK_INTERVAL_MS: ${JOB_TICK_INTERVAL_MS:-}
       JOBS_DISABLED: ${JOBS_DISABLED:-}
+      EVATR_URL: ${EVATR_URL:-}
     depends_on:
       pocketbase:
         condition: service_healthy

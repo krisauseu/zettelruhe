@@ -188,6 +188,7 @@ export async function createFirmaAction(formData: FormData): Promise<void> {
       ort: formString(formData, "ort"),
       land: formString(formData, "land"),
       steuernummer: formString(formData, "steuernummer"),
+      ust_id: formString(formData, "ust_id"),
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Angaben ungültig.";

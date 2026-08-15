@@ -64,12 +64,18 @@ export function mapParsedToBelegInput(
 }
 
 /**
- * Light Kontakt-Match: exakter Name (case-insensitive) oder USt-Id in Notiz.
- * Kontakte haben in v1 kein eigenes ust_id-Feld — USt-Id nur in notiz suchen.
+ * Light Kontakt-Match: Name und USt-IdNr. am Stamm, Notiz nur Fallback.
+ * Schreibt nichts auf den Kontakt und nichts auf festgeschriebene Belege.
  */
 export function scoreLieferantMatch(
   dto: ParsedEInvoice,
-  kontakt: { id: string; name: string; notiz?: string; ist_lieferant?: boolean },
+  kontakt: {
+    id: string;
+    name: string;
+    notiz?: string;
+    ust_id?: string;
+    ist_lieferant?: boolean;
+  },
 ): number {
   let score = 0;
   const nameDto = normalizeName(dto.lieferant.name);
@@ -83,12 +89,19 @@ export function scoreLieferantMatch(
   }
 
   const ust = (dto.lieferant.ust_id || "")
-    .replace(/\s/g, "")
+    .replace(/[\s.\-/]/g, "")
     .toUpperCase();
-  if (ust && kontakt.notiz) {
-    const n = kontakt.notiz.replace(/\s/g, "").toUpperCase();
-    if (n.includes(ust)) {
+  if (ust) {
+    const stamm = (kontakt.ust_id || "")
+      .replace(/[\s.\-/]/g, "")
+      .toUpperCase();
+    if (stamm && stamm === ust) {
       score += 50;
+    } else if (kontakt.notiz) {
+      const n = kontakt.notiz.replace(/[\s.\-/]/g, "").toUpperCase();
+      if (n.includes(ust)) {
+        score += 50;
+      }
     }
   }
 

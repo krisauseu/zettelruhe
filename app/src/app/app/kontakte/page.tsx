@@ -92,7 +92,7 @@ export default async function KontaktePage({
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Suche & Filter</CardTitle>
           <CardDescription>
-            Nach Name, E-Mail, Ort oder Telefon filtern.
+            Nach Name, E-Mail, Ort, Telefon oder USt-IdNr. filtern.
           </CardDescription>
         </CardHeader>
         <CardContent>
