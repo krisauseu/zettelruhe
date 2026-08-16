@@ -27,6 +27,10 @@ Keine stillen Journal-Updates. Setup-`verified`, Layout, Logo/Favicon, Multi-Use
 - DATEV-BU-Schlüssel für Alt-Zeilen ohne Satz
 - Follow-ups aus Protokoll Abschnitt 9
 
+## Nachtest M2-01 (kf, 2026-08-16)
+
+Deployed und nachgetestet auf `app.zettelruhe.de` (HEAD `13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Meilenstein 2 **abgeschlossen**. Zahlung erzeugt in v1 kein Journal.
+
 ## Next step
 
-Nach Deploy: `/app/ust` an der bestehenden 95-€-Rechnung (19 % / Kz 81 / Kz 83 = 10,07 €). Neue Rechnung festschreiben und Journal-Satz prüfen. Danach Open Decisions / Multi-User weiter separat.
+Setup-verified (eigener Schnitt), danach Dokumenten-Layout, dann Logo/Favicon. Open Decisions / Multi-User / Ist-Versteuerung / Hybrid-PDF weiter separat.

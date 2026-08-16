@@ -4,6 +4,8 @@
  * Bevorzugt fetch statt SDK-XHR, um Edge/Server-Action-Stolpersteine zu vermeiden.
  */
 
+import { eigentuemerCreateBody } from "./setup-verified";
+
 function pbUrl(): string {
   const url = process.env.PB_URL;
   if (!url) {
@@ -388,6 +390,7 @@ export async function updateFirma(
   return mapFirma(r);
 }
 
+/** Erst-User im Setup. verified immer true — Login ohne SMTP. */
 export async function createEigentuemer(input: {
   email: string;
   password: string;
@@ -404,15 +407,7 @@ export async function createEigentuemer(input: {
   }>("/api/collections/users/records", {
     method: "POST",
     token,
-    body: JSON.stringify({
-      email: input.email,
-      password: input.password,
-      passwordConfirm: input.password,
-      name: input.name,
-      role: "eigentuemer",
-      firma: input.firmaId,
-      emailVisibility: true,
-    }),
+    body: JSON.stringify(eigentuemerCreateBody(input)),
   });
   return {
     id: r.id,

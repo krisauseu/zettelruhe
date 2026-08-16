@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden mit Mängeln** — Blocker M2-01 (Steuersatz der Rechnung fehlt im Journal/UStVA); Fix committed, Nachtest auf der Instanz offen. Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und E-Rechnungs-Versand stehen. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023), Server-Nachtest gelaufen. Als Nächstes: M2-01 deployen und nachtesten.
+**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und E-Rechnungs-Versand stehen. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Setup-verified (dieser Schnitt): Eigentümer:in beim Anlegen automatisch verifiziert. Als Nächstes: Dokumenten-Layout, danach Logo/Favicon.
 
 ### Fundament & Stammdaten
 
@@ -104,9 +104,11 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 4. Zusammenfassende Meldung (ZM) Übersicht ← erledigt (ADR-0020)
 5. USt-IdNr.-Validierung (BZSt) ← erledigt (ADR-0021)
 6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback) ← erledigt (ADR-0022); Browser kf 2026-08-15 ohne Fehler
-7. Funktionstest M2 ← durchgeführt ([`funktionstest-m2.md`](./funktionstest-m2.md), [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md)); HTTPS ADR-0023 in Betrieb. **M2-01** (USt-Satz Rechnung → Journal) blockiert die Freigabe, Fix committed.
+7. Funktionstest M2 ← **bestanden** ([`funktionstest-m2.md`](./funktionstest-m2.md), [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md)); HTTPS ADR-0023 in Betrieb. **M2-01** nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine.
 
-Später: Multi-User / grobe Rechte. Follow-ups ohne M2-Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
+**Meilenstein 2 abgeschlossen.** Zahlung erzeugt in v1 kein Journal.
+
+Als Nächstes (nicht vermischen): **Setup-verified** (dieser Schnitt) ← erledigt; danach Dokumenten-Layout, dann Logo/Favicon. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
 
 ---
 

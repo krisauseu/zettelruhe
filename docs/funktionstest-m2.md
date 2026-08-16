@@ -12,7 +12,7 @@ Checkliste für die **M2-Keile** (ADR-0017–0022). Ableitung: `CONTEXT.md`, Fea
 | Steuer-Modi getestet | ☑ Kleinunternehmerregelung · ☑ Regelbesteuerung (Ist) |
 | Tester:in | kf |
 | TLS / eVatR | ☑ eingehendes HTTPS · (BZSt-Klick nicht als Mangel gemeldet) |
-| Ergebnis gesamt | ☐ bestanden · ☑ bestanden mit Mängeln · ☐ nicht bestanden |
+| Ergebnis gesamt | ☑ bestanden · ☐ bestanden mit Mängeln · ☐ nicht bestanden |
 
 **Legende:** `[ ]` offen · `[x]` ok · `[~]` ok mit Hinweis · `[!]` Fehler (kurz notieren)
 
@@ -249,7 +249,7 @@ Nicht als Fehler werten:
 - Multi-User, Einladen, Rechte-UI
 - Open Decisions (Journal-Nachzug Zahlungen, Kassenbuch aus Barzahlung, MT940, robustes ZUGFeRD-PDF-Parsing)
 - M1-15 (`NEXT_REDIRECT`)
-- Setup-`verified` (manuelles Häkchen in PocketBase nach Erst-Registrierung)
+- Setup-`verified` (eigener Schnitt nach M2-Freigabe; nicht Teil dieses Protokolls)
 - Dokumenten-Profi-Layout, Logo/Favicon der Marke
 - Empfangspfad umbauen
 - Feature-Parität zu Papierkram; den kompletten M1-Happy-Path von vorn
@@ -262,7 +262,7 @@ Nicht als Fehler werten:
 
 | ID | Modul / Route | Beschreibung | Schwere |
 |----|---------------|--------------|---------|
-| M2-01 | `/app/ust` | Steuersatz der festgeschriebenen Rechnung fehlt im Journal → „Nach Steuersatz“ ohne Satz, Kz 81/XML ohne Umsatz. Screenshot `issues/Fehler.UST-Auswertung.png`. | Blocker |
+| M2-01 | `/app/ust` | Steuersatz der festgeschriebenen Rechnung fehlte im Journal → „Nach Steuersatz“ ohne Satz, Kz 81/XML ohne Umsatz. Screenshot `issues/Fehler.UST-Auswertung.png`. **Behoben und nachgetestet** (`13da9e7`, 2026-08-16). | — |
 
 ### Hinweise
 
@@ -272,12 +272,12 @@ Nicht als Fehler werten:
 
 ### Freigabe
 
-- [ ] Abschnitte 1–7 im lokalen/HTTP-Lauf grün oder nur mit dokumentierten Mängeln (5.2 darf hier offen bleiben)
-- [ ] Beide Steuer-Modi angefasst (Kleinunternehmerregelung **und** Regelbesteuerung)
-- [ ] Isolation über `session.firmaId` stichprobenartig (Rechnung, USt/ZM, E-Rechnung)
-- [ ] Kein Versand-/Abgabe-Claim in der UI missverstanden
+- [x] Abschnitte 1–7 im lokalen/HTTP-Lauf grün oder nur mit dokumentierten Mängeln (5.2 darf hier offen bleiben)
+- [x] Beide Steuer-Modi angefasst (Kleinunternehmerregelung **und** Regelbesteuerung)
+- [x] Isolation über `session.firmaId` stichprobenartig (Rechnung, USt/ZM, E-Rechnung)
+- [x] Kein Versand-/Abgabe-Claim in der UI missverstanden
 - [x] **Server-Nachtest inkl. BZSt-Klick** (Abschnitt 8) — ja (HTTPS `app.zettelruhe.de`; BZSt nicht als Mangel gemeldet)
-- [ ] **M2 Alltag trägt** — nein, solange M2-01 auf der Instanz nicht nachgetestet ist
+- [x] **M2 Alltag trägt** — ja (M2-01 nachgetestet, HEAD `13da9e7`)
 
 Unterschrift / Datum: kf / 2026-08-16
 
@@ -291,4 +291,4 @@ Wenn Zeit knapp: 0 → Kategorie anlegen + an Beleg und Kasse + umbenennen (Hist
 
 ---
 
-_Stand: Durchführung 2026-08-15/16, Auswertung 2026-08-16. HEAD zum Test `02686b4`. M2-01-Fix committed, Nachtest auf der Instanz offen._
+_Stand: Durchführung 2026-08-15/16, Auswertung + Nachtest M2-01 2026-08-16. Freigabe **M2 Alltag trägt**. HEAD Nachtest `13da9e7`. Blocker keine._

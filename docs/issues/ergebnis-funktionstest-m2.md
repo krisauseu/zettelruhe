@@ -1,18 +1,18 @@
 # Ergebnis Funktionstest M2
 
-_Durchführung: kf, lokal und Server (HTTPS `app.zettelruhe.de`, ADR-0023). Auswertung 2026-08-16._
+_Durchführung: kf, lokal und Server (HTTPS `app.zettelruhe.de`, ADR-0023). Auswertung 2026-08-16. Nachtest M2-01 2026-08-16._
 
-**Gesamt: bestanden mit Mängeln** — ein Blocker (USt-Satz auf Einnahmen).
+**Gesamt: bestanden.** Freigabe **M2 Alltag trägt**. Blocker keine.
 
-Protokoll: [`funktionstest-m2.md`](../funktionstest-m2.md). Screenshot: [`Fehler.UST-Auswertung.png`](./Fehler.UST-Auswertung.png).
+Protokoll: [`funktionstest-m2.md`](../funktionstest-m2.md). Screenshot (vor dem Fix): [`Fehler.UST-Auswertung.png`](./Fehler.UST-Auswertung.png).
 
-Nicht Gegenstand (Protokoll Abschnitt 9): Setup-`verified`, Dokumenten-Layout, Logo/Favicon, Multi-User, Open Decisions, Hybrid-PDF, ELSTER-Versand.
+Nicht Gegenstand (Protokoll Abschnitt 9): Setup-`verified` (eigener Schnitt nach Freigabe), Dokumenten-Layout, Logo/Favicon, Multi-User, Open Decisions, Hybrid-PDF, ELSTER-Versand.
 
 ## Priorität
 
 | Prio | ID | Modul | Schwere | Status |
 |------|----|-------|---------|--------|
-| 1 | **M2-01** | USt-Übersicht / UStVA / ELSTER-XML (`/app/ust`) | **Blocker** | Fix committed, Nachtest auf der Instanz offen |
+| 1 | **M2-01** | USt-Übersicht / UStVA / ELSTER-XML (`/app/ust`) | Blocker (behoben) | nachgetestet auf der Instanz (`13da9e7`, 2026-08-16) |
 | — | — | übrige M2-Keile (Kategorien, Multi-Firma, ZM, BZSt, E-Rechnungs-Versand, HTTPS) | — | vom Tester als tragend beschrieben; kein zweiter Mangel gemeldet |
 
 ## M2-01 — Steuersatz der Rechnung fehlt im Journal
@@ -28,9 +28,9 @@ Nicht Gegenstand (Protokoll Abschnitt 9): Setup-`verified`, Dokumenten-Layout, L
 1. **Schreiben:** einheitlicher Satz 0/7/19 aus den Rechnungspositionen ins Journal. Gemischt oder Kleinunternehmerregelung: leer bleiben (kein Raten aus dem Kopf).
 2. **Lesen:** USt-Übersicht/UStVA ordnen 19/7 zu, wenn das Journal-Feld leer ist, die Beträge aber exakt `percentOf`/Rundung der Rechnung treffen. Bestehende festgeschriebene Zeilen werden nicht geändert (ADR-0004). 0 % wird nicht geraten.
 
-Nach Deploy: dieselbe 95-€-Rechnung muss unter 19 % / Kz 81 erscheinen, ohne Storno. Neue Festschreibungen tragen den Satz selbst.
+Nachtest (kf, 2026-08-16, `app.zettelruhe.de`, HEAD `13da9e7`): Fix deployed; M2-01 geschlossen. Arbeitsfirma der Instanz steht im Steuer-Modus Kleinunternehmerregelung. Zahlung erzeugt in v1 kein Journal.
 
 ## Hinweise
 
 - Server-Nachtest inkl. HTTPS hat stattgefunden (`app.zettelruhe.de` im Screenshot).
-- Checklisten-Kästchen im Protokoll nicht einzeln transkribiert — ein gemeldeter Fehler, restliche Keile ohne weiteren Mangel.
+- Checklisten-Kästchen im Protokoll nicht einzeln transkribiert — ein gemeldeter Fehler (M2-01), restliche Keile ohne weiteren Mangel; Nachtest M2-01 bestanden.
