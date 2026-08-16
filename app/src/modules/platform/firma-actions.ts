@@ -13,6 +13,7 @@ import {
 import { requireFirmaSession, requireSession } from "@/lib/session";
 import {
   assertLogoUpload,
+  parseDokumentSchalterForm,
   validateDokumentAkzentfarbe,
   validateDokumentTexte,
 } from "@/modules/sales/pdf-layout";
@@ -144,6 +145,15 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
       dokument_akzentfarbe,
       dokument_kopftext: kopftext,
       dokument_fusstext: fusstext,
+      dokument_header_drucken: parseDokumentSchalterForm(
+        formData.get("dokument_header_drucken"),
+      ),
+      dokument_fuss_drucken: parseDokumentSchalterForm(
+        formData.get("dokument_fuss_drucken"),
+      ),
+      dokument_zahlblock: parseDokumentSchalterForm(
+        formData.get("dokument_zahlblock"),
+      ),
       logo,
       logo_entfernen: logo_entfernen && !logo,
     });

@@ -59,6 +59,12 @@ export type FirmaRecord = {
   dokument_akzentfarbe?: string;
   dokument_kopftext?: string;
   dokument_fusstext?: string;
+  /** Default an; false blendet Logo und Firmenblock aus */
+  dokument_header_drucken?: boolean;
+  /** Default an; false blendet Fußzeile aus */
+  dokument_fuss_drucken?: boolean;
+  /** Default an; Überweisungstext + GiroCode auf Rechnungen */
+  dokument_zahlblock?: boolean;
 };
 
 export type AuthUser = {
@@ -217,6 +223,9 @@ type PbFirma = {
   dokument_akzentfarbe?: string;
   dokument_kopftext?: string;
   dokument_fusstext?: string;
+  dokument_header_drucken?: boolean;
+  dokument_fuss_drucken?: boolean;
+  dokument_zahlblock?: boolean;
 };
 
 function mapFirma(r: PbFirma): FirmaRecord {
@@ -238,6 +247,9 @@ function mapFirma(r: PbFirma): FirmaRecord {
     dokument_akzentfarbe: r.dokument_akzentfarbe ?? "",
     dokument_kopftext: r.dokument_kopftext ?? "",
     dokument_fusstext: r.dokument_fusstext ?? "",
+    dokument_header_drucken: r.dokument_header_drucken !== false,
+    dokument_fuss_drucken: r.dokument_fuss_drucken !== false,
+    dokument_zahlblock: r.dokument_zahlblock !== false,
   };
 }
 
@@ -301,6 +313,9 @@ export type FirmaStammdatenInput = {
   dokument_akzentfarbe?: string;
   dokument_kopftext?: string;
   dokument_fusstext?: string;
+  dokument_header_drucken?: boolean;
+  dokument_fuss_drucken?: boolean;
+  dokument_zahlblock?: boolean;
   logo?: Blob;
   logo_entfernen?: boolean;
 };
@@ -331,6 +346,9 @@ export async function createFirma(input: {
       land: (input.land ?? "DE").trim() || "DE",
       steuernummer: (input.steuernummer ?? "").trim(),
       ust_id: (input.ust_id ?? "").replace(/[\s.\-/]/g, "").toUpperCase(),
+      dokument_header_drucken: true,
+      dokument_fuss_drucken: true,
+      dokument_zahlblock: true,
     }),
   });
   return mapFirma(r);
@@ -366,6 +384,15 @@ export async function updateFirma(
   }
   if (input.dokument_fusstext !== undefined) {
     scalars.dokument_fusstext = input.dokument_fusstext;
+  }
+  if (input.dokument_header_drucken !== undefined) {
+    scalars.dokument_header_drucken = input.dokument_header_drucken;
+  }
+  if (input.dokument_fuss_drucken !== undefined) {
+    scalars.dokument_fuss_drucken = input.dokument_fuss_drucken;
+  }
+  if (input.dokument_zahlblock !== undefined) {
+    scalars.dokument_zahlblock = input.dokument_zahlblock;
   }
 
   const hasLogo = input.logo instanceof Blob;

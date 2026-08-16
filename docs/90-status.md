@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-16_
 
-**Last session:** 2026-08-16 — Meilenstein 2 geschlossen (M2-01 nachgetestet, Freigabe „M2 Alltag trägt“). Setup-verified: Eigentümer:in beim Anlegen automatisch verifiziert; Login hängt nicht an `users.verified`.
+**Last session:** 2026-08-16 — Dokumenten-Layout Angebot/Rechnung (über M1-10 light hinaus). GiroCode, Bankzeile, Sichtbarkeit Header/Fuß/Zahlblock.
 
 ## What's done
 
@@ -18,7 +18,7 @@ _Last updated: 2026-08-16_
 - **M1-13 + M1-14:** Entwurfs-PDF on-the-fly (Wasserzeichen „Entwurf“, kein Nummernkreis, kein Journal); Original erst bei Senden / Festschreibung; E-Mail optional
 - **M1-10:** Dokumenten-Layout light (Logo, Akzentfarbe, Kopf-/Fußtext) an der Firma
 - **M1-12:** UI-Akzente light (kein CSS-Profi-Layout)
-- 373 Unit-Tests grün (nach Setup-verified)
+- 389 Unit-Tests grün (nach Dokumenten-Layout)
 - **M1-11 nachgetestet** (2026-08-15): Bank-CSV de-DE inkl. Idempotenz und Match gegen offene Rechnung; E-Rechnung-Empfang mit beiden Fixtures. Zahlung erzeugt kein Journal. Mangel M1-15 (`NEXT_REDIRECT` nach Import / Beleg-Entwurf) — nicht blockierend
 - **Kategorien** (ADR-0017): gemeinsame Auswahlliste für Belege und Kassenbuch, CRUD unter `/app/kategorien`
 - **Multi-Firma dünn** (ADR-0018): zweite Firma anlegen + in der Shell wechseln; `users.firma` bleibt 1:1 (zuletzt aktiv); Isolation über `session.firmaId`. Kein Einladen, keine zweite Rolle, Setup unverändert. 277 Unit-Tests grün. Browser-Nachtest durch kf 2026-08-15.
@@ -31,21 +31,20 @@ _Last updated: 2026-08-16_
 - **HTTPS / Caddy (ADR-0023):** Caddy nativ auf dem Server (`app.zettelruhe.de`, Let’s Encrypt). Compose-Caddy nur lokal (HTTP:80). Overlay `docker-compose.server.yml`, Site-Block `deploy/Caddyfile.host`. `/_/` über denselben Host (explizit). Next↔PocketBase intern. Server-Nachtest durch kf (2026-08-15/16) über `https://app.zettelruhe.de`.
 - **Funktionstest M2** (kf, lokal + Server HTTPS): **bestanden**. Rohbericht [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md). **M2-01** (Steuersatz festgeschriebener Rechnungen ins Journal / in die USt-Auswertung) deployed und nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Arbeitsfirma auf `app.zettelruhe.de`: Kleinunternehmerregelung.
 - **Setup-verified:** Beim Anlegen der Eigentümer:in `users.verified = true`. `users.authRule` leer — Login hängt nicht an `verified` und nicht an SMTP. Bestehende unverifizierte User einmalig nachziehen; bereits verifizierte bleiben verifiziert. Multi-Firma (ADR-0018) und Setup-Wizard unverändert.
+- **Dokumenten-Layout (über M1-10 hinaus):** Angebot und Rechnung teilen ein DIN-ähnliches Gerüst (Fenstertasche, Akzent-Tabelle, Summen). Unter Kleinunternehmerregelung ohne USt-Zeilen + §-19-Hinweis; Regelbesteuerung mit Ausweis. Bankzeile aus dem ersten aktiven Bankkonto mit IBAN; GiroCode (EPC) nur auf der Rechnung. Schalter Header/Fuß/Zahlblock an der Firma. Entwurf weiter ohne Nummernkreis, mit Wasserzeichen. Bestehende Originale unverändert (ADR-0012). E-Rechnungs-XML unangetastet.
 
 ## What's next
 
 **Vereinbarte Reihenfolge (nicht vermischen):**
 
-1. **Dokumenten-Layout** — Angebote und Rechnungen überarbeiten (über das heutige light: Logo, Akzent, Kopf-/Fußtext hinaus).
-2. **Marke** — Zettelruhe-Logo und Favicon, oben links in der Shell.
+1. **Marke** — Zettelruhe-Logo und Favicon, oben links in der Shell.
 
-Danach weiter separat: Ist-Versteuerung, Multi-User, Hybrid-PDF, Open Decisions.
+Danach weiter separat: Ist-Versteuerung, Multi-User, Hybrid-PDF, Open Decisions. Dokumenten-Layout-Vertiefung (Briefpapier, Font-Upload, …) steht unter Roadmap „Später“.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
 
 ## Follow-up
 
-- **Dokumenten-Layout:** Angebote und Rechnungen überarbeiten (über das heutige light hinaus).
 - **Marke:** Zettelruhe-Logo und Favicon entwerfen, oben links in der Shell einsetzen.
 
 ## Open decisions
@@ -82,4 +81,4 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-16-setup-verified.md`](./sessions/2026-08-16-setup-verified.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-16-dokumenten-layout.md`](./sessions/2026-08-16-dokumenten-layout.md)

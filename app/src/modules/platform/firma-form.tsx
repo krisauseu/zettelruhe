@@ -254,6 +254,58 @@ export function FirmaForm({
             defaultValue={firma.dokument_fusstext ?? ""}
           />
         </div>
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-foreground">Sichtbarkeit</p>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="dokument_header_drucken"
+              value="1"
+              defaultChecked={firma.dokument_header_drucken !== false}
+              className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
+            />
+            <span>
+              Firmen-Header und Logo drucken
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Aus, wenn vorgedrucktes Briefpapier Logo und Anschrift schon
+                enthält.
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="dokument_fuss_drucken"
+              value="1"
+              defaultChecked={firma.dokument_fuss_drucken !== false}
+              className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
+            />
+            <span>
+              Standard-Fußzeile drucken
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Fußtext, Bankverbindung und Steuernummern am unteren
+                Seitenrand.
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="dokument_zahlblock"
+              value="1"
+              defaultChecked={firma.dokument_zahlblock !== false}
+              className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
+            />
+            <span>
+              Zahlungsziel und Bankverbindung im Text
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Überweisungshinweis und GiroCode auf Rechnungen, sobald ein
+                aktives Bankkonto mit IBAN existiert. Angebote ohne
+                Zahlblock.
+              </span>
+            </span>
+          </label>
+        </div>
       </fieldset>
 
       <fieldset className="flex flex-col gap-3">

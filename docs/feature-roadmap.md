@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und E-Rechnungs-Versand stehen. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Setup-verified (dieser Schnitt): Eigentümer:in beim Anlegen automatisch verifiziert. Als Nächstes: Dokumenten-Layout, danach Logo/Favicon.
+**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt: DIN-ähnlicher Briefkopf, Tabelle mit Akzent, Bankzeile, GiroCode auf der Rechnung, Sichtbarkeit Header/Fuß/Zahlblock an der Firma. Als Nächstes: Logo/Favicon der Marke.
 
 ### Fundament & Stammdaten
 
@@ -39,7 +39,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 ### Angebote & Rechnungen
 
-- Layout light: Logo, Briefpapier-Hintergrund optional, Textbausteine
+- Layout Angebot/Rechnung: DIN-ähnlicher Briefkopf, Logo, Akzentfarbe, Textbausteine, Sichtbarkeit Header/Fuß/Zahlblock; GiroCode auf der Rechnung bei IBAN. Briefpapier-Hintergrund, Font-Upload, Mehrvorlagen → Später
 - Dokumente folgen Steuer-Modus: **ohne USt + §-19-Hinweis** bzw. **mit USt-Ausweis** (Regelbesteuerung)
 - Angebote: Positionen, Mengen, Preise, Rabatte, Freitext; PDF; Übersicht + CSV
 - Angebotsstatus: Entwurf → Gesendet → Angenommen / Abgelehnt / Abgelaufen → Abgerechnet
@@ -108,7 +108,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 **Meilenstein 2 abgeschlossen.** Zahlung erzeugt in v1 kein Journal.
 
-Als Nächstes (nicht vermischen): **Setup-verified** (dieser Schnitt) ← erledigt; danach Dokumenten-Layout, dann Logo/Favicon. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
+Als Nächstes (nicht vermischen): **Dokumenten-Layout** ← erledigt; danach Logo/Favicon der Marke. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
 
 ---
 
@@ -122,7 +122,7 @@ Als Nächstes (nicht vermischen): **Setup-verified** (dieser Schnitt) ← erledi
 - Lieferscheine
 - Kundenportal (Angebot annehmen, Rechnung laden, Pay-Link)
 - PayPal/Stripe-Zahllinks
-- CSS-Profi-Layouts, Font-Upload, Mehrvorlagen
+- Dokumenten-Layout nochmal ansehen (Schnitt 2026-08-16 bewusst schlank): Briefpapier-Hintergrund (PNG sowie PDF-Stempel Seite 1 / Folgeseiten), Schrift-Upload und mitgelieferte Hausschrift, Inhaber:in an der Firma, Kunden-Nr. am Kontakt, Ansprechpartner „z. Hd.“ auf dem PDF, AGB als weitere Seiten, Live-Vorschau/Studio in den Einstellungen, Mehrvorlagen, CSS-Profi-Layouts
 - SEPA-Mandate
 - Verpflegungspauschalen / erweiterte Reisekosten
 - Anlagenverzeichnis, GWG, AfA

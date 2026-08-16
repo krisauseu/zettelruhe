@@ -1,12 +1,15 @@
 /**
- * Lädt Layout light der Firma für PDF-Erzeugung (Logo-Bytes + Texte).
+ * Lädt Layout der Firma für PDF-Erzeugung (Logo, Texte, Schalter, Bankkonto).
  * Fehlt das Logo oder die Felder (alte Instanz), fällt auf Defaults zurück.
  */
 
 import { fetchRecordFile, type FirmaRecord } from "@/lib/pb";
+import { listBankkonten } from "@/modules/banking";
 import {
   defaultDokumentPdfLayout,
+  dokumentSchalterWert,
   guessImageMime,
+  pickDokumentBankkonto,
   validateDokumentAkzentfarbe,
   validateDokumentTexte,
   type DokumentPdfLayout,
@@ -29,6 +32,17 @@ export async function loadDokumentLayout(
   });
   layout.kopftext = texte.kopftext;
   layout.fusstext = texte.fusstext;
+  layout.headerDrucken = dokumentSchalterWert(firma.dokument_header_drucken);
+  layout.fussDrucken = dokumentSchalterWert(firma.dokument_fuss_drucken);
+  layout.zahlblock = dokumentSchalterWert(firma.dokument_zahlblock);
+
+  try {
+    const konten = await listBankkonten(firma.id, { aktiv: true }, 1, 50);
+    const bank = pickDokumentBankkonto(konten.items);
+    if (bank) layout.bank = bank;
+  } catch {
+    /* PDF ohne Bankzeile */
+  }
 
   const logoName = (firma.logo ?? "").trim();
   if (!logoName) return layout;
