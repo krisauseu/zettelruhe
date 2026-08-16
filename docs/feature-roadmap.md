@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-15):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest **bestanden mit Mängeln**; Bank-CSV und E-Rechnung-Empfang nachgetestet (kein Blocker). Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und **E-Rechnungs-Versand** stehen (Browser kf: keine Fehler). Funktionstest-Protokoll M2: [`funktionstest-m2.md`](./funktionstest-m2.md). HTTPS-Schnitt: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Als Nächstes Host-Caddy auf der Maschine, danach Server-Nachtest inkl. BZSt-Klick.
+**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden mit Mängeln** — Blocker M2-01 (Steuersatz der Rechnung fehlt im Journal/UStVA); Fix committed, Nachtest auf der Instanz offen. Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung (BZSt) und E-Rechnungs-Versand stehen. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023), Server-Nachtest gelaufen. Als Nächstes: M2-01 deployen und nachtesten.
 
 ### Fundament & Stammdaten
 
@@ -104,9 +104,9 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 4. Zusammenfassende Meldung (ZM) Übersicht ← erledigt (ADR-0020)
 5. USt-IdNr.-Validierung (BZSt) ← erledigt (ADR-0021)
 6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback) ← erledigt (ADR-0022); Browser kf 2026-08-15 ohne Fehler
-7. Funktionstest-Protokoll M2 ← erledigt ([`funktionstest-m2.md`](./funktionstest-m2.md)); HTTPS-Schnitt ADR-0023 (Host-Caddy, `app.zettelruhe.de`); Host-Caddy auf der Maschine, danach Server-Nachtest inkl. BZSt-Klick
+7. Funktionstest M2 ← durchgeführt ([`funktionstest-m2.md`](./funktionstest-m2.md), [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md)); HTTPS ADR-0023 in Betrieb. **M2-01** (USt-Satz Rechnung → Journal) blockiert die Freigabe, Fix committed.
 
-Später (nicht vor UStVA): Multi-User / grobe Rechte. Follow-ups ohne M2-Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon. Host-Caddy auf der Maschine vor dem Server-Nachtest (Protokoll Abschnitt 8).
+Später: Multi-User / grobe Rechte. Follow-ups ohne M2-Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
 
 ---
 

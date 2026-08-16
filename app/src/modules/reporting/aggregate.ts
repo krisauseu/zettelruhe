@@ -8,7 +8,14 @@
  * in die Summen einfließen. Sonst stimmt nur der Überschuss, nicht EÜR/USt.
  */
 
-import { money, moneyToString, subMoney, sumMoney } from "@/lib/money";
+import {
+  money,
+  moneyToString,
+  percentOf,
+  roundMoney,
+  subMoney,
+  sumMoney,
+} from "@/lib/money";
 import { invertRichtung } from "@/modules/journal/invariants";
 import type {
   Buchungsrichtung,
@@ -226,8 +233,34 @@ export function buildEur(
   };
 }
 
-function steuersatzKey(s: JournalEintrag["steuersatz"]): Steuersatz | "ohne" {
-  if (s === "0" || s === "7" || s === "19") return s;
+/**
+ * Satz 19/7 aus Journal-Beträgen, wenn das Feld leer ist.
+ * Nur bei exakter Übereinstimmung mit percentOf/roundMoney (wie auf der Rechnung).
+ * 0 % wird nicht geraten (0-USt vs. ohne Satz vs. Kleinunternehmerregelung).
+ * Gemischte Sätze auf einer Zeile bleiben „ohne“.
+ */
+export function inferSteuersatzFromBetraege(
+  betrag_netto: string,
+  betrag_ust: string,
+): Steuersatz | "" {
+  const netto = money(betrag_netto);
+  const ust = money(betrag_ust);
+  if (!netto.gt(0) || !ust.gt(0)) return "";
+  const ustStr = moneyToString(ust);
+  for (const satz of ["19", "7"] as const) {
+    if (moneyToString(roundMoney(percentOf(netto, satz))) === ustStr) {
+      return satz;
+    }
+  }
+  return "";
+}
+
+function steuersatzKey(e: JournalEintrag): Steuersatz | "ohne" {
+  if (e.steuersatz === "0" || e.steuersatz === "7" || e.steuersatz === "19") {
+    return e.steuersatz;
+  }
+  const inferred = inferSteuersatzFromBetraege(e.betrag_netto, e.betrag_ust);
+  if (inferred === "7" || inferred === "19") return inferred;
   return "ohne";
 }
 
@@ -276,7 +309,7 @@ export function buildUstUebersicht(
 
   const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
-    const k = steuersatzKey(e.steuersatz);
+    const k = steuersatzKey(e);
     const a = get(k);
     const richtung = wirtschaftlicheRichtung(e, originals);
     const faktor = isStornoEintrag(e) ? -1 : 1;

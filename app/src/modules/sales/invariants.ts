@@ -438,7 +438,36 @@ export function buildBuchungstextFromRechnung(opts: {
 }
 
 /**
+ * Einheitlicher USt-Satz der Positionen für das Journal.
+ * Regelbesteuerung: nur wenn alle Positionen denselben Satz 0/7/19 haben.
+ * Gemischt oder leer → leer (kein erzwungener Einzel-Satz, keine Kopf-Schätzung).
+ * Kleinunternehmerregelung: immer leer.
+ */
+export function einheitlicherSteuersatz(
+  positionen: Array<{ steuersatz?: Steuersatz | "" }>,
+  steuermodus: Steuermodus,
+): Steuersatz | "" {
+  if (steuermodus !== "regelbesteuerung_ist") return "";
+  if (positionen.length === 0) return "";
+
+  let gefunden: Steuersatz | "" | null = null;
+  for (const p of positionen) {
+    const satz: Steuersatz | "" =
+      p.steuersatz && VALID_STEUERSATZ.has(p.steuersatz)
+        ? (p.steuersatz as Steuersatz)
+        : "";
+    if (gefunden === null) {
+      gefunden = satz;
+      continue;
+    }
+    if (satz !== gefunden) return "";
+  }
+  return gefunden ?? "";
+}
+
+/**
  * Journal-Eingabe aus festzuschreibender Rechnung (Einnahme).
+ * Steuersatz kommt aus den Positionen (einheitlich), nicht aus Kopf-USt geraten.
  */
 export function buildJournalInputFromRechnung(
   rechnung: Rechnung,
@@ -446,6 +475,7 @@ export function buildJournalInputFromRechnung(
     rechnungId: string;
     rechnungsnummer: string;
     kundeName?: string;
+    positionen?: Array<{ steuersatz?: Steuersatz | "" }>;
   },
 ): JournalBuchungInput {
   const text = buildBuchungstextFromRechnung({
@@ -453,18 +483,6 @@ export function buildJournalInputFromRechnung(
     kundeName: opts.kundeName,
     notiz: rechnung.notiz,
   });
-
-  // Dominanter Steuersatz light: leer wenn gemischt/0, sonst einheitlicher Satz
-  let steuersatz: Steuersatz | "" = "";
-  // aus Kopf-USt ableiten: wenn USt > 0 und netto > 0, grob raten — besser leer lassen
-  // Journal speichert steuersatz optional; Beträge sind führend.
-  if (
-    rechnung.steuermodus === "regelbesteuerung_ist" &&
-    money(rechnung.betrag_ust).gt(0)
-  ) {
-    // kein erzwungener Einzel-Satz bei gemischten Positionen
-    steuersatz = "";
-  }
 
   return {
     buchungsdatum: rechnung.rechnungsdatum,
@@ -474,7 +492,10 @@ export function buildJournalInputFromRechnung(
     betrag_netto: rechnung.betrag_netto,
     betrag_ust: rechnung.betrag_ust,
     betrag_brutto: rechnung.betrag_brutto,
-    steuersatz,
+    steuersatz: einheitlicherSteuersatz(
+      opts.positionen ?? [],
+      rechnung.steuermodus,
+    ),
     kontakt: rechnung.kunde,
     quelle_typ: "rechnung",
     quelle_id: opts.rechnungId,

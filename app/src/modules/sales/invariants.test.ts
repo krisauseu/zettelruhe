@@ -9,6 +9,7 @@ import {
   assertEntwurfOhneNummer,
   buildJournalInputFromRechnung,
   calculatePositionBetraege,
+  einheitlicherSteuersatz,
   defaultFaelligAm,
   FESTGESCHRIEBEN_ERROR,
   isEntwurf,
@@ -260,19 +261,86 @@ describe("assertCanStornierenRechnung", () => {
   });
 });
 
+describe("einheitlicherSteuersatz", () => {
+  it("nimmt den gemeinsamen Satz unter Regelbesteuerung", () => {
+    expect(
+      einheitlicherSteuersatz(
+        [{ steuersatz: "19" }, { steuersatz: "19" }],
+        "regelbesteuerung_ist",
+      ),
+    ).toBe("19");
+    expect(
+      einheitlicherSteuersatz([{ steuersatz: "7" }], "regelbesteuerung_ist"),
+    ).toBe("7");
+    expect(
+      einheitlicherSteuersatz([{ steuersatz: "0" }], "regelbesteuerung_ist"),
+    ).toBe("0");
+  });
+
+  it("bleibt leer bei gemischten Sätzen, fehlenden Positionen oder Kleinunternehmerregelung", () => {
+    expect(
+      einheitlicherSteuersatz(
+        [{ steuersatz: "19" }, { steuersatz: "7" }],
+        "regelbesteuerung_ist",
+      ),
+    ).toBe("");
+    expect(
+      einheitlicherSteuersatz(
+        [{ steuersatz: "19" }, { steuersatz: "" }],
+        "regelbesteuerung_ist",
+      ),
+    ).toBe("");
+    expect(einheitlicherSteuersatz([], "regelbesteuerung_ist")).toBe("");
+    expect(
+      einheitlicherSteuersatz([{ steuersatz: "19" }], "kleinunternehmer"),
+    ).toBe("");
+  });
+});
+
 describe("buildJournalInputFromRechnung", () => {
   it("setzt quelle_typ=rechnung und Richtung Einnahme", () => {
     const j = buildJournalInputFromRechnung(sampleRechnung(), {
       rechnungId: "r1",
       rechnungsnummer: "R-0001",
       kundeName: "Muster GmbH",
+      positionen: [samplePos()],
     });
     expect(j.quelle_typ).toBe("rechnung");
     expect(j.quelle_id).toBe("r1");
     expect(j.richtung).toBe("einnahme");
     expect(j.betrag_brutto).toBe("119.00");
+    expect(j.steuersatz).toBe("19");
     expect(j.buchungstext).toMatch(/R-0001/);
     expect(j.buchungstext).toMatch(/Muster/);
+  });
+
+  it("schreibt keinen Satz bei gemischten Positionen", () => {
+    const j = buildJournalInputFromRechnung(sampleRechnung(), {
+      rechnungId: "r1",
+      rechnungsnummer: "R-0002",
+      positionen: [
+        samplePos({ steuersatz: "19" }),
+        samplePos({ id: "p2", steuersatz: "7" }),
+      ],
+    });
+    expect(j.steuersatz).toBe("");
+    expect(j.betrag_ust).toBe("19.00");
+  });
+
+  it("schreibt unter Kleinunternehmerregelung keinen Satz", () => {
+    const j = buildJournalInputFromRechnung(
+      sampleRechnung({
+        steuermodus: "kleinunternehmer",
+        betrag_ust: "0.00",
+        betrag_brutto: "100.00",
+      }),
+      {
+        rechnungId: "r1",
+        rechnungsnummer: "R-0003",
+        positionen: [samplePos({ steuersatz: "19" })],
+      },
+    );
+    expect(j.steuersatz).toBe("");
   });
 });
 

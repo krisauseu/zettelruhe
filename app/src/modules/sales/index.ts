@@ -61,6 +61,7 @@ export {
   buildBuchungstextFromRechnung,
   buildJournalInputFromRechnung,
   calculatePositionBetraege,
+  einheitlicherSteuersatz,
   defaultFaelligAm,
   defaultGueltigBis,
   FESTGESCHRIEBEN_ERROR,

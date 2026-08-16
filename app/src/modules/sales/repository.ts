@@ -414,6 +414,7 @@ export async function festschreibenRechnung(
       rechnungId: existing.id,
       rechnungsnummer,
       kundeName: kunde.name,
+      positionen: existing.positionen,
     },
   );
 

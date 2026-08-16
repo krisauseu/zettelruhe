@@ -6,13 +6,13 @@ Checkliste für die **M2-Keile** (ADR-0017–0022). Ableitung: `CONTEXT.md`, Fea
 
 | Feld | Eintrag |
 |------|---------|
-| Instanz / Host | |
-| `APP_URL` | |
-| Datum | |
-| Steuer-Modi getestet | ☐ Kleinunternehmerregelung · ☐ Regelbesteuerung (Ist) |
-| Tester:in | |
-| TLS / eVatR | ☐ eingehendes HTTPS · ☐ ausgehend BZSt (eVatR) |
-| Ergebnis gesamt | ☐ bestanden · ☐ bestanden mit Mängeln · ☐ nicht bestanden |
+| Instanz / Host | lokal + Server `app.zettelruhe.de` |
+| `APP_URL` | lokal HTTP · Server `https://app.zettelruhe.de` |
+| Datum | 2026-08-15/16 |
+| Steuer-Modi getestet | ☑ Kleinunternehmerregelung · ☑ Regelbesteuerung (Ist) |
+| Tester:in | kf |
+| TLS / eVatR | ☑ eingehendes HTTPS · (BZSt-Klick nicht als Mangel gemeldet) |
+| Ergebnis gesamt | ☐ bestanden · ☑ bestanden mit Mängeln · ☐ nicht bestanden |
 
 **Legende:** `[ ]` offen · `[x]` ok · `[~]` ok mit Hinweis · `[!]` Fehler (kurz notieren)
 
@@ -262,7 +262,7 @@ Nicht als Fehler werten:
 
 | ID | Modul / Route | Beschreibung | Schwere |
 |----|---------------|--------------|---------|
-|    |               |              |         |
+| M2-01 | `/app/ust` | Steuersatz der festgeschriebenen Rechnung fehlt im Journal → „Nach Steuersatz“ ohne Satz, Kz 81/XML ohne Umsatz. Screenshot `issues/Fehler.UST-Auswertung.png`. | Blocker |
 
 ### Hinweise
 
@@ -276,10 +276,12 @@ Nicht als Fehler werten:
 - [ ] Beide Steuer-Modi angefasst (Kleinunternehmerregelung **und** Regelbesteuerung)
 - [ ] Isolation über `session.firmaId` stichprobenartig (Rechnung, USt/ZM, E-Rechnung)
 - [ ] Kein Versand-/Abgabe-Claim in der UI missverstanden
-- [ ] **Server-Nachtest inkl. BZSt-Klick** (Abschnitt 8) — ja / nein / später: ________
-- [ ] **M2 Alltag trägt** — ja / nein: ________
+- [x] **Server-Nachtest inkl. BZSt-Klick** (Abschnitt 8) — ja (HTTPS `app.zettelruhe.de`; BZSt nicht als Mangel gemeldet)
+- [ ] **M2 Alltag trägt** — nein, solange M2-01 auf der Instanz nicht nachgetestet ist
 
-Unterschrift / Datum:
+Unterschrift / Datum: kf / 2026-08-16
+
+Auswertung: [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md).
 
 ---
 
@@ -289,4 +291,4 @@ Wenn Zeit knapp: 0 → Kategorie anlegen + an Beleg und Kasse + umbenennen (Hist
 
 ---
 
-_Stand: Protokoll 2026-08-15. Keile auf `origin/main` (`869833c`). Ausfüllen bei der Durchführung. Bei Software-Updates Checkliste nachziehen._
+_Stand: Durchführung 2026-08-15/16, Auswertung 2026-08-16. HEAD zum Test `02686b4`. M2-01-Fix committed, Nachtest auf der Instanz offen._

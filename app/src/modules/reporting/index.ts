@@ -51,6 +51,7 @@ export {
   buildDashboard,
   buildEur,
   buildUstUebersicht,
+  inferSteuersatzFromBetraege,
   mapEurKategorie,
   sumOffenePosten,
 } from "./aggregate";

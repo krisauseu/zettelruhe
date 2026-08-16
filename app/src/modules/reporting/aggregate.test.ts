@@ -5,6 +5,7 @@ import {
   buildDashboard,
   buildEur,
   buildUstUebersicht,
+  inferSteuersatzFromBetraege,
   isStornoEintrag,
   mapEurKategorie,
   sumOffenePosten,
@@ -269,6 +270,88 @@ describe("buildUstUebersicht", () => {
     expect(u.summe_ust_einnahmen).toBe("0.00");
     expect(u.summe_vorsteuer).toBe("0.00");
     expect(u.zahllast).toBe("0.00");
+  });
+
+  it("ordnet Rechnungs-USt ohne Journal-Satz über die Beträge dem Satz 19 % zu", () => {
+    const u = buildUstUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "113.05",
+          betrag_netto: "95.00",
+          betrag_ust: "18.05",
+          steuersatz: "",
+          quelle_typ: "rechnung",
+        }),
+        je({
+          richtung: "ausgabe",
+          betrag_brutto: "49.98",
+          betrag_netto: "42.00",
+          betrag_ust: "7.98",
+          steuersatz: "19",
+          quelle_typ: "beleg",
+        }),
+      ],
+      Z,
+      "regelbesteuerung_ist",
+    );
+    expect(u.zeilen.find((z) => z.steuersatz === "19")?.netto_einnahmen).toBe(
+      "95.00",
+    );
+    expect(u.zeilen.find((z) => z.steuersatz === "19")?.ust_einnahmen).toBe(
+      "18.05",
+    );
+    expect(u.zeilen.find((z) => z.steuersatz === "ohne")).toBeUndefined();
+    expect(u.summe_ust_einnahmen).toBe("18.05");
+    expect(u.summe_vorsteuer).toBe("7.98");
+    expect(u.zahllast).toBe("10.07");
+  });
+
+  it("rät 0 % nicht und lässt gemischte Beträge ohne Satz", () => {
+    const leer0 = buildUstUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "50.00",
+          betrag_netto: "50.00",
+          betrag_ust: "0.00",
+          steuersatz: "",
+        }),
+      ],
+      Z,
+      "regelbesteuerung_ist",
+    );
+    expect(leer0.zeilen.find((z) => z.steuersatz === "ohne")?.netto_einnahmen).toBe(
+      "50.00",
+    );
+    expect(leer0.zeilen.find((z) => z.steuersatz === "0")).toBeUndefined();
+
+    const gemischt = buildUstUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "113.00",
+          betrag_netto: "100.00",
+          betrag_ust: "13.00",
+          steuersatz: "",
+        }),
+      ],
+      Z,
+      "regelbesteuerung_ist",
+    );
+    expect(
+      gemischt.zeilen.find((z) => z.steuersatz === "ohne")?.ust_einnahmen,
+    ).toBe("13.00");
+    expect(gemischt.zeilen.find((z) => z.steuersatz === "19")).toBeUndefined();
+  });
+});
+
+describe("inferSteuersatzFromBetraege", () => {
+  it("erkennt 19 % und 7 % nur bei exakter Übereinstimmung", () => {
+    expect(inferSteuersatzFromBetraege("95.00", "18.05")).toBe("19");
+    expect(inferSteuersatzFromBetraege("100.00", "7.00")).toBe("7");
+    expect(inferSteuersatzFromBetraege("100.00", "0.00")).toBe("");
+    expect(inferSteuersatzFromBetraege("100.00", "13.00")).toBe("");
   });
 });
 

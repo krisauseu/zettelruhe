@@ -169,6 +169,38 @@ describe("buildUstvaDatensatz", () => {
     expect(d.kz83).toBe("0.00");
   });
 
+  it("füllt Kz 81 aus Rechnungs-USt ohne Journal-Satz (M2-01)", () => {
+    const ust = buildUstUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "113.05",
+          betrag_netto: "95.00",
+          betrag_ust: "18.05",
+          steuersatz: "",
+          quelle_typ: "rechnung",
+        }),
+        je({
+          richtung: "ausgabe",
+          betrag_brutto: "49.98",
+          betrag_netto: "42.00",
+          betrag_ust: "7.98",
+          steuersatz: "19",
+          quelle_typ: "beleg",
+        }),
+      ],
+      MONAT,
+      "regelbesteuerung_ist",
+    );
+    const d = buildUstvaDatensatz(ust);
+    expect(d.kennzahlen.find((k) => k.kz === "81")?.eintrag).toBe("95");
+    expect(d.kennzahlen.find((k) => k.kz === "81")?.journal_ust).toBe("18.05");
+    expect(d.kennzahlen.find((k) => k.kz === "66")?.eintrag).toBe("7.98");
+    expect(d.kz83).toBe("10.07");
+    expect(d.zahllast_journal).toBe("10.07");
+    expect(d.nicht_gefuehrt.some((n) => n.kz === "0 / ohne")).toBe(false);
+  });
+
   it("ordnet 0 % / ohne Satz nicht einer Kz zu", () => {
     const ust = buildUstUebersicht(
       [
