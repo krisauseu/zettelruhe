@@ -62,6 +62,7 @@ export {
   buildJournalInputFromRechnung,
   calculatePositionBetraege,
   einheitlicherSteuersatz,
+  ustStaffelAusPositionen,
   defaultFaelligAm,
   defaultGueltigBis,
   FESTGESCHRIEBEN_ERROR,

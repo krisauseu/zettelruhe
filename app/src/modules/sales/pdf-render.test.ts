@@ -104,6 +104,53 @@ describe("PDF-Render", () => {
     expect(buf.length).toBeGreaterThan(800);
   });
 
+  it("erzeugt Original-Rechnung mit gemischten Steuersätzen", async () => {
+    const buf = await renderRechnungPdf({
+      rechnung: rechnung({
+        status: "offen",
+        rechnungsnummer: "R-0002",
+        steuermodus: "regelbesteuerung_ist",
+        betrag_netto: "393.00",
+        betrag_ust: "65.37",
+        betrag_brutto: "458.37",
+      }),
+      positionen: [
+        { ...position, betrag_netto: "333.00", betrag_ust: "63.27", betrag_brutto: "396.27" },
+        {
+          ...position,
+          id: "p2",
+          sortierung: 2,
+          bezeichnung: "Testartikel 7%",
+          einzelpreis: "30.00",
+          steuersatz: "7",
+          betrag_netto: "30.00",
+          betrag_ust: "2.10",
+          betrag_brutto: "32.10",
+        },
+        {
+          ...position,
+          id: "p3",
+          sortierung: 3,
+          bezeichnung: "Gebühren 0%",
+          einzelpreis: "30.00",
+          steuersatz: "0",
+          betrag_netto: "30.00",
+          betrag_ust: "0.00",
+          betrag_brutto: "30.00",
+        },
+      ],
+      firma: firma({
+        steuermodus: "regelbesteuerung_ist",
+        ust_id: "DE123456789",
+      }),
+      kunde,
+      rechnungsnummer: "R-0002",
+      entwurf: false,
+      layout: defaultDokumentPdfLayout(),
+    });
+    expect(buf.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+  });
+
   it("erzeugt Original-Rechnung unter Regelbesteuerung mit GiroCode", async () => {
     const buf = await renderRechnungPdf({
       rechnung: rechnung({

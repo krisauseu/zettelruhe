@@ -10,6 +10,7 @@ import {
   buildJournalInputFromRechnung,
   calculatePositionBetraege,
   einheitlicherSteuersatz,
+  ustStaffelAusPositionen,
   defaultFaelligAm,
   FESTGESCHRIEBEN_ERROR,
   isEntwurf,
@@ -294,6 +295,35 @@ describe("einheitlicherSteuersatz", () => {
     expect(
       einheitlicherSteuersatz([{ steuersatz: "19" }], "kleinunternehmer"),
     ).toBe("");
+  });
+});
+
+describe("ustStaffelAusPositionen", () => {
+  it("bündelt Bemessungsgrundlage und Steuerbetrag je Satz", () => {
+    expect(
+      ustStaffelAusPositionen([
+        { steuersatz: "19", betrag_netto: "333.00", betrag_ust: "63.27" },
+        { steuersatz: "7", betrag_netto: "30.00", betrag_ust: "2.10" },
+        { steuersatz: "0", betrag_netto: "30.00", betrag_ust: "0.00" },
+      ]),
+    ).toEqual([
+      { steuersatz: "19", betrag_netto: "333.00", betrag_ust: "63.27" },
+      { steuersatz: "7", betrag_netto: "30.00", betrag_ust: "2.10" },
+      { steuersatz: "0", betrag_netto: "30.00", betrag_ust: "0.00" },
+    ]);
+  });
+
+  it("summiert gleiche Sätze und sortiert 19 vor 7 vor 0", () => {
+    expect(
+      ustStaffelAusPositionen([
+        { steuersatz: "7", betrag_netto: "10.00", betrag_ust: "0.70" },
+        { steuersatz: "19", betrag_netto: "100.00", betrag_ust: "19.00" },
+        { steuersatz: "19", betrag_netto: "50.00", betrag_ust: "9.50" },
+      ]),
+    ).toEqual([
+      { steuersatz: "19", betrag_netto: "150.00", betrag_ust: "28.50" },
+      { steuersatz: "7", betrag_netto: "10.00", betrag_ust: "0.70" },
+    ]);
   });
 });
 

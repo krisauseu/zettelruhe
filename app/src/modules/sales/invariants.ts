@@ -465,6 +465,49 @@ export function einheitlicherSteuersatz(
   return gefunden ?? "";
 }
 
+export type UstStaffelZeile = {
+  steuersatz: Steuersatz | "";
+  betrag_netto: string;
+  betrag_ust: string;
+};
+
+const UST_STAFFEL_REIHENFOLGE: Array<Steuersatz | ""> = ["19", "7", "0", ""];
+
+/**
+ * USt-Ausweis je Steuersatz (Bemessungsgrundlage + Steuerbetrag).
+ * § 14 Abs. 4 UStG: Satz, Entgelt und Steuerbetrag; bei mehreren Sätzen getrennt.
+ */
+export function ustStaffelAusPositionen(
+  positionen: Array<{
+    steuersatz?: Steuersatz | "";
+    betrag_netto: string;
+    betrag_ust: string;
+  }>,
+): UstStaffelZeile[] {
+  const buckets = new Map<string, { netto: Decimal; ust: Decimal }>();
+  for (const p of positionen) {
+    const satz: Steuersatz | "" =
+      p.steuersatz && VALID_STEUERSATZ.has(p.steuersatz)
+        ? (p.steuersatz as Steuersatz)
+        : "";
+    const cur = buckets.get(satz) ?? { netto: money(0), ust: money(0) };
+    cur.netto = cur.netto.plus(money(p.betrag_netto));
+    cur.ust = cur.ust.plus(money(p.betrag_ust));
+    buckets.set(satz, cur);
+  }
+  return [...buckets.entries()]
+    .sort(([a], [b]) => {
+      const ia = UST_STAFFEL_REIHENFOLGE.indexOf(a as Steuersatz | "");
+      const ib = UST_STAFFEL_REIHENFOLGE.indexOf(b as Steuersatz | "");
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    })
+    .map(([satz, b]) => ({
+      steuersatz: satz as Steuersatz | "",
+      betrag_netto: moneyToString(roundMoney(b.netto)),
+      betrag_ust: moneyToString(roundMoney(b.ust)),
+    }));
+}
+
 /**
  * Journal-Eingabe aus festzuschreibender Rechnung (Einnahme).
  * Steuersatz kommt aus den Positionen (einheitlich), nicht aus Kopf-USt geraten.

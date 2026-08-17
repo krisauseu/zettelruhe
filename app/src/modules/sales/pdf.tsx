@@ -20,7 +20,11 @@ import type { FirmaRecord, Steuermodus } from "@/lib/pb";
 import type { Kontakt } from "@/modules/contacts/types";
 import { buildGirocodePayload } from "./girocode";
 import { renderGirocodeDataUri } from "./girocode-qr";
-import { KLEINUNTERNEHMER_HINWEIS, einheitlicherSteuersatz } from "./invariants";
+import {
+  KLEINUNTERNEHMER_HINWEIS,
+  ustStaffelAusPositionen,
+  type UstStaffelZeile,
+} from "./invariants";
 import {
   DEFAULT_DOKUMENT_AKZENTFARBE,
   PDF_WASSERZEICHEN_ENTWURF,
@@ -162,10 +166,18 @@ const styles = StyleSheet.create({
   },
   totalRow: {
     flexDirection: "row",
-    width: 220,
+    width: 280,
     justifyContent: "space-between",
     marginBottom: 3,
     fontSize: 9,
+  },
+  staffelRow: {
+    flexDirection: "row",
+    width: 280,
+    justifyContent: "space-between",
+    marginBottom: 2,
+    fontSize: 8.5,
+    color: "#333",
   },
   totalBold: {
     fontFamily: "Helvetica-Bold",
@@ -232,6 +244,7 @@ type PdfPosition = {
   einzelpreis: string;
   steuersatz: string;
   betrag_netto: string;
+  betrag_ust: string;
   betrag_brutto: string;
 };
 
@@ -257,13 +270,14 @@ function addressLines(opts: {
 function colWidths(showUst: boolean) {
   return showUst
     ? {
-        pos: "6%",
-        bez: "30%",
-        menge: "10%",
-        einheit: "12%",
-        preis: "15%",
-        ust: "9%",
-        summe: "18%",
+        pos: "5%",
+        bez: "27%",
+        menge: "8%",
+        einheit: "11%",
+        preis: "14%",
+        ust: "7%",
+        ustBetrag: "13%",
+        summe: "15%",
       }
     : {
         pos: "7%",
@@ -272,6 +286,7 @@ function colWidths(showUst: boolean) {
         einheit: "14%",
         preis: "16%",
         ust: "0%",
+        ustBetrag: "0%",
         summe: "16%",
       };
 }
@@ -415,6 +430,9 @@ function Positionstabelle({
         {showUst ? (
           <Text style={{ width: w.ust, textAlign: "right" }}>MwSt.</Text>
         ) : null}
+        {showUst ? (
+          <Text style={{ width: w.ustBetrag, textAlign: "right" }}>USt.</Text>
+        ) : null}
         <Text style={{ width: w.summe, textAlign: "right" }}>
           {showUst ? "Gesamt (Netto)" : "Gesamt"}
         </Text>
@@ -447,6 +465,11 @@ function Positionstabelle({
                 {p.steuersatz ? `${p.steuersatz} %` : "—"}
               </Text>
             ) : null}
+            {showUst ? (
+              <Text style={{ width: w.ustBetrag, textAlign: "right" }}>
+                {formatMoneyDe(p.betrag_ust || "0", { currency: true })}
+              </Text>
+            ) : null}
             <Text style={{ width: w.summe, textAlign: "right" }}>
               {formatMoneyDe(showUst ? p.betrag_netto : p.betrag_brutto, {
                 currency: true,
@@ -459,18 +482,24 @@ function Positionstabelle({
   );
 }
 
+function ustStaffelLabel(z: UstStaffelZeile): string {
+  const basis = formatMoneyDe(z.betrag_netto, { currency: true });
+  if (z.steuersatz) {
+    return `USt. ${z.steuersatz} % auf ${basis}`;
+  }
+  return `USt. auf ${basis}`;
+}
+
 function Summenblock({
   showUst,
-  steuersatzLabel,
+  staffel,
   betragNetto,
-  betragUst,
   betragBrutto,
   accent,
 }: {
   showUst: boolean;
-  steuersatzLabel: string;
+  staffel: UstStaffelZeile[];
   betragNetto: string;
-  betragUst: string;
   betragBrutto: string;
   accent: string;
 }) {
@@ -490,17 +519,21 @@ function Summenblock({
       </View>
     );
   }
-  const ustLabel = steuersatzLabel ? `USt. (${steuersatzLabel} %)` : "USt.";
   return (
     <View style={styles.totals} wrap={false}>
       <View style={styles.totalRow}>
         <Text>Gesamt Netto</Text>
         <Text>{formatMoneyDe(betragNetto, { currency: true })}</Text>
       </View>
-      <View style={styles.totalRow}>
-        <Text>{ustLabel}</Text>
-        <Text>{formatMoneyDe(betragUst, { currency: true })}</Text>
-      </View>
+      {staffel.map((z) => (
+        <View
+          key={z.steuersatz || "ohne"}
+          style={styles.staffelRow}
+        >
+          <Text>{ustStaffelLabel(z)}</Text>
+          <Text>{formatMoneyDe(z.betrag_ust, { currency: true })}</Text>
+        </View>
+      ))}
       <View
         style={[
           styles.totalRow,
@@ -526,9 +559,8 @@ function DokumentSeite({
   meta,
   positionen,
   showUst,
-  steuersatzLabel,
+  staffel,
   betragNetto,
-  betragUst,
   betragBrutto,
   kleinunternehmer,
   notiz,
@@ -543,9 +575,8 @@ function DokumentSeite({
   meta: MetaItem[];
   positionen: PdfPosition[];
   showUst: boolean;
-  steuersatzLabel: string;
+  staffel: UstStaffelZeile[];
   betragNetto: string;
-  betragUst: string;
   betragBrutto: string;
   kleinunternehmer: boolean;
   notiz?: string;
@@ -595,9 +626,8 @@ function DokumentSeite({
 
         <Summenblock
           showUst={showUst}
-          steuersatzLabel={steuersatzLabel}
+          staffel={staffel}
           betragNetto={betragNetto}
-          betragUst={betragUst}
           betragBrutto={betragBrutto}
           accent={accent}
         />
@@ -666,10 +696,7 @@ export async function renderRechnungPdf(
   const entwurf = Boolean(data.entwurf);
   const nummer = data.rechnungsnummer || data.rechnung.rechnungsnummer;
   const showUst = data.rechnung.steuermodus === "regelbesteuerung_ist";
-  const satz = einheitlicherSteuersatz(
-    data.positionen,
-    data.rechnung.steuermodus,
-  );
+  const staffel = showUst ? ustStaffelAusPositionen(data.positionen) : [];
 
   let girocodeDataUri: string | undefined;
   let zahlungstext: string | undefined;
@@ -706,9 +733,8 @@ export async function renderRechnungPdf(
       meta={rechnungMeta(data.rechnung)}
       positionen={data.positionen}
       showUst={showUst}
-      steuersatzLabel={satz}
+      staffel={staffel}
       betragNetto={data.rechnung.betrag_netto}
-      betragUst={data.rechnung.betrag_ust}
       betragBrutto={data.rechnung.betrag_brutto}
       kleinunternehmer={data.rechnung.steuermodus === "kleinunternehmer"}
       notiz={data.rechnung.notiz}
@@ -751,10 +777,7 @@ export async function renderAngebotPdf(data: AngebotPdfData): Promise<Buffer> {
   const entwurf = Boolean(data.entwurf);
   const nummer = data.angebotsnummer || data.angebot.angebotsnummer;
   const showUst = data.angebot.steuermodus === "regelbesteuerung_ist";
-  const satz = einheitlicherSteuersatz(
-    data.positionen,
-    data.angebot.steuermodus,
-  );
+  const staffel = showUst ? ustStaffelAusPositionen(data.positionen) : [];
 
   const instance = pdf(
     <DokumentSeite
@@ -766,9 +789,8 @@ export async function renderAngebotPdf(data: AngebotPdfData): Promise<Buffer> {
       meta={angebotMeta(data.angebot)}
       positionen={data.positionen}
       showUst={showUst}
-      steuersatzLabel={satz}
+      staffel={staffel}
       betragNetto={data.angebot.betrag_netto}
-      betragUst={data.angebot.betrag_ust}
       betragBrutto={data.angebot.betrag_brutto}
       kleinunternehmer={data.angebot.steuermodus === "kleinunternehmer"}
       notiz={data.angebot.notiz}
