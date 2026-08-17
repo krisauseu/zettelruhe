@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ConfirmForm } from "@/components/ui/confirm-form";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -56,15 +57,10 @@ export default async function NutzerPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Nutzer:innen
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Einladen und grobe Rechte für die aktive Firma. Zugang mit E-Mail und
-          Startpasswort — ohne SMTP-Pflicht.
-        </p>
-      </div>
+      <PageHeader
+        title="Nutzer:innen"
+        description="Einladen und grobe Rechte für die aktive Firma. Zugang mit E-Mail und Startpasswort — ohne SMTP-Pflicht."
+      />
 
       {sp.error ? (
         <p

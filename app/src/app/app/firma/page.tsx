@@ -3,6 +3,7 @@ import { getFirmaById } from "@/lib/pb";
 import { requireFirmaSession } from "@/lib/session";
 import { FirmaForm } from "@/modules/platform/firma-form";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -58,17 +59,10 @@ export default async function FirmaPage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Firma
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stammdaten, Steuer-Modus, Dokumenten-Layout und Nummernkreise der
-            aktiven Firma. Festgeschriebene Belege bleiben beim
-            Steuer-Modus-Wechsel unverändert.
-          </p>
-        </div>
+      <PageHeader
+        title="Firma"
+        description="Stammdaten, Steuer-Modus, Dokumenten-Layout und Nummernkreise der aktiven Firma. Festgeschriebene Belege bleiben beim Steuer-Modus-Wechsel unverändert."
+      >
         {session.kannFirmaAnlegen ? (
           <Link
             href="/app/firma/neu"
@@ -77,7 +71,7 @@ export default async function FirmaPage({
             Weitere Firma anlegen
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
       {sp.success ? (
         <p

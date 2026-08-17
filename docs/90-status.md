@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-17_
 
-**Last session:** 2026-08-17 — UX/UI App-Layout / CSS-Modernisierung (erster Keil).
+**Last session:** 2026-08-17 — UX/UI Rest (Sidebar mobil Off-Canvas + Detailköpfe).
 
 ## What's done
 
@@ -37,6 +37,7 @@ _Last updated: 2026-08-17_
 - **Multi-User / grobe Rechte (ADR-0025):** Mitgliedschaft User↔Firma; Rollen Eigentümer:in / Bearbeiten / Lesen. Einladen unter `/app/nutzer` (Startpasswort, kein SMTP-Pflicht; Hinweis-Mail ohne Passwort wenn SMTP steht). `users.firma` bleibt zuletzt aktiv. Instanz-Eigentümer:in legt weitere Firmen an. Isolation: Session nur mit Mitgliedschaft. Backfill: bestehende Instanz-Eigentümer:innen werden Eigentümer:in aller vorhandenen Firmen. Schreib-Actions serverseitig geprüft. Commit `1ae4965`. **Server-Nachtest kf inkl. SMTP: keine Fehler.**
 - **Eigenes Passwort ändern** (Nachzug ADR-0025): `/app/passwort` — jede angemeldete Nutzer:in (Instanz-Eigentümer:in und Eingeladene, alle drei Rollen inkl. Lesen) ändert nur das eigene Passwort (alt + neu + Bestätigung, mindestens 8 Zeichen). Fremdes Passwort unter `/app/nutzer` unverändert. Kein SMTP, kein Reset-per-Mail. Next-Session bleibt gültig (ADR-0009).
 - **UX/UI erster Keil (App-Layout / CSS):** Tokens (Papier-Canvas, Tinte-Sidebar, Primärfarbe an der Z-Marke), gemeinsame Primitives, PageHeader auf Alltagslisten, Übersicht und Login/Setup. M1-12 und Marke nicht zurückgebaut. Toast unten rechts. Lokal hinter Caddy nachgetestet.
+- **UX/UI Rest:** Sidebar mobil Off-Canvas (unter `md`; Desktop fest). Esc, Overlay, Nav-Link schließt, Fokus. PageHeader auf Firma, Nutzer:innen, Passwort (nur Optik) und Dokument-Details (Angebot, Rechnung, Beleg). Nav-Logik und erster Keil unangetastet. 437 Unit-Tests. Lokal hinter Caddy nachgetestet.
 
 ## What's next
 
@@ -45,21 +46,21 @@ Zettelruhe soll ein Tool für jedermann werden — verschiedene Steuer-Modi, ver
 
 **Als Nächstes sichtbar, noch nicht gebaut** (nicht vermischen mit Erledigtem):
 
-- **UX/UI Rest** — Sidebar mobil einklappbar; PageHeader auf Detail-/Formularköpfen. Nicht Marke, nicht Dokumenten-Layout, nicht den ersten Keil zurückbauen.
+- **Übersicht / Dashboard** unter den KPI-Karten (kf-Vorschläge, kein Muss): Verlauf, §-19-Wächter, Fälligkeiten, Ausgaben-Split, letzte Buchungen. Kickoff: [`sessions/2026-08-17-uebersicht-dashboard-prompt.md`](./sessions/2026-08-17-uebersicht-dashboard-prompt.md). Nicht den ersten UX-Keil zurückbauen.
 - Daneben weiter separat: Hybrid-PDF, übrige Open Decisions.
 
-Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung, Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen).
+Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung, Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen), UX/UI Rest (Sidebar mobil, Detailköpfe).
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). Zugang zu Firmen über Mitgliedschaft (ADR-0025). de-DE im UI.
 
 ## Follow-up
 
-- **UX/UI Rest** — Sidebar mobil einklappbar; Detail-/Formularköpfe
+- **Übersicht / Dashboard** — Kickoff [`sessions/2026-08-17-uebersicht-dashboard-prompt.md`](./sessions/2026-08-17-uebersicht-dashboard-prompt.md)
 - Hybrid-PDF und übrige Open Decisions — weiter separat
 
 ## Open decisions
 
-UX/UI erster Keil (Tokens/Shell/Listen) steht; Rest (mobil einklappbare Sidebar, Detailköpfe) bleibt Follow-up. Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
+UX/UI erster Keil und Rest (mobil Off-Canvas, Detailköpfe) stehen. Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
 
 - Automatische Kassenbuch-Buchung aus Rechnungszahlung (Zahlungsweg bar) — bewusst nicht in Abschn. 9
 - MT940-Parser — Follow-up (CSV in v1 produktionsfähig)
@@ -92,4 +93,4 @@ UX/UI erster Keil (Tokens/Shell/Listen) steht; Rest (mobil einklappbare Sidebar,
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-17-ux-ui-app-layout.md`](./sessions/2026-08-17-ux-ui-app-layout.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-17-ux-ui-rest-sidebar-mobil.md`](./sessions/2026-08-17-ux-ui-rest-sidebar-mobil.md)

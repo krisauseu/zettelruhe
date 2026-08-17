@@ -6,6 +6,7 @@ import { logoutAction } from "@/modules/platform/auth-actions";
 import { FirmaSwitcher } from "@/modules/platform/firma-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { AppNav, type NavItem } from "@/components/app-nav";
+import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandMark } from "@/components/brand-mark";
 import { FlashToast } from "@/components/ui/flash-toast";
@@ -80,9 +81,9 @@ export function AppShell({
   mitgliedschaftRolle: MitgliedschaftRolle | null;
 }) {
   return (
-    <div className="flex min-h-full flex-1 bg-background">
-      <aside className="flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
-        <div className="relative border-b border-sidebar-border px-4 py-5">
+    <AppSidebar
+      header={
+        <>
           <div
             className="absolute inset-x-0 top-0 h-0.5 bg-sidebar-primary"
             aria-hidden
@@ -101,11 +102,11 @@ export function AppShell({
             activeFirmaId={session.firmaId}
             kannFirmaAnlegen={kannFirmaAnlegen}
           />
-        </div>
-
-        <AppNav items={buildNav(kannVerwalten)} />
-
-        <div className="mt-auto space-y-0.5 border-t border-sidebar-border p-3">
+        </>
+      }
+      nav={<AppNav items={buildNav(kannVerwalten)} />}
+      footer={
+        <>
           <ThemeToggle />
           <Link
             href="/app/passwort"
@@ -128,23 +129,21 @@ export function AppShell({
               Abmelden
             </Button>
           </form>
+        </>
+      }
+    >
+      <Suspense fallback={null}>
+        <FlashToast />
+      </Suspense>
+      {!kannSchreiben && mitgliedschaftRolle === "lesen" ? (
+        <div
+          className="border-b border-warning/30 bg-warning/10 px-6 py-2 text-sm text-foreground md:px-8"
+          role="status"
+        >
+          Lesezugriff auf diese Firma — Änderungen sind nicht erlaubt.
         </div>
-      </aside>
-
-      <main className="flex-1 overflow-auto">
-        <Suspense fallback={null}>
-          <FlashToast />
-        </Suspense>
-        {!kannSchreiben && mitgliedschaftRolle === "lesen" ? (
-          <div
-            className="border-b border-warning/30 bg-warning/10 px-6 py-2 text-sm text-foreground md:px-8"
-            role="status"
-          >
-            Lesezugriff auf diese Firma — Änderungen sind nicht erlaubt.
-          </div>
-        ) : null}
-        <div className="mx-auto min-h-full p-6 md:p-9">{children}</div>
-      </main>
-    </div>
+      ) : null}
+      <div className="mx-auto min-h-full p-6 md:p-9">{children}</div>
+    </AppSidebar>
   );
 }

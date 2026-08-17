@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -28,15 +29,10 @@ export default async function PasswortPage({
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Passwort ändern
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Nur Ihr eigenes Login. Altes Passwort, neues Passwort und Bestätigung.
-          Mindestens 8 Zeichen. Sie bleiben danach angemeldet.
-        </p>
-      </div>
+      <PageHeader
+        title="Passwort ändern"
+        description="Nur Ihr eigenes Login. Altes Passwort, neues Passwort und Bestätigung. Mindestens 8 Zeichen. Sie bleiben danach angemeldet."
+      />
 
       {sp.error ? (
         <p

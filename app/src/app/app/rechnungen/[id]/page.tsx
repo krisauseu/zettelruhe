@@ -46,6 +46,7 @@ import { RechnungForm } from "@/modules/sales/rechnung-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -183,25 +184,22 @@ export default async function RechnungDetailPage({
             ← Rechnungen
           </Link>
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {title}
-          </h1>
-          <Badge variant={statusBadgeVariant(rechnung.status)}>
-            {RECHNUNG_STATUS_LABELS[rechnung.status]}
-          </Badge>
-        </div>
-        {rechnung.festgeschrieben_am ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Festgeschrieben am{" "}
-            {formatDateTimeDe(rechnung.festgeschrieben_am)}
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Entwurf — editierbar bis zur Festschreibung. Keine
-            Rechnungsnummer vor der Festschreibung.
-          </p>
-        )}
+        <PageHeader
+          className="mt-2"
+          title={
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {title}
+              <Badge variant={statusBadgeVariant(rechnung.status)}>
+                {RECHNUNG_STATUS_LABELS[rechnung.status]}
+              </Badge>
+            </span>
+          }
+          description={
+            rechnung.festgeschrieben_am
+              ? `Festgeschrieben am ${formatDateTimeDe(rechnung.festgeschrieben_am)}`
+              : "Entwurf — editierbar bis zur Festschreibung. Keine Rechnungsnummer vor der Festschreibung."
+          }
+        />
         {sp.error ? (
           <p className="mt-2 text-sm text-destructive">{sp.error}</p>
         ) : null}

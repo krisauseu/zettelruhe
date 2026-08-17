@@ -25,6 +25,7 @@ import {
 import { BelegForm } from "@/modules/expenses/beleg-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -100,32 +101,31 @@ export default async function BelegDetailPage({
             ← Belege
           </Link>
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {title}
-          </h1>
-          <Badge
-            variant={
-              beleg.status === "festgeschrieben" ? "success" : "secondary"
-            }
-          >
-            {BELEG_STATUS_LABELS[beleg.status]}
-          </Badge>
-          <Badge
-            variant={beleg.richtung === "einnahme" ? "success" : "muted"}
-          >
-            {BUCHUNGSRICHTUNG_LABELS[beleg.richtung]}
-          </Badge>
-        </div>
-        {beleg.festgeschrieben_am ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Festgeschrieben am {formatDateTimeDe(beleg.festgeschrieben_am)}
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Entwurf — editierbar bis zur Festschreibung.
-          </p>
-        )}
+        <PageHeader
+          className="mt-2"
+          title={
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {title}
+              <Badge
+                variant={
+                  beleg.status === "festgeschrieben" ? "success" : "secondary"
+                }
+              >
+                {BELEG_STATUS_LABELS[beleg.status]}
+              </Badge>
+              <Badge
+                variant={beleg.richtung === "einnahme" ? "success" : "muted"}
+              >
+                {BUCHUNGSRICHTUNG_LABELS[beleg.richtung]}
+              </Badge>
+            </span>
+          }
+          description={
+            beleg.festgeschrieben_am
+              ? `Festgeschrieben am ${formatDateTimeDe(beleg.festgeschrieben_am)}`
+              : "Entwurf — editierbar bis zur Festschreibung."
+          }
+        />
         {sp.error ? (
           <p className="mt-2 text-sm text-destructive">{sp.error}</p>
         ) : null}

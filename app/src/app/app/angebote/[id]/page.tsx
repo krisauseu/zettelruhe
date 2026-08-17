@@ -30,6 +30,7 @@ import { AngebotForm } from "@/modules/sales/angebot-form";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -137,24 +138,22 @@ export default async function AngebotDetailPage({
             ← Angebote
           </Link>
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {title}
-          </h1>
-          <Badge variant={statusBadgeVariant(angebot.status)}>
-            {ANGEBOT_STATUS_LABELS[angebot.status]}
-          </Badge>
-        </div>
-        {angebot.gesendet_am ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gesendet am {formatDateTimeDe(angebot.gesendet_am)}
-          </p>
-        ) : (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Entwurf — editierbar bis zum Senden. Keine Angebotsnummer vor dem
-            Senden.
-          </p>
-        )}
+        <PageHeader
+          className="mt-2"
+          title={
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {title}
+              <Badge variant={statusBadgeVariant(angebot.status)}>
+                {ANGEBOT_STATUS_LABELS[angebot.status]}
+              </Badge>
+            </span>
+          }
+          description={
+            angebot.gesendet_am
+              ? `Gesendet am ${formatDateTimeDe(angebot.gesendet_am)}`
+              : "Entwurf — editierbar bis zum Senden. Keine Angebotsnummer vor dem Senden."
+          }
+        />
         {sp.error ? (
           <p className="mt-2 text-sm text-destructive">{sp.error}</p>
         ) : null}
