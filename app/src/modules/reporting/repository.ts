@@ -7,8 +7,13 @@ import { getFirmaById } from "@/lib/pb";
 import type { Steuermodus } from "@/lib/pb";
 import { getJournalEintrag, listJournal } from "@/modules/journal/repository";
 import type { JournalEintrag } from "@/modules/journal/types";
-import { listBelege, getBelegDateiResponse } from "@/modules/expenses/repository";
+import {
+  listBelege,
+  listBelegeByIds,
+  getBelegDateiResponse,
+} from "@/modules/expenses/repository";
 import type { Beleg } from "@/modules/expenses/types";
+import { listKassenbuchByIds } from "@/modules/cash/repository";
 import { getKontakt } from "@/modules/contacts/repository";
 import { getAktuellePruefungenFuerKontakte } from "@/modules/ustid";
 import { listOffenePosten } from "@/modules/payments/repository";
@@ -21,9 +26,18 @@ import {
 } from "./aggregate";
 import { buildPar19Waechter, type Par19Waechter } from "./par19";
 import {
+  buildAusgabenNachKategorien,
   buildFaelligkeiten,
+  buildLetzteBuchungen,
   buildMonatlicheReihe,
+  LETZTE_BUCHUNGEN_ANZAHL,
+  monatKategorienLabel,
+  quartalKategorienLabel,
+  sammelnKategorieQuelleIds,
+  type AusgabenKategorienBlick,
   type FaelligkeitenBlick,
+  type KategorieSchnappschuesse,
+  type LetzteBuchung,
   type VerlaufMonat,
 } from "./uebersicht";
 import {
@@ -39,6 +53,7 @@ import {
   isDateInZeitraum,
   periodLastNMonths,
   periodMonth,
+  periodQuarter,
   periodYear,
   todayBerlin,
   validateZeitraum,
@@ -261,11 +276,29 @@ export type UebersichtDashboard = {
   verlauf: VerlaufMonat[];
   par19: Par19Waechter | null;
   faelligkeiten: FaelligkeitenBlick;
+  ausgaben_kategorien_monat: AusgabenKategorienBlick;
+  ausgaben_kategorien_quartal: AusgabenKategorienBlick;
+  letzte_buchungen: LetzteBuchung[];
 };
 
+async function loadKategorieSchnappschuesse(
+  firmaId: string,
+  ids: { beleg: string[]; kasse: string[] },
+): Promise<KategorieSchnappschuesse> {
+  const [belege, kasse] = await Promise.all([
+    listBelegeByIds(firmaId, ids.beleg),
+    listKassenbuchByIds(firmaId, ids.kasse),
+  ]);
+  return {
+    beleg: new Map(belege.map((b) => [b.id, b.kategorie])),
+    kasse: new Map(kasse.map((e) => [e.id, e.kategorie])),
+  };
+}
+
 /**
- * Übersicht `/app`: Monatskennzahlen plus Verlauf, §-19-Wächter und Fälligkeiten.
- * Ein Journal-Lauf über Kalenderjahr ∪ letzte 12 Monate.
+ * Übersicht `/app`: Monatskennzahlen plus Verlauf, §-19-Wächter, Fälligkeiten,
+ * Ausgaben nach Kategorie und letzte Journal-Zeilen.
+ * Ein Journal-Lauf über Kalenderjahr ∪ letzte 12 Monate; Schnappschüsse gebündelt.
  */
 export async function getUebersichtDashboard(
   firmaId: string,
@@ -273,19 +306,28 @@ export async function getUebersichtDashboard(
 ): Promise<UebersichtDashboard> {
   const ref = refYmd ?? todayBerlin();
   const monat = periodMonth(ref);
+  const quartal = periodQuarter(ref);
   const jahr = periodYear(ref);
   const zwoelf = periodLastNMonths(12, ref);
   const journalVon = jahr.von < zwoelf.von ? jahr.von : zwoelf.von;
   const steuermodus = await loadSteuermodus(firmaId);
-  const [{ items, extra }, offene] = await Promise.all([
+  const [{ items, extra }, offene, letzte] = await Promise.all([
     journalMitStornoKontext(firmaId, { von: journalVon, bis: monat.bis }),
     listOffenePosten(firmaId, 1, 500),
+    listJournal(firmaId, {}, 1, LETZTE_BUCHUNGEN_ANZAHL),
   ]);
   const originale = [...extra, ...items];
   const monthItems = items.filter((e) =>
     isDateInZeitraum(e.buchungsdatum, monat),
   );
   const yearItems = items.filter((e) => isDateInZeitraum(e.buchungsdatum, jahr));
+  const quarterItems = items.filter((e) =>
+    isDateInZeitraum(e.buchungsdatum, quartal),
+  );
+  const schnappschuesse = await loadKategorieSchnappschuesse(
+    firmaId,
+    sammelnKategorieQuelleIds(quarterItems, extra),
+  );
   const summe = sumOffenePosten(offene.items);
   const kennzahlen = buildDashboard(
     monthItems,
@@ -305,6 +347,21 @@ export async function getUebersichtDashboard(
       refYmd: ref,
     }),
     faelligkeiten: buildFaelligkeiten(offene.items, ref, 14),
+    ausgaben_kategorien_monat: buildAusgabenNachKategorien(
+      items,
+      monat,
+      schnappschuesse,
+      extra,
+      { label: monatKategorienLabel(monat) },
+    ),
+    ausgaben_kategorien_quartal: buildAusgabenNachKategorien(
+      items,
+      quartal,
+      schnappschuesse,
+      extra,
+      { label: quartalKategorienLabel(quartal) },
+    ),
+    letzte_buchungen: buildLetzteBuchungen(letzte.items),
   };
 }
 

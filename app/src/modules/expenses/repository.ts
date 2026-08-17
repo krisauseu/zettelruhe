@@ -365,6 +365,28 @@ export async function listBelege(
   };
 }
 
+/** Kategorie-Schnappschüsse zu bekannten IDs (eine Filterwelle je 50, Solo-Volumen). */
+export async function listBelegeByIds(
+  firmaId: string,
+  ids: string[],
+): Promise<Beleg[]> {
+  const unique = [
+    ...new Set(ids.map((id) => id.trim()).filter(Boolean)),
+  ];
+  if (unique.length === 0) return [];
+  const out: Beleg[] = [];
+  for (let i = 0; i < unique.length; i += 50) {
+    const chunk = unique.slice(i, i + 50);
+    const result = await listRecords<PbBeleg>(COL, {
+      page: 1,
+      perPage: 50,
+      filter: `${pbEq("firma", firmaId)} && (${chunk.map((id) => pbEq("id", id)).join(" || ")})`,
+    });
+    out.push(...result.items.map(mapBeleg));
+  }
+  return out;
+}
+
 /** Datei-Bytes für Download (nur eigene Firma). */
 export async function getBelegDateiResponse(
   firmaId: string,

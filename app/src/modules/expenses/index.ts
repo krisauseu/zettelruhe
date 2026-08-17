@@ -43,6 +43,7 @@ export {
   getBeleg,
   getBelegDateiResponse,
   listBelege,
+  listBelegeByIds,
   setBelegDatei,
   updateBeleg,
   updateFestgeschriebenenBeleg,

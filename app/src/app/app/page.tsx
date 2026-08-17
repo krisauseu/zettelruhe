@@ -21,6 +21,8 @@ import { getUebersichtDashboard } from "@/modules/reporting";
 import { UebersichtPar19 } from "@/modules/reporting/uebersicht-par19";
 import { UebersichtVerlauf } from "@/modules/reporting/uebersicht-verlauf";
 import { UebersichtFaelligkeiten } from "@/modules/reporting/uebersicht-faelligkeiten";
+import { UebersichtKategorien } from "@/modules/reporting/uebersicht-kategorien";
+import { UebersichtLetzteBuchungen } from "@/modules/reporting/uebersicht-letzte-buchungen";
 import {
   Card,
   CardContent,
@@ -225,6 +227,22 @@ export default async function AppHomePage() {
             <UebersichtFaelligkeiten
               blick={uebersicht.faelligkeiten}
               kannSchreiben={kannSchreiben}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {uebersicht ? (
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,0.9fr)]">
+          <div className="min-w-0">
+            <UebersichtKategorien
+              monat={uebersicht.ausgaben_kategorien_monat}
+              quartal={uebersicht.ausgaben_kategorien_quartal}
+            />
+          </div>
+          <div className="min-w-0">
+            <UebersichtLetzteBuchungen
+              eintraege={uebersicht.letzte_buchungen}
             />
           </div>
         </div>

@@ -60,10 +60,28 @@ export {
 } from "./par19";
 export type { Par19Ampel, Par19Grenze, Par19Waechter } from "./par19";
 
-export { buildFaelligkeiten, buildMonatlicheReihe } from "./uebersicht";
+export {
+  AUSGABEN_KATEGORIEN_TOP,
+  LETZTE_BUCHUNGEN_ANZAHL,
+  OHNE_KATEGORIE_LABEL,
+  WEITERE_KATEGORIE_KEY,
+  WEITERE_KATEGORIE_LABEL,
+  buildAusgabenNachKategorien,
+  buildFaelligkeiten,
+  buildLetzteBuchungen,
+  buildMonatlicheReihe,
+  hrefFuerJournalQuelle,
+  monatKategorienLabel,
+  quartalKategorienLabel,
+  sammelnKategorieQuelleIds,
+} from "./uebersicht";
 export type {
+  AusgabenKategorieZeile,
+  AusgabenKategorienBlick,
   FaelligkeitEintrag,
   FaelligkeitenBlick,
+  KategorieSchnappschuesse,
+  LetzteBuchung,
   VerlaufMonat,
 } from "./uebersicht";
 

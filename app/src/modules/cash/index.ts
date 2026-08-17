@@ -45,6 +45,7 @@ export {
   getKassenSaldo,
   getSaldoNachEintrag,
   listKassenbuch,
+  listKassenbuchByIds,
   storniereKassenbuchEintrag,
   updateKassenbuchEintrag,
 } from "./repository";
