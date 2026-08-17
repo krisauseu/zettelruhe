@@ -29,6 +29,7 @@ import {
   ScrollText,
   Search,
   Star,
+  Users,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -80,7 +81,8 @@ export type NavIconKey =
   | "zm"
   | "export"
   | "firma"
-  | "kategorien";
+  | "kategorien"
+  | "nutzer";
 
 export type NavLinkItem = {
   type?: "link";
@@ -121,6 +123,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   export: Download,
   firma: Building2,
   kategorien: Tags,
+  nutzer: Users,
 };
 
 let cachedRaw: string | null | undefined;

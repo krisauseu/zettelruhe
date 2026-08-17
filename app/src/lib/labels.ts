@@ -28,6 +28,16 @@ export const SKR_LABELS: Record<SkrWahl, string> = {
   skr04: "SKR04",
 };
 
+/** Grobe Rechte an der Mitgliedschaft (ADR-0025) */
+export const MITGLIEDSCHAFT_ROLLE_LABELS: Record<
+  "eigentuemer" | "bearbeiten" | "lesen",
+  string
+> = {
+  eigentuemer: "Eigentümer:in",
+  bearbeiten: "Bearbeiten",
+  lesen: "Lesen",
+};
+
 /** Steuersätze unter Regelbesteuerung (Anzeige) */
 export const STEUERSATZ_LABELS: Record<string, string> = {
   "0": "0 %",

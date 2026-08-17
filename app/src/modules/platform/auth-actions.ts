@@ -17,10 +17,10 @@ import {
   createEigentuemer,
   createFirma,
   isSetupRequired,
-  resolveAktiveFirmaId,
   type SkrWahl,
   type Steuermodus,
 } from "@/lib/pb";
+import { resolveMitgliedschaftFuerSession } from "./mitgliedschaft";
 
 function formString(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -43,12 +43,16 @@ export async function loginAction(formData: FormData): Promise<void> {
 
   try {
     const user = await authWithPassword(email, password);
+    const mitgliedschaft = await resolveMitgliedschaftFuerSession(
+      user.id,
+      user.firma,
+    );
     const payload: SessionPayload = {
       userId: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
-      firmaId: await resolveAktiveFirmaId(user.firma),
+      firmaId: mitgliedschaft?.firmaId ?? null,
     };
     await setSessionCookie(payload);
   } catch {

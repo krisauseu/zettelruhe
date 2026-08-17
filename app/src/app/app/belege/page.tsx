@@ -90,12 +90,14 @@ export default async function BelegeListPage({
             Buchungsjournal.
           </p>
         </div>
-        <Link
-          href="/app/belege/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Beleg anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/belege/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Beleg anlegen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

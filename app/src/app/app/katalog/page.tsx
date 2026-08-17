@@ -68,24 +68,28 @@ export default async function KatalogPage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/app/katalog/import"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            CSV-Import
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href="/app/katalog/import"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              CSV-Import
+            </Link>
+          ) : null}
           <Link
             href="/app/katalog/export"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             CSV-Export
           </Link>
-          <Link
-            href="/app/katalog/neu"
-            className={cn(buttonVariants({ size: "sm" }))}
-          >
-            Position anlegen
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href="/app/katalog/neu"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              Position anlegen
+            </Link>
+          ) : null}
         </div>
       </div>
 

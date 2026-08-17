@@ -92,24 +92,26 @@ export default async function WiederkehrendeRechnungenPage({
             {formatDateDe(heute)}.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <form action={runJobsTickAction}>
-            <input
-              type="hidden"
-              name="returnTo"
-              value="/app/wiederkehrende-rechnungen"
-            />
-            <Button type="submit" variant="secondary" size="sm">
-              Fällige jetzt erzeugen
-            </Button>
-          </form>
-          <Link
-            href="/app/wiederkehrende-rechnungen/neu"
-            className={cn(buttonVariants({ size: "sm" }))}
-          >
-            Vorlage anlegen
-          </Link>
-        </div>
+        {session.kannSchreiben ? (
+          <div className="flex flex-wrap gap-2">
+            <form action={runJobsTickAction}>
+              <input
+                type="hidden"
+                name="returnTo"
+                value="/app/wiederkehrende-rechnungen"
+              />
+              <Button type="submit" variant="secondary" size="sm">
+                Fällige jetzt erzeugen
+              </Button>
+            </form>
+            <Link
+              href="/app/wiederkehrende-rechnungen/neu"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              Vorlage anlegen
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {sp.error ? (

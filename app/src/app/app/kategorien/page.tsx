@@ -60,12 +60,14 @@ export default async function KategorienPage({
             Gemeinsame Auswahlliste für Belege und Kassenbuch.
           </p>
         </div>
-        <Link
-          href="/app/kategorien/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Kategorie anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/kategorien/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Kategorie anlegen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

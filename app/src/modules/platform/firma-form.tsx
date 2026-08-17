@@ -22,19 +22,27 @@ const NK_ROWS = [
 export function FirmaForm({
   firma,
   error,
+  readOnly = false,
 }: {
   firma: FirmaRecord;
   error?: string | null;
+  readOnly?: boolean;
 }) {
   const [steuermodus, setSteuermodus] = useState(firma.steuermodus);
   const steuermodusGeaendert = steuermodus !== firma.steuermodus;
 
   return (
     <form
-      action={updateFirmaAction}
+      action={readOnly ? undefined : updateFirmaAction}
       encType="multipart/form-data"
       className="flex flex-col gap-8"
     >
+      {readOnly ? (
+        <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          Nur die Eigentümer:in der Firma kann Stammdaten, Steuer-Modus und
+          Nummernkreise ändern.
+        </p>
+      ) : null}
       {error ? (
         <p
           className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
@@ -44,6 +52,7 @@ export function FirmaForm({
         </p>
       ) : null}
 
+      <fieldset disabled={readOnly} className="flex flex-col gap-8 border-0 p-0">
       <fieldset className="flex flex-col gap-4">
         <legend className="text-sm font-semibold text-foreground">
           Stammdaten
@@ -366,9 +375,12 @@ export function FirmaForm({
         </div>
       </fieldset>
 
-      <div>
-        <Button type="submit">Firmendaten speichern</Button>
-      </div>
+      {readOnly ? null : (
+        <div>
+          <Button type="submit">Firmendaten speichern</Button>
+        </div>
+      )}
+      </fieldset>
     </form>
   );
 }

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import {
   createWiederkehrendeRechnung,
   deleteWiederkehrendeRechnung,
@@ -25,7 +25,7 @@ function formString(formData: FormData, key: string): string {
 }
 
 async function requireFirmaId(): Promise<string> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   return session.firmaId;
 }
 

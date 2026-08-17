@@ -4,6 +4,7 @@ import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
 import {
   formatDateDe,
+  MITGLIEDSCHAFT_ROLLE_LABELS,
   SKR_LABELS,
   STEUERMODUS_LABELS,
 } from "@/lib/labels";
@@ -37,10 +38,14 @@ export default async function AppHomePage() {
 
   let firma: Awaited<ReturnType<typeof getFirmaById>> = null;
   let dash: Awaited<ReturnType<typeof getDashboardKennzahlen>> | null = null;
+  let kannSchreiben = false;
+  let rollenLabel = "";
   try {
     const s = await requireFirmaSession();
     firma = await getFirmaById(s.firmaId);
     dash = await getDashboardKennzahlen(s.firmaId, periodMonth());
+    kannSchreiben = s.kannSchreiben;
+    rollenLabel = MITGLIEDSCHAFT_ROLLE_LABELS[s.mitgliedschaftRolle];
   } catch {
     dash = null;
   }
@@ -89,7 +94,9 @@ export default async function AppHomePage() {
         <CardHeader>
           <CardTitle>Willkommen, {session?.name}</CardTitle>
           <CardDescription>
-            Du bist als Eigentümer:in angemeldet.
+            {rollenLabel
+              ? `Angemeldet als ${rollenLabel} dieser Firma.`
+              : "Angemeldet."}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-foreground">
@@ -133,7 +140,9 @@ export default async function AppHomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          {QUICK_LINKS.map((l) => (
+          {QUICK_LINKS.filter(
+            (l) => kannSchreiben || !l.href.endsWith("/neu"),
+          ).map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -223,26 +232,32 @@ export default async function AppHomePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2 text-sm">
-            <Link
-              href="/app/kontakte/neu"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Kontakt anlegen
-            </Link>
-            <span className="text-muted-foreground">·</span>
-            <Link
-              href="/app/rechnungen/neu"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Rechnung anlegen
-            </Link>
-            <span className="text-muted-foreground">·</span>
-            <Link
-              href="/app/belege/neu"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-            >
-              Beleg anlegen
-            </Link>
+            {kannSchreiben ? (
+              <>
+                <Link
+                  href="/app/kontakte/neu"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Kontakt anlegen
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link
+                  href="/app/rechnungen/neu"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Rechnung anlegen
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link
+                  href="/app/belege/neu"
+                  className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  Beleg anlegen
+                </Link>
+              </>
+            ) : (
+              <span>Keine Bewegungen in diesem Monat.</span>
+            )}
           </CardContent>
         </Card>
       ) : null}

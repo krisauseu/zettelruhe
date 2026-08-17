@@ -88,12 +88,14 @@ export default async function RechnungenListPage({
             Original-PDF und Buchungsjournal.
           </p>
         </div>
-        <Link
-          href="/app/rechnungen/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Rechnung anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/rechnungen/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Rechnung anlegen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

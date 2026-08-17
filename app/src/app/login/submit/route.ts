@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import {
-  authWithPassword,
-  isSetupRequired,
-  resolveAktiveFirmaId,
-} from "@/lib/pb";
+import { authWithPassword, isSetupRequired } from "@/lib/pb";
 import { setSessionCookie } from "@/lib/session";
+import { resolveMitgliedschaftFuerSession } from "@/modules/platform/mitgliedschaft";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +33,16 @@ export async function POST(request: Request) {
 
   try {
     const user = await authWithPassword(email, password);
+    const mitgliedschaft = await resolveMitgliedschaftFuerSession(
+      user.id,
+      user.firma,
+    );
     await setSessionCookie({
       userId: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
-      firmaId: await resolveAktiveFirmaId(user.firma),
+      firmaId: mitgliedschaft?.firmaId ?? null,
     });
   } catch {
     return NextResponse.redirect(

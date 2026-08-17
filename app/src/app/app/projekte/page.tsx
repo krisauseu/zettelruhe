@@ -76,12 +76,14 @@ export default async function ProjektePage({
             zugeordnet werden.
           </p>
         </div>
-        <Link
-          href="/app/projekte/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Projekt anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/projekte/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Projekt anlegen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

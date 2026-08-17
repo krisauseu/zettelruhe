@@ -67,24 +67,28 @@ export default async function KontaktePage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/app/kontakte/import"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-          >
-            CSV-Import
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href="/app/kontakte/import"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              CSV-Import
+            </Link>
+          ) : null}
           <Link
             href="/app/kontakte/export"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
             CSV-Export
           </Link>
-          <Link
-            href="/app/kontakte/neu"
-            className={cn(buttonVariants({ size: "sm" }))}
-          >
-            Kontakt anlegen
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href="/app/kontakte/neu"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              Kontakt anlegen
+            </Link>
+          ) : null}
         </div>
       </div>
 

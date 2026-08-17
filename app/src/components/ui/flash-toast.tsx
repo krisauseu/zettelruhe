@@ -40,8 +40,12 @@ const FLASH_MESSAGES: Record<(typeof FLASH_KEYS)[number], string> = {
 
 function resolveFlash(params: URLSearchParams): {
   text: string;
-  tone: "ok";
+  tone: "ok" | "error";
 } | null {
+  const error = params.get("error");
+  if (error) {
+    return { text: error, tone: "error" };
+  }
   const success = params.get("success");
   if (success) {
     return { text: success, tone: "ok" };
@@ -64,6 +68,7 @@ export function FlashToast() {
   function dismiss() {
     const next = new URLSearchParams(params.toString());
     next.delete("success");
+    next.delete("error");
     for (const key of FLASH_KEYS) {
       next.delete(key);
     }
@@ -86,7 +91,10 @@ export function FlashToast() {
     <div
       role="status"
       className={cn(
-        "pointer-events-auto fixed right-4 top-4 z-50 max-w-sm rounded-lg border border-success/30 border-l-4 border-l-success bg-card px-4 py-3 text-sm text-foreground shadow-lg",
+        "pointer-events-auto fixed right-4 top-4 z-50 max-w-sm rounded-lg border bg-card px-4 py-3 text-sm text-foreground shadow-lg",
+        toast.tone === "error"
+          ? "border-destructive/40 border-l-4 border-l-destructive"
+          : "border-success/30 border-l-4 border-l-success",
       )}
     >
       <div className="flex items-start gap-3">

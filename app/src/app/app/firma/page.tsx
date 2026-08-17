@@ -69,12 +69,14 @@ export default async function FirmaPage({
             Steuer-Modus-Wechsel unverändert.
           </p>
         </div>
-        <Link
-          href="/app/firma/neu"
-          className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-        >
-          Weitere Firma anlegen
-        </Link>
+        {session.kannFirmaAnlegen ? (
+          <Link
+            href="/app/firma/neu"
+            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+          >
+            Weitere Firma anlegen
+          </Link>
+        ) : null}
       </div>
 
       {sp.success ? (
@@ -86,7 +88,11 @@ export default async function FirmaPage({
         </p>
       ) : null}
 
-      <FirmaForm firma={firma} error={sp.error ?? null} />
+      <FirmaForm
+        firma={firma}
+        error={sp.error ?? null}
+        readOnly={!session.kannVerwalten}
+      />
 
       <Card>
         <CardHeader>
@@ -117,11 +123,13 @@ export default async function FirmaPage({
               nicht relevant.
             </p>
           ) : null}
-          <form action={pruefeEigeneUstIdAction}>
-            <Button type="submit" variant="secondary" size="sm">
-              Gespeicherte Nummer prüfen (Syntax, kein BZSt-Stempel)
-            </Button>
-          </form>
+          {session.kannSchreiben ? (
+            <form action={pruefeEigeneUstIdAction}>
+              <Button type="submit" variant="secondary" size="sm">
+                Gespeicherte Nummer prüfen (Syntax, kein BZSt-Stempel)
+              </Button>
+            </form>
+          ) : null}
         </CardContent>
       </Card>
     </div>

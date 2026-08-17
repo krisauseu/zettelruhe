@@ -78,12 +78,14 @@ export default async function KassenbuchListPage({
             Anlegen = Festschreibung; fließt ins Buchungsjournal.
           </p>
         </div>
-        <Link
-          href="/app/kassenbuch/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Eintrag erfassen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/kassenbuch/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Eintrag erfassen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

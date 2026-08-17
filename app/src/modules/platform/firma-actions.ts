@@ -10,7 +10,11 @@ import {
   type Nummernkreise,
   type Steuermodus,
 } from "@/lib/pb";
-import { requireFirmaSession, requireSession } from "@/lib/session";
+import {
+  requireInstanzEigentuemerSession,
+  requireSession,
+  requireVerwaltenSession,
+} from "@/lib/session";
 import {
   assertLogoUpload,
   parseDokumentSchalterForm,
@@ -48,7 +52,7 @@ function parseNummernkreis(
 }
 
 export async function updateFirmaAction(formData: FormData): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireVerwaltenSession();
   const existing = await getFirmaById(session.firmaId);
   if (!existing) {
     redirect("/app/firma?error=" + encodeURIComponent("Firma nicht gefunden."));
@@ -187,7 +191,7 @@ export async function switchFirmaAction(formData: FormData): Promise<void> {
 }
 
 export async function createFirmaAction(formData: FormData): Promise<void> {
-  const session = await requireSession();
+  const session = await requireInstanzEigentuemerSession();
 
   let input;
   try {

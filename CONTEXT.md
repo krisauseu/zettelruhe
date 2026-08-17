@@ -7,7 +7,7 @@ Open-Source-Webanwendung unter [zettelruhe.de](https://zettelruhe.de) für die B
 ### Akteure & Organisation
 
 **Firma**:
-Die rechtliche Wirtschaftseinheit, deren Bücher und Belege geführt werden. Das Datenmodell ist firma-gebunden. Eine Eigentümer:in kann mehrere Firmen anlegen und in der Session wechseln. In den Firmeneinstellungen ist der Steuer-Modus zentral (u. a. umsatzsteuerfrei über Kleinunternehmerregelung — typisch auch für Kleingewerbe am Anfang).
+Die rechtliche Wirtschaftseinheit, deren Bücher und Belege geführt werden. Das Datenmodell ist firma-gebunden. Die Instanz-Eigentümer:in kann mehrere Firmen anlegen; der Zugang anderer Nutzer:innen läuft über eine Mitgliedschaft. In der Session ist immer eine Firma aktiv. In den Firmeneinstellungen ist der Steuer-Modus zentral (u. a. umsatzsteuerfrei über Kleinunternehmerregelung — typisch auch für Kleingewerbe am Anfang).
 _Avoid_: Account, Tenant, Workspace (im Fachvokabular)
 
 **Steuer-Modus**:
@@ -23,11 +23,27 @@ Steuer-Modus mit Umsatzsteuer auf Ausgangsrechnungen und Vorsteuer auf Belegen; 
 _Avoid_: Normalbesteuerung (wenn Regelbesteuerung gemeint ist)
 
 **Eigentümer:in**:
-Die eine Person, die die self-hosted Instanz verwaltet und alle Rechte an der aktiven Firma hat. Weitere Nutzer:innen/Rollen sind im Modell vorgesehen, in v1 nicht im UI.
+Zwei Ebenen, derselbe Fachbegriff. **Instanz-Eigentümer:in**: die Person aus dem Setup-Wizard; sie legt weitere Firmen an (`users.role=eigentuemer`). **Eigentümer:in der Firma**: Mitgliedschaftsrolle mit allen Rechten an dieser Firma, einschließlich Einladen und Firmeneinstellungen.
 _Avoid_: Admin (allein als Domänenbegriff), Teammitglied
 
+**Nutzer:in**:
+Ein Login. Zugang zu Firmen nur über Mitgliedschaft. Eingeladene Konten haben `users.role=nutzer`.
+_Avoid_: User (im UI), Teammitglied, Mitarbeiter:in (als Rollenlabel)
+
+**Mitgliedschaft**:
+Verbindung Nutzer:in ↔ Firma mit einer groben Rolle. `users.firma` bleibt die zuletzt aktive Firma (Login-Landung), keine Mehrfachrelation.
+_Avoid_: Membership (im UI), Tenant-Zuordnung
+
+**Rolle**:
+Grobes Recht an der Firma: **Eigentümer:in** (verwalten, einladen), **Bearbeiten** (Alltag schreiben), **Lesen** (nur sehen). Keine Feinrechte je Modul. Rolle Lesen ist die Grundlage für späteren Steuerberater-Lesezugriff, kein Kanzlei-Portal.
+_Avoid_: Permission, Admin, Teamrolle
+
+**Einladen**:
+Eigentümer:in der Firma legt einen Zugang an (Name, E-Mail, Startpasswort, Rolle) oder ordnet eine bestehende E-Mail dieser Firma zu. Ohne SMTP-Pflicht.
+_Avoid_: Invite-only per Mail, Onboarding (als Produktwort)
+
 **Solo-Selbstständige:r**:
-Die primäre Nutzer:in — eine Person ohne Mitarbeiter:innen und ohne Steuerberater-Rolle im System. Die Software löst deren eigenen Arbeitsalltag, nicht den einer Kanzlei.
+Die primäre Nutzer:in — der Alltag, den die Software löst. Weitere Nutzer:innen (z. B. Mithilfe, Lesezugriff) sind möglich; kein Kanzlei-Mandantenbetrieb.
 _Avoid_: Team, Multi-User-Organisation, Kanzlei-Mandant
 
 **Kontakt**:
@@ -142,9 +158,9 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 ## Scope-Grenzen (bewusst)
 
 - **Produkt**: Zettelruhe / zettelruhe.de
-- **v1-Betrieb**: Self-hosted; eine Eigentümer:in; mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
+- **v1-Betrieb**: Self-hosted; Instanz-Eigentümer:in plus eingeladene Nutzer:innen mit groben Rechten je Firma (Mitgliedschaft); mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand. Checkliste: `docs/funktionstest-m2.md`. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Funktionstest M2 (lokal + Server) **bestanden**; M2-01 nachgetestet. Freigabe **M2 Alltag trägt**. Blocker keine. Dokumenten-Layout Angebot/Rechnung (über light hinaus) steht; Vertiefung (Briefpapier, Font-Upload, …) unter Roadmap „Später“. Marke (Logo/Favicon der App, nicht firmen.logo) steht. **Ist-Versteuerung:** Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024).
+- **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand. Checkliste: `docs/funktionstest-m2.md`. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Funktionstest M2 (lokal + Server) **bestanden**; M2-01 nachgetestet. Freigabe **M2 Alltag trägt**. Blocker keine. Dokumenten-Layout Angebot/Rechnung (über light hinaus) steht; Vertiefung (Briefpapier, Font-Upload, …) unter Roadmap „Später“. Marke (Logo/Favicon der App, nicht firmen.logo) steht. **Ist-Versteuerung:** Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). **Multi-User / grobe Rechte:** Mitgliedschaft je Firma, Einladen und Rollen im UI (ADR-0025).
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

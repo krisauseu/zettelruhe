@@ -88,12 +88,14 @@ export default async function ERechnungenListPage({
             Rechnung aus.
           </p>
         </div>
-        <Link
-          href="/app/e-rechnungen/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          E-Rechnung empfangen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/e-rechnungen/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            E-Rechnung empfangen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

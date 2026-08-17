@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireFirmaSession, requireSchreibenSession } from "@/lib/session";
 import { getFirmaById, type Steuermodus } from "@/lib/pb";
 import { parseKatalogCsv } from "./csv";
 import {
@@ -25,7 +25,7 @@ function formCheckbox(formData: FormData, key: string): boolean {
 }
 
 async function requireFirmaId(): Promise<string> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   return session.firmaId;
 }
 

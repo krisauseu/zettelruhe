@@ -6,9 +6,11 @@ import { Select } from "@/components/ui/select";
 export function FirmaSwitcher({
   firmen,
   activeFirmaId,
+  kannFirmaAnlegen,
 }: {
   firmen: { id: string; name: string }[];
   activeFirmaId: string | null;
+  kannFirmaAnlegen: boolean;
 }) {
   const active =
     firmen.find((f) => f.id === activeFirmaId) ?? firmen[0] ?? null;
@@ -23,12 +25,14 @@ export function FirmaSwitcher({
         <p className="truncate text-xs text-muted-foreground" title={active.name}>
           {active.name}
         </p>
-        <Link
-          href="/app/firma/neu"
-          className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-        >
-          Weitere Firma anlegen
-        </Link>
+        {kannFirmaAnlegen ? (
+          <Link
+            href="/app/firma/neu"
+            className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Weitere Firma anlegen
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -60,12 +64,14 @@ export function FirmaSwitcher({
           Wechseln
         </button>
       </noscript>
-      <Link
-        href="/app/firma/neu"
-        className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-      >
-        Weitere Firma anlegen
-      </Link>
+      {kannFirmaAnlegen ? (
+        <Link
+          href="/app/firma/neu"
+          className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
+          Weitere Firma anlegen
+        </Link>
+      ) : null}
     </form>
   );
 }

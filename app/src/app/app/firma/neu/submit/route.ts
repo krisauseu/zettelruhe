@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { validateNeueFirmaInput } from "@/modules/platform/firma-invariants";
 import { createAndActivateFirma } from "@/modules/platform/firma-write";
+import {
+  KEINE_FIRMA_ANLEGEN_ERROR,
+  istInstanzEigentuemer,
+} from "@/modules/platform/rechte";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +20,15 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.redirect(new URL("/login", appUrl), 303);
+  }
+  if (!istInstanzEigentuemer(session.role)) {
+    return NextResponse.redirect(
+      new URL(
+        `/app/firma?error=${encodeURIComponent(KEINE_FIRMA_ANLEGEN_ERROR)}`,
+        appUrl,
+      ),
+      303,
+    );
   }
 
   const formData = await request.formData();

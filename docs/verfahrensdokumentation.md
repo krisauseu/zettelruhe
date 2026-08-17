@@ -12,15 +12,17 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 | Punkt | Inhalt v1 |
 |-------|-----------|
 | System | Zettelruhe (Next.js + PocketBase/SQLite) |
-| Nutzerkreis | Eigentümer:in der Instanz |
+| Nutzerkreis | Instanz-Eigentümer:in plus eingeladene Nutzer:innen mit grober Rolle je Firma |
 | Steuerziel | EÜR; optional USt-Übersicht und ZM-Übersicht bei Regelbesteuerung (Ist-Versteuerung) |
 | Standort Daten | Volume `zettelruhe_pb_data` (Docker Compose) bzw. konfigurierter PB-Datenpfad |
 
 ## 2. Verantwortlichkeiten
 
-- **Eigentümer:in**: Betrieb, Backup, Zugangsdaten, inhaltliche Richtigkeit der Buchungen.
+- **Instanz-Eigentümer:in**: Betrieb, Backup, Setup, weitere Firmen anlegen.
+- **Eigentümer:in der Firma**: Firmeneinstellungen, Einladen, inhaltliche Richtigkeit der Buchungen.
+- **Bearbeiten / Lesen**: Alltag schreiben bzw. nur sehen (ADR-0025).
 - **System**: Erzwingt Festschreibung (keine stillen Änderungen an Journal/Belegdateien),
-  firmengebundene Datentrennung im Schema, Exporte nur für authentifizierte Session.
+  firmengebundene Datentrennung im Schema, Zugang nur mit Mitgliedschaft, Exporte nur für authentifizierte Session.
 
 ## 3. Beleg- und Buchungsprozess (Überblick)
 

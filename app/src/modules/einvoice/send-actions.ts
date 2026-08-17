@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import { parseSendProfil } from "./outbound";
 import {
   EInvoiceValidationError,
@@ -33,7 +33,7 @@ function rechnungUrl(
 export async function pruefeERechnungVersandAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const id = formString(formData, "id");
   if (!id) redirect("/app/rechnungen");
 
@@ -88,7 +88,7 @@ export async function pruefeERechnungVersandAction(
 export async function erzeugeERechnungVersandAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const id = formString(formData, "id");
   if (!id) redirect("/app/rechnungen");
 

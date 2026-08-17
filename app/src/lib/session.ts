@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import type { MitgliedschaftRolle } from "@/modules/platform/rechte";
 import {
   SESSION_COOKIE,
   SESSION_TTL_SECONDS,
@@ -13,6 +15,14 @@ export {
   verifySessionToken,
   type SessionPayload,
 } from "./session-token";
+
+export type FirmaSession = SessionPayload & {
+  firmaId: string;
+  mitgliedschaftRolle: MitgliedschaftRolle;
+  kannSchreiben: boolean;
+  kannVerwalten: boolean;
+  kannFirmaAnlegen: boolean;
+};
 
 /** Secure-Flag nur bei HTTPS-APP_URL (Self-hosted oft HTTP hinter Caddy) */
 function cookieSecure(): boolean {
@@ -58,20 +68,67 @@ export async function requireSession(): Promise<SessionPayload> {
 }
 
 /**
- * Session + aktive Firma.
- * firmaId kommt aus der Session; ungültig/leer fällt auf die erste Firma zurück.
+ * Session + aktive Firma mit Mitgliedschaft (ADR-0025).
+ * firmaId nur, wenn die Nutzer:in Mitglied ist; sonst erste Mitgliedschaft.
  */
-export async function requireFirmaSession(): Promise<
-  SessionPayload & { firmaId: string }
-> {
+export async function requireFirmaSession(): Promise<FirmaSession> {
   const session = await requireSession();
-  // lazy import um Zirkel mit pb↔session zu vermeiden
-  const { resolveAktiveFirmaId } = await import("./pb");
-  const firmaId = await resolveAktiveFirmaId(session.firmaId);
-  if (!firmaId) {
-    throw new Error("Keine Firma vorhanden.");
+  const { resolveMitgliedschaftFuerSession } = await import(
+    "@/modules/platform/mitgliedschaft"
+  );
+  const {
+    hatRecht,
+    istInstanzEigentuemer,
+    KEIN_FIRMA_MITGLIED_ERROR,
+  } = await import("@/modules/platform/rechte");
+  const mitgliedschaft = await resolveMitgliedschaftFuerSession(
+    session.userId,
+    session.firmaId,
+  );
+  if (!mitgliedschaft) {
+    throw new Error(KEIN_FIRMA_MITGLIED_ERROR);
   }
-  return { ...session, firmaId };
+  return {
+    ...session,
+    firmaId: mitgliedschaft.firmaId,
+    mitgliedschaftRolle: mitgliedschaft.rolle,
+    kannSchreiben: hatRecht(mitgliedschaft.rolle, "schreiben"),
+    kannVerwalten: hatRecht(mitgliedschaft.rolle, "verwalten"),
+    kannFirmaAnlegen: istInstanzEigentuemer(session.role),
+  };
+}
+
+export async function requireSchreibenSession(): Promise<FirmaSession> {
+  const session = await requireFirmaSession();
+  if (!session.kannSchreiben) {
+    const { KEINE_AENDERUNG_ERROR } = await import(
+      "@/modules/platform/rechte"
+    );
+    redirect(`/app?error=${encodeURIComponent(KEINE_AENDERUNG_ERROR)}`);
+  }
+  return session;
+}
+
+export async function requireVerwaltenSession(): Promise<FirmaSession> {
+  const session = await requireFirmaSession();
+  if (!session.kannVerwalten) {
+    const { KEINE_VERWALTUNG_ERROR } = await import(
+      "@/modules/platform/rechte"
+    );
+    redirect(`/app?error=${encodeURIComponent(KEINE_VERWALTUNG_ERROR)}`);
+  }
+  return session;
+}
+
+export async function requireInstanzEigentuemerSession(): Promise<SessionPayload> {
+  const session = await requireSession();
+  const { istInstanzEigentuemer, KEINE_FIRMA_ANLEGEN_ERROR } = await import(
+    "@/modules/platform/rechte"
+  );
+  if (!istInstanzEigentuemer(session.role)) {
+    redirect(`/app/firma?error=${encodeURIComponent(KEINE_FIRMA_ANLEGEN_ERROR)}`);
+  }
+  return session;
 }
 
 /** Aktive Firma in der Session setzen und als users.firma merken. */

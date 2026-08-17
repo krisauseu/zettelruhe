@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-17_
 
-**Last session:** 2026-08-17 — Ist-Versteuerung: Journal-Nachzug für Zahlungen (ADR-0024).
+**Last session:** 2026-08-17 — Multi-User / grobe Rechte (ADR-0025).
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0024
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0025
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -34,32 +34,31 @@ _Last updated: 2026-08-17_
 - **Dokumenten-Layout (über M1-10 hinaus):** Angebot und Rechnung teilen ein DIN-ähnliches Gerüst (Fenstertasche, Akzent-Tabelle, Summen). Unter Kleinunternehmerregelung ohne USt-Zeilen + §-19-Hinweis; Regelbesteuerung mit Ausweis. Bankzeile aus dem ersten aktiven Bankkonto mit IBAN; GiroCode (EPC) nur auf der Rechnung. Schalter Header/Fuß/Zahlblock an der Firma. Entwurf weiter ohne Nummernkreis, mit Wasserzeichen. Bestehende Originale unverändert (ADR-0012). E-Rechnungs-XML unangetastet.
 - **Marke (Logo/Favicon):** App-Marke aus `docs/logo-512x512-transparent.png` (Z ohne Schriftzug). Shell oben links, Login und Setup; Favicon + 32×32 + Apple-Touch + PWA-Icons 192/512. Unabhängig von `firmen.logo` auf Angebot/Rechnung.
 - **Ist-Versteuerung / Journal-Nachzug Zahlungen (ADR-0024):** Zahlung (manuell oder Bank-Match) erzeugt festgeschriebene Journal-Zeilen (`quelle_typ=zahlung`, Buchungsdatum = Zahlungsdatum), anteilig nach Steuerstaffel. EÜR, USt, ZM, BWA, Dashboard und DATEV zählen den Zufluss, nicht die Forderungsbuchung der Rechnungs-Festschreibung. Löschen storniert das Zahlungsjournal; Rechnungs-Storno storniert es mit. Bestehende Zahlungen werden idempotent nachgezogen. Kassenbuch aus Barzahlung bleibt eigene Open Decision.
+- **Multi-User / grobe Rechte (ADR-0025):** Mitgliedschaft User↔Firma; Rollen Eigentümer:in / Bearbeiten / Lesen. Einladen unter `/app/nutzer` (Startpasswort, kein SMTP-Pflicht). `users.firma` bleibt zuletzt aktiv. Instanz-Eigentümer:in legt weitere Firmen an. Isolation: Session nur mit Mitgliedschaft. Backfill: bestehende Instanz-Eigentümer:innen werden Eigentümer:in aller vorhandenen Firmen. Schreib-Actions serverseitig geprüft.
 
 ## What's next
 
 **Ausblick (nicht durch den aktuellen Server-Stand verengen):**
 Zettelruhe soll ein Tool für jedermann werden — verschiedene Steuer-Modi, verschiedene Firmagrößen, mehrere Nutzer:innen. Die Arbeitsfirma auf `app.zettelruhe.de` (Kleinunternehmerregelung, eine Eigentümer:in) ist der heutige Betrieb, nicht das Produkt. Priorisierung und nächste Schnitte daran nicht festmachen.
 
-**Gleichwertig sichtbar, noch nicht gebaut** (Reihenfolge untereinander offen; nicht vermischen mit Erledigtem):
+**Als Nächstes sichtbar, noch nicht gebaut** (nicht vermischen mit Erledigtem):
 
-- **UX/UI (App-Layout / CSS-Modernisierung)** — alltägliche App-Oberfläche: Shell, Listen, Formulare, Sidebar, Toasts usw. Eindruck heute: zu monoton / 2000er-Jahre. Eigenständiger Punkt, gleiche Ebene wie Multi-User. Nicht Marke, nicht das erledigte Dokumenten-Layout Angebot/Rechnung, nicht M1-12 UI-Akzente light. Vertiefung Briefpapier / Font-Upload bleibt Roadmap „Später“.
-- **Multi-User / grobe Rechte** — über die eine Eigentümer:in hinaus; Einladen und Rollen im UI. Schema ist vorgesehen, UI fehlt. Eigenständiger Punkt, gleiche Ebene wie UX/UI.
+- **UX/UI (App-Layout / CSS-Modernisierung)** — alltägliche App-Oberfläche: Shell, Listen, Formulare, Sidebar, Toasts usw. Eindruck heute: zu monoton / 2000er-Jahre. Nicht Marke, nicht das erledigte Dokumenten-Layout Angebot/Rechnung, nicht M1-12 UI-Akzente light. Vertiefung Briefpapier / Font-Upload bleibt Roadmap „Später“.
 
 Daneben weiter separat (nicht höher priorisiert, nur weil die Arbeitsfirma kleinunternehmerisch läuft): Hybrid-PDF, übrige Open Decisions.
 
-Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung, Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen).
+Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung, Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte.
 
-Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). Eine Eigentümer:in, mehrere Firmen über die Session (bis Multi-User gebaut ist). de-DE im UI.
+Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). Zugang zu Firmen über Mitgliedschaft (ADR-0025). de-DE im UI.
 
 ## Follow-up
 
-- **UX/UI (App-Layout / CSS-Modernisierung)** — gleichwertig zu Multi-User; Alltag der App, nicht Dokumenten-Layout
-- **Multi-User / grobe Rechte** — gleichwertig zu UX/UI; nicht durch den Ein-Personen-Stand der Arbeitsfirma verengen
+- **UX/UI (App-Layout / CSS-Modernisierung)** — Alltag der App, nicht Dokumenten-Layout
 - Hybrid-PDF und übrige Open Decisions — weiter separat
 
 ## Open decisions
 
-UX/UI und Multi-User sind offene Bauabschnitte (siehe What’s next / Follow-up), keine bloßen Fußnoten zu den Buchhaltungs-Fragen. Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
+UX/UI bleibt offener Bauabschnitt (siehe What’s next / Follow-up). Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
 
 - Automatische Kassenbuch-Buchung aus Rechnungszahlung (Zahlungsweg bar) — bewusst nicht in Abschn. 9
 - MT940-Parser — Follow-up (CSV in v1 produktionsfähig)
@@ -92,4 +91,4 @@ UX/UI und Multi-User sind offene Bauabschnitte (siehe What’s next / Follow-up)
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-17-ist-versteuerung-zahlungsjournal.md`](./sessions/2026-08-17-ist-versteuerung-zahlungsjournal.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-17-multi-user-grobe-rechte.md`](./sessions/2026-08-17-multi-user-grobe-rechte.md)

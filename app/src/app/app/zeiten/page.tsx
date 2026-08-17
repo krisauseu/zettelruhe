@@ -106,12 +106,14 @@ export default async function ZeitenPage({
             Zeiteinträge je Kund:in — Grundlage für die Abrechnung.
           </p>
         </div>
-        <Link
-          href="/app/zeiten/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Zeiteintrag anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/zeiten/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Zeiteintrag anlegen
+          </Link>
+        ) : null}
       </div>
 
       {sp.error ? (

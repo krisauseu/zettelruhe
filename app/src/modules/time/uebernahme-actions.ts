@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import { uebernehmenAlsRechnung } from "./uebernahme";
 
 function formString(formData: FormData, key: string): string {
@@ -17,7 +17,7 @@ function formString(formData: FormData, key: string): string {
 export async function uebernehmenZeitenFahrtenAlsRechnungAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const firmaId = session.firmaId;
   const kunde = formString(formData, "kunde");
   const returnTo = formString(formData, "return_to") || "/app/zeiten";

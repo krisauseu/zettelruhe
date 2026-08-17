@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireSession } from "@/lib/session";
+import { requireInstanzEigentuemerSession } from "@/lib/session";
 import { FirmaAnlegenForm } from "@/modules/platform/firma-anlegen-form";
 import {
   Card,
@@ -18,7 +18,7 @@ export default async function FirmaNeuPage({
 }: {
   searchParams: SearchParams;
 }) {
-  await requireSession();
+  await requireInstanzEigentuemerSession();
   const sp = await searchParams;
 
   return (
@@ -36,8 +36,8 @@ export default async function FirmaNeuPage({
           Weitere Firma anlegen
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Eigene Bücher, eigener Steuer-Modus, eigene Nummernkreise. Du bleibst
-          die eine Eigentümer:in — kein zweites Login.
+          Eigene Bücher, eigener Steuer-Modus, eigene Nummernkreise. Nach dem
+          Anlegen bist du Eigentümer:in dieser Firma.
         </p>
       </div>
 

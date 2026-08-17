@@ -95,12 +95,14 @@ export default async function AngeboteListPage({
             SMTP-Pflicht).
           </p>
         </div>
-        <Link
-          href="/app/angebote/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Angebot anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/angebote/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Angebot anlegen
+          </Link>
+        ) : null}
       </div>
 
       <Card>

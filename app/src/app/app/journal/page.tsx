@@ -83,12 +83,14 @@ export default async function JournalListPage({
             Forderungsbuchung bei Festschreibung.
           </p>
         </div>
-        <Link
-          href="/app/journal/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Manuelle Buchung
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/journal/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Manuelle Buchung
+          </Link>
+        ) : null}
       </div>
 
       <Card>

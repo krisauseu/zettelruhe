@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import { parseKontakteCsv } from "./csv";
 import {
   createAnsprechpartner,
@@ -25,7 +25,7 @@ function formBool(formData: FormData, key: string): boolean {
 }
 
 async function requireFirmaId(): Promise<string> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   return session.firmaId;
 }
 

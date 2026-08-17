@@ -264,7 +264,7 @@ export async function getFirstFirma(): Promise<FirmaRecord | null> {
   return mapFirma(list.items[0]);
 }
 
-/** Alle Firmen der Instanz (eine Eigentümer:in sieht alle). */
+/** Alle Firmen der Instanz (ohne Mitgliedschaftsfilter; Jobs/Admin). */
 export async function listFirmen(): Promise<FirmaRecord[]> {
   const token = await getAdminToken();
   const list = await pbFetch<PbList<PbFirma>>(
@@ -275,8 +275,8 @@ export async function listFirmen(): Promise<FirmaRecord[]> {
 }
 
 /**
- * Bevorzugte Firma, sonst erste vorhandene.
- * users.firma bleibt 1:1 und speichert die zuletzt aktive Firma.
+ * Bevorzugte Firma, sonst erste vorhandene — ohne Mitgliedschaftsprüfung.
+ * Login/Session nutzen resolveMitgliedschaftFuerSession (ADR-0025).
  */
 export async function resolveAktiveFirmaId(
   preferredId: string | null,
@@ -436,6 +436,11 @@ export async function createEigentuemer(input: {
     token,
     body: JSON.stringify(eigentuemerCreateBody(input)),
   });
+  await createRecord("mitgliedschaften", {
+    user: r.id,
+    firma: input.firmaId,
+    rolle: "eigentuemer",
+  });
   return {
     id: r.id,
     email: r.email,
@@ -468,7 +473,7 @@ export async function authWithPassword(
     id: record.id,
     email: record.email,
     name: record.name || email,
-    role: record.role || "eigentuemer",
+    role: record.role || "nutzer",
     firma: record.firma || null,
   };
 }

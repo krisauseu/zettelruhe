@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import {
   sendeAngebotPerMail,
   sendeRechnungPerMail,
@@ -17,7 +17,7 @@ function formString(formData: FormData, key: string): string {
 
 /** Manueller Job-Tick (geschützt) — z. B. von Vorlagen-Liste. */
 export async function runJobsTickAction(formData: FormData): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const returnTo =
     formString(formData, "returnTo") || "/app/wiederkehrende-rechnungen";
 
@@ -51,7 +51,7 @@ export async function runJobsTickAction(formData: FormData): Promise<void> {
 export async function sendeRechnungMailAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const id = formString(formData, "id");
   if (!id) redirect("/app/rechnungen");
 
@@ -78,7 +78,7 @@ export async function sendeRechnungMailAction(
 export async function sendeAngebotMailAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const id = formString(formData, "id");
   if (!id) redirect("/app/angebote");
 
@@ -105,7 +105,7 @@ export async function sendeAngebotMailAction(
 export async function sendeZahlungserinnerungAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const id = formString(formData, "id");
   if (!id) redirect("/app/rechnungen");
 

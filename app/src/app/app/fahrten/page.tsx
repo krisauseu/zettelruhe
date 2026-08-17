@@ -103,12 +103,14 @@ export default async function FahrtenPage({
             Dienstliche Kilometer je Kund:in — standardmäßig abrechenbar.
           </p>
         </div>
-        <Link
-          href="/app/fahrten/neu"
-          className={cn(buttonVariants({ size: "sm" }))}
-        >
-          Fahrt anlegen
-        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/fahrten/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Fahrt anlegen
+          </Link>
+        ) : null}
       </div>
 
       {sp.error ? (

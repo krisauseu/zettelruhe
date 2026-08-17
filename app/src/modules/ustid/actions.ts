@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getFirmaById } from "@/lib/pb";
-import { requireFirmaSession } from "@/lib/session";
+import { requireSchreibenSession } from "@/lib/session";
 import { getKontakt } from "@/modules/contacts";
 import { evatrAbfrage } from "./evatr";
 import { eigeneUstIdLage } from "./format";
@@ -28,7 +28,7 @@ function formBool(formData: FormData, key: string): boolean {
 export async function pruefeKontaktUstIdAction(
   formData: FormData,
 ): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const kontaktId = formString(formData, "kontaktId");
   if (!kontaktId) redirect("/app/kontakte");
 
@@ -112,7 +112,7 @@ export async function pruefeKontaktUstIdAction(
  * Zeigt die ehrliche Lage der gespeicherten Syntax.
  */
 export async function pruefeEigeneUstIdAction(): Promise<void> {
-  const session = await requireFirmaSession();
+  const session = await requireSchreibenSession();
   const firma = await getFirmaById(session.firmaId);
   if (!firma) {
     redirect(`/app/firma?error=${encodeURIComponent("Firma nicht gefunden.")}`);

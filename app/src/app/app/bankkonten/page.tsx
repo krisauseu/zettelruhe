@@ -66,12 +66,14 @@ export default async function BankkontenListPage({
           >
             Kontoauszug
           </Link>
-          <Link
-            href="/app/bankkonten/neu"
-            className={cn(buttonVariants({ size: "sm" }))}
-          >
-            Bankkonto anlegen
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href="/app/bankkonten/neu"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              Bankkonto anlegen
+            </Link>
+          ) : null}
         </div>
       </div>
 
