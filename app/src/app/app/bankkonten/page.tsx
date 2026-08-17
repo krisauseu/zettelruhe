@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -49,33 +50,25 @@ export default async function BankkontenListPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Bankkonten
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stammdaten für unbare Zahlwege und Kontoauszugs-Import. Getrennt
-            vom Kassenbuch.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader
+        title="Bankkonten"
+        description="Stammdaten für unbare Zahlwege und Kontoauszugs-Import. Getrennt vom Kassenbuch."
+      >
+        <Link
+          href="/app/kontoauszug"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          Kontoauszug
+        </Link>
+        {session.kannSchreiben ? (
           <Link
-            href="/app/kontoauszug"
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            href="/app/bankkonten/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
           >
-            Kontoauszug
+            Bankkonto anlegen
           </Link>
-          {session.kannSchreiben ? (
-            <Link
-              href="/app/bankkonten/neu"
-              className={cn(buttonVariants({ size: "sm" }))}
-            >
-              Bankkonto anlegen
-            </Link>
-          ) : null}
-        </div>
-      </div>
+        ) : null}
+      </PageHeader>
 
       {sp.deleted ? (
         <p className="text-sm text-success" role="status">
@@ -83,7 +76,7 @@ export default async function BankkontenListPage({
         </p>
       ) : null}
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>Nach Name, IBAN oder Notiz suchen.</CardDescription>

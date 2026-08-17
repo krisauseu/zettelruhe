@@ -30,6 +30,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import type { ZmLandGruppe } from "@/modules/reporting/types";
 
@@ -66,17 +67,17 @@ export default async function ZmPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Zusammenfassende Meldung
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Vorbereitung Mein Elster — Werte selbst eintragen, kein Versand ·{" "}
-          {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)}
-        </p>
-      </div>
+      <PageHeader
+        title="Zusammenfassende Meldung"
+        description={
+          <>
+            Vorbereitung Mein Elster — Werte selbst eintragen, kein Versand ·{" "}
+            {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)}
+          </>
+        }
+      />
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Zeitraum</CardTitle>
           <CardDescription>

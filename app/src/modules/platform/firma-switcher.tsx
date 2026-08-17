@@ -22,13 +22,13 @@ export function FirmaSwitcher({
   if (firmen.length === 1) {
     return (
       <div className="mt-2 space-y-1">
-        <p className="truncate text-xs text-muted-foreground" title={active.name}>
+        <p className="truncate text-xs text-sidebar-muted" title={active.name}>
           {active.name}
         </p>
         {kannFirmaAnlegen ? (
           <Link
             href="/app/firma/neu"
-            className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            className="block text-[11px] text-sidebar-muted underline-offset-2 hover:text-sidebar-foreground hover:underline"
           >
             Weitere Firma anlegen
           </Link>
@@ -47,7 +47,7 @@ export function FirmaSwitcher({
         name="firmaId"
         key={active.id}
         defaultValue={active.id}
-        className="h-8 px-2 pr-7 text-xs"
+        className="h-8 border-sidebar-border bg-black/25 px-2 pr-7 text-xs text-sidebar-foreground shadow-none"
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
       >
         {firmen.map((f) => (
@@ -59,7 +59,7 @@ export function FirmaSwitcher({
       <noscript>
         <button
           type="submit"
-          className="text-[11px] text-muted-foreground underline"
+          className="text-[11px] text-sidebar-muted underline"
         >
           Wechseln
         </button>
@@ -67,7 +67,7 @@ export function FirmaSwitcher({
       {kannFirmaAnlegen ? (
         <Link
           href="/app/firma/neu"
-          className="block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          className="block text-[11px] text-sidebar-muted underline-offset-2 hover:text-sidebar-foreground hover:underline"
         >
           Weitere Firma anlegen
         </Link>

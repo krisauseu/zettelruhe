@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -66,16 +67,10 @@ export default async function ProjektePage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Projekte
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Optionale Arbeitseinheiten je Kund:in — Zeiten und Fahrten können
-            zugeordnet werden.
-          </p>
-        </div>
+      <PageHeader
+        title="Projekte"
+        description="Optionale Arbeitseinheiten je Kund:in — Zeiten und Fahrten können zugeordnet werden."
+      >
         {session.kannSchreiben ? (
           <Link
             href="/app/projekte/neu"
@@ -84,9 +79,9 @@ export default async function ProjektePage({
             Projekt anlegen
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>

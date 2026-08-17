@@ -81,16 +81,16 @@ export function AppShell({
 }) {
   return (
     <div className="flex min-h-full flex-1 bg-background">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
+      <aside className="flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
         <div className="relative border-b border-sidebar-border px-4 py-5">
           <div
-            className="absolute inset-x-0 top-0 h-0.5 bg-primary"
+            className="absolute inset-x-0 top-0 h-0.5 bg-sidebar-primary"
             aria-hidden
           />
           <Link href="/app" className="inline-flex rounded-sm">
-            <BrandMark />
+            <BrandMark className="text-sidebar-foreground" />
           </Link>
-          <p className="mt-1 truncate text-xs text-muted-foreground">
+          <p className="mt-2 truncate text-xs text-sidebar-muted">
             {session.name}
             {mitgliedschaftRolle
               ? ` · ${MITGLIEDSCHAFT_ROLLE_LABELS[mitgliedschaftRolle]}`
@@ -105,13 +105,13 @@ export function AppShell({
 
         <AppNav items={buildNav(kannVerwalten)} />
 
-        <div className="mt-auto space-y-1 border-t border-sidebar-border p-3">
+        <div className="mt-auto space-y-0.5 border-t border-sidebar-border p-3">
           <ThemeToggle />
           <Link
             href="/app/passwort"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "w-full justify-start text-sidebar-foreground/80",
+              "w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             )}
           >
             <KeyRound className="h-4 w-4" aria-hidden />
@@ -122,7 +122,7 @@ export function AppShell({
               type="submit"
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-sidebar-foreground/80"
+              className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <LogOut className="h-4 w-4" aria-hidden />
               Abmelden
@@ -137,13 +137,13 @@ export function AppShell({
         </Suspense>
         {!kannSchreiben && mitgliedschaftRolle === "lesen" ? (
           <div
-            className="border-b border-border bg-muted/40 px-6 py-2 text-sm text-muted-foreground md:px-8"
+            className="border-b border-warning/30 bg-warning/10 px-6 py-2 text-sm text-foreground md:px-8"
             role="status"
           >
             Lesezugriff auf diese Firma — Änderungen sind nicht erlaubt.
           </div>
         ) : null}
-        <div className="mx-auto min-h-full p-6 md:p-8">{children}</div>
+        <div className="mx-auto min-h-full p-6 md:p-9">{children}</div>
       </main>
     </div>
   );

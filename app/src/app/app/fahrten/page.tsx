@@ -15,6 +15,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -94,15 +95,10 @@ export default async function FahrtenPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Fahrten
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Dienstliche Kilometer je Kund:in — standardmäßig abrechenbar.
-          </p>
-        </div>
+      <PageHeader
+        title="Fahrten"
+        description="Dienstliche Kilometer je Kund:in — standardmäßig abrechenbar."
+      >
         {session.kannSchreiben ? (
           <Link
             href="/app/fahrten/neu"
@@ -111,7 +107,7 @@ export default async function FahrtenPage({
             Fahrt anlegen
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
       {sp.error ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -119,7 +115,7 @@ export default async function FahrtenPage({
         </p>
       ) : null}
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>

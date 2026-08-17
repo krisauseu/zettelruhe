@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -46,17 +47,18 @@ export default async function ExportPage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Export
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          DATEV light, Journal-CSV und Belegarchiv für Steuerkanzlei und Prüfung ·{" "}
-          {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)}
-        </p>
-      </div>
+      <PageHeader
+        title="Export"
+        description={
+          <>
+            DATEV light, Journal-CSV und Belegarchiv für Steuerkanzlei und
+            Prüfung · {formatDateDe(zeitraum.von)} –{" "}
+            {formatDateDe(zeitraum.bis)}
+          </>
+        }
+      />
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Zeitraum</CardTitle>
           <CardDescription>

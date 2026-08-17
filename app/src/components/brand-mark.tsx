@@ -9,6 +9,7 @@ const SIZES = {
 /**
  * App-Marke Zettelruhe (nicht firmen.logo auf Angebot/Rechnung).
  * Transparentes Z — taugt für Hell- und Dunkelmodus.
+ * Wortmarke erbt die Textfarbe vom Wrapper (Sidebar vs. Login).
  */
 export function BrandMark({
   size = "sm",
@@ -21,7 +22,12 @@ export function BrandMark({
 }) {
   const spec = SIZES[size];
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-2.5 text-primary",
+        className,
+      )}
+    >
       <Image
         src="/brand/zettelruhe-mark.png"
         alt=""
@@ -31,7 +37,7 @@ export function BrandMark({
         preload
       />
       {wordmark ? (
-        <span className="text-lg font-semibold tracking-tight text-primary">
+        <span className="text-lg font-semibold tracking-tight">
           Zettelruhe
         </span>
       ) : (

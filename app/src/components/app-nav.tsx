@@ -178,17 +178,17 @@ export function AppNav({ items }: { items: NavItem[] }) {
         <div className="flex flex-wrap items-center gap-x-1.5">
           <button
             type="button"
-            className="cursor-pointer text-muted-foreground hover:text-sidebar-foreground"
+            className="cursor-pointer text-sidebar-muted hover:text-sidebar-foreground"
             onClick={() => update(setAllCollapsed(prefs, sectionIds, false))}
           >
             Alle öffnen
           </button>
-          <span className="text-muted-foreground/40" aria-hidden>
+          <span className="text-sidebar-muted/40" aria-hidden>
             |
           </span>
           <button
             type="button"
-            className="cursor-pointer text-muted-foreground hover:text-sidebar-foreground"
+            className="cursor-pointer text-sidebar-muted hover:text-sidebar-foreground"
             onClick={() => update(setAllCollapsed(prefs, sectionIds, true))}
           >
             Alle schließen
@@ -201,7 +201,7 @@ export function AppNav({ items }: { items: NavItem[] }) {
             "w-fit cursor-pointer hover:text-sidebar-foreground",
             viewPrefs.favoritesOnly
               ? "font-semibold text-sidebar-primary"
-              : "text-muted-foreground",
+              : "text-sidebar-muted",
           )}
           onClick={() =>
             update(setFavoritesOnly(prefs, !viewPrefs.favoritesOnly))
@@ -212,7 +212,7 @@ export function AppNav({ items }: { items: NavItem[] }) {
       </div>
 
       {viewPrefs.favoritesOnly && viewPrefs.favorites.length === 0 ? (
-        <p className="px-3 pb-1 text-[10px] leading-4 text-muted-foreground">
+        <p className="px-3 pb-1 text-[10px] leading-4 text-sidebar-muted">
           Keine Favoriten. Stern an einem Eintrag setzen.
         </p>
       ) : null}
@@ -234,7 +234,7 @@ export function AppNav({ items }: { items: NavItem[] }) {
                 id={headingId}
                 aria-expanded={!collapsed}
                 aria-controls={panelId}
-                className="flex w-full cursor-pointer items-center gap-1 px-3 pb-1 pt-3 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-sidebar-foreground"
+                className="flex w-full cursor-pointer items-center gap-1 px-3 pb-1 pt-3.5 text-left text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted hover:text-sidebar-foreground"
                 onClick={() => update(toggleCollapsed(prefs, section.id))}
               >
                 <ChevronRight
@@ -285,15 +285,21 @@ function NavLinkRow({
   return (
     <div
       className={cn(
-        "group flex items-center rounded-lg",
+        "group relative flex items-center rounded-lg",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+          : "text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
       )}
     >
+      {active ? (
+        <span
+          className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-sidebar-primary"
+          aria-hidden
+        />
+      ) : null}
       <Link
         href={item.href}
-        className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-1.5 text-sm font-medium"
+        className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-[13px] font-medium"
         aria-current={active ? "page" : undefined}
       >
         <Icon
@@ -315,9 +321,9 @@ function NavLinkRow({
         aria-pressed={favorite}
         onClick={onToggleFavorite}
         className={cn(
-          "mr-0.5 shrink-0 rounded-md p-1 text-muted-foreground hover:text-sidebar-foreground",
+          "mr-0.5 shrink-0 rounded-md p-1 text-sidebar-muted hover:text-sidebar-foreground",
           favorite
-            ? "opacity-100 text-sidebar-primary"
+            ? "text-sidebar-primary opacity-100"
             : "opacity-70 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100",
         )}
       >

@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -77,17 +78,10 @@ export default async function ERechnungenListPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            E-Rechnungen
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Empfang: XRechnung/ZUGFeRD hochladen, Original archivieren, Beleg
-            vorbefüllen. Versand einer E-Rechnung von der festgeschriebenen
-            Rechnung aus.
-          </p>
-        </div>
+      <PageHeader
+        title="E-Rechnungen"
+        description="Empfang: XRechnung/ZUGFeRD hochladen, Original archivieren, Beleg vorbefüllen. Versand einer E-Rechnung von der festgeschriebenen Rechnung aus."
+      >
         {session.kannSchreiben ? (
           <Link
             href="/app/e-rechnungen/neu"
@@ -96,9 +90,9 @@ export default async function ERechnungenListPage({
             E-Rechnung empfangen
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>

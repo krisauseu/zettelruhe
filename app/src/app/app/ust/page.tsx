@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 import type { UstvaKennzahlZeile } from "@/modules/reporting";
 
@@ -67,18 +68,18 @@ export default async function UstPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          USt-Übersicht
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Vorbereitung Mein Elster — Werte selbst eintragen oder XML lokal
-          speichern, kein Versand · {formatDateDe(zeitraum.von)} –{" "}
-          {formatDateDe(zeitraum.bis)}
-        </p>
-      </div>
+      <PageHeader
+        title="USt-Übersicht"
+        description={
+          <>
+            Vorbereitung Mein Elster — Werte selbst eintragen oder XML lokal
+            speichern, kein Versand · {formatDateDe(zeitraum.von)} –{" "}
+            {formatDateDe(zeitraum.bis)}
+          </>
+        }
+      />
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Zeitraum</CardTitle>
           <CardDescription>

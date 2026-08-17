@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -57,42 +58,35 @@ export default async function KontaktePage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Kontakte
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Kund:innen und Lieferant:innen der Firma.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {session.kannSchreiben ? (
-            <Link
-              href="/app/kontakte/import"
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-            >
-              CSV-Import
-            </Link>
-          ) : null}
+      <PageHeader
+        title="Kontakte"
+        description="Kund:innen und Lieferant:innen der Firma."
+      >
+        {session.kannSchreiben ? (
           <Link
-            href="/app/kontakte/export"
+            href="/app/kontakte/import"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
           >
-            CSV-Export
+            CSV-Import
           </Link>
-          {session.kannSchreiben ? (
-            <Link
-              href="/app/kontakte/neu"
-              className={cn(buttonVariants({ size: "sm" }))}
-            >
-              Kontakt anlegen
-            </Link>
-          ) : null}
-        </div>
-      </div>
+        ) : null}
+        <Link
+          href="/app/kontakte/export"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          CSV-Export
+        </Link>
+        {session.kannSchreiben ? (
+          <Link
+            href="/app/kontakte/neu"
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Kontakt anlegen
+          </Link>
+        ) : null}
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Suche & Filter</CardTitle>
           <CardDescription>

@@ -47,7 +47,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={toggle}
-      className="w-full justify-start text-sidebar-foreground/80"
+      className="w-full justify-start text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       aria-label={
         theme === "dark" ? "Hellmodus aktivieren" : "Dunkelmodus aktivieren"
       }

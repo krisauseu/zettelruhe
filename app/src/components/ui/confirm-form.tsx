@@ -50,7 +50,7 @@ export function ConfirmForm({
 
       {open ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/30 p-4 backdrop-blur-[2px]"
           role="presentation"
           onClick={() => setOpen(false)}
         >
@@ -58,7 +58,7 @@ export function ConfirmForm({
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
-            className="w-full max-w-md rounded-lg border border-border bg-card p-5 shadow-xl"
+            className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-toast"
             onClick={(e) => e.stopPropagation()}
           >
             <h2

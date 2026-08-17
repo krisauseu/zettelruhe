@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -81,19 +82,18 @@ export default async function WiederkehrendeRechnungenPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Wiederkehrende Rechnungen
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title="Wiederkehrende Rechnungen"
+        description={
+          <>
             Vorlagen mit Rhythmus — der Job erzeugt Rechnungs-Entwürfe
             (Nummernkreis erst bei Festschreibung). Heute:{" "}
             {formatDateDe(heute)}.
-          </p>
-        </div>
+          </>
+        }
+      >
         {session.kannSchreiben ? (
-          <div className="flex flex-wrap gap-2">
+          <>
             <form action={runJobsTickAction}>
               <input
                 type="hidden"
@@ -110,9 +110,9 @@ export default async function WiederkehrendeRechnungenPage({
             >
               Vorlage anlegen
             </Link>
-          </div>
+          </>
         ) : null}
-      </div>
+      </PageHeader>
 
       {sp.error ? (
         <p className="text-sm text-destructive">{sp.error}</p>
@@ -144,7 +144,7 @@ export default async function WiederkehrendeRechnungenPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
         </CardHeader>

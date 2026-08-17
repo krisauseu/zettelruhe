@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -38,16 +39,12 @@ export default async function SuchePage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Suche
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Light-Suche über Kontakte, Rechnungen, Belege und Angebote.
-        </p>
-      </div>
+      <PageHeader
+        title="Suche"
+        description="Light-Suche über Kontakte, Rechnungen, Belege und Angebote."
+      />
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Suchbegriff</CardTitle>
           <CardDescription>Mindestens 2 Zeichen.</CardDescription>

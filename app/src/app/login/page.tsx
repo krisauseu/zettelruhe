@@ -24,13 +24,13 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-background p-6">
+    <div className="flex flex-1 flex-col items-center justify-center bg-gradient-to-b from-primary/12 via-background to-background p-6">
       <BrandMark size="md" className="mb-6" />
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Anmelden</CardTitle>
           <CardDescription>
-            Melde dich als Eigentümer:in bei Zettelruhe an.
+            Melde dich bei Zettelruhe an.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -38,34 +39,31 @@ export default async function AuswertungenPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Auswertungen
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title="Auswertungen"
+        description={
+          <>
             Dashboard light und BWA light aus dem Buchungsjournal. Zeitraum:{" "}
-            {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)} (
-            Europe/Berlin).
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/app/eur?preset=${encodeURIComponent(preset)}&von=${zeitraum.von}&bis=${zeitraum.bis}`}
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-          >
-            EÜR
-          </Link>
-          <Link
-            href={`/app/export?preset=${encodeURIComponent(preset)}&von=${zeitraum.von}&bis=${zeitraum.bis}`}
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-          >
-            Export
-          </Link>
-        </div>
-      </div>
+            {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)}{" "}
+            (Europe/Berlin).
+          </>
+        }
+      >
+        <Link
+          href={`/app/eur?preset=${encodeURIComponent(preset)}&von=${zeitraum.von}&bis=${zeitraum.bis}`}
+          className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+        >
+          EÜR
+        </Link>
+        <Link
+          href={`/app/export?preset=${encodeURIComponent(preset)}&von=${zeitraum.von}&bis=${zeitraum.bis}`}
+          className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+        >
+          Export
+        </Link>
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Zeitraum</CardTitle>
           <CardDescription>

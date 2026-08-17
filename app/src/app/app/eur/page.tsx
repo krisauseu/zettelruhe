@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -43,18 +44,18 @@ export default async function EurPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          EÜR
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Einnahmen-Überschuss-Rechnung light ·{" "}
-          {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)} ·{" "}
-          {eur.anzahl_buchungen} Buchungen
-        </p>
-      </div>
+      <PageHeader
+        title="EÜR"
+        description={
+          <>
+            Einnahmen-Überschuss-Rechnung light ·{" "}
+            {formatDateDe(zeitraum.von)} – {formatDateDe(zeitraum.bis)} ·{" "}
+            {eur.anzahl_buchungen} Buchungen
+          </>
+        }
+      />
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Zeitraum</CardTitle>
           <CardDescription>

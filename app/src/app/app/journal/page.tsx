@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -72,17 +73,10 @@ export default async function JournalListPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Buchungsjournal
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Unveränderbare, fortlaufende Buchungen. Anlegen = Festschreibung.
-            Zahlungen erzeugen eine Zufluss-Buchung; die Rechnung bleibt die
-            Forderungsbuchung bei Festschreibung.
-          </p>
-        </div>
+      <PageHeader
+        title="Buchungsjournal"
+        description="Unveränderbare, fortlaufende Buchungen. Anlegen = Festschreibung. Zahlungen erzeugen eine Zufluss-Buchung; die Rechnung bleibt die Forderungsbuchung bei Festschreibung."
+      >
         {session.kannSchreiben ? (
           <Link
             href="/app/journal/neu"
@@ -91,9 +85,9 @@ export default async function JournalListPage({
             Manuelle Buchung
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>

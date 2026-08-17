@@ -1,4 +1,13 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
+import {
+  Clock,
+  Contact,
+  Download,
+  FileText,
+  Receipt,
+  Search,
+} from "lucide-react";
 import { getSession, requireFirmaSession } from "@/lib/session";
 import { getFirmaById } from "@/lib/pb";
 import { formatMoneyDe } from "@/lib/money";
@@ -19,18 +28,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 const QUICK_LINKS = [
-  { href: "/app/rechnungen/neu", label: "Rechnung" },
-  { href: "/app/belege/neu", label: "Beleg" },
-  { href: "/app/kontakte/neu", label: "Kontakt" },
-  { href: "/app/zeiten/neu", label: "Zeit" },
-  { href: "/app/suche", label: "Suche" },
-  { href: "/app/export", label: "Export" },
+  { href: "/app/rechnungen/neu", label: "Rechnung", icon: FileText },
+  { href: "/app/belege/neu", label: "Beleg", icon: Receipt },
+  { href: "/app/kontakte/neu", label: "Kontakt", icon: Contact },
+  { href: "/app/zeiten/neu", label: "Zeit", icon: Clock },
+  { href: "/app/suche", label: "Suche", icon: Search },
+  { href: "/app/export", label: "Export", icon: Download },
 ] as const;
 
 export default async function AppHomePage() {
@@ -60,169 +70,142 @@ export default async function AppHomePage() {
     dash.offene_posten_anzahl === 0;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Übersicht
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Stammdaten und Kennzahlen light
-            {dash
-              ? ` · Monat ${formatDateDe(dash.zeitraum.von)} – ${formatDateDe(dash.zeitraum.bis)}`
-              : ""}
-            .
-          </p>
-        </div>
+    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+      <PageHeader
+        title="Übersicht"
+        description={
+          dash
+            ? `Kennzahlen light · Monat ${formatDateDe(dash.zeitraum.von)} – ${formatDateDe(dash.zeitraum.bis)}`
+            : "Stammdaten und Kennzahlen light."
+        }
+      >
+        <Link
+          href="/app/suche"
+          className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+        >
+          Suche
+        </Link>
+        <Link
+          href="/app/auswertungen"
+          className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+        >
+          Auswertungen
+        </Link>
+      </PageHeader>
+
+      {firma ? (
+        <dl className="grid gap-4 rounded-xl border border-border/70 bg-card px-5 py-4 shadow-card sm:grid-cols-3">
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">
+              Firma
+            </dt>
+            <dd className="mt-1 font-medium tracking-tight">{firma.name}</dd>
+            <dd className="mt-0.5 text-xs text-muted-foreground">
+              {rollenLabel
+                ? `${session?.name} · ${rollenLabel}`
+                : session?.name}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">
+              Steuer-Modus
+            </dt>
+            <dd className="mt-1 font-medium tracking-tight">
+              {STEUERMODUS_LABELS[firma.steuermodus]}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium text-muted-foreground">
+              Kontenrahmen
+            </dt>
+            <dd className="mt-1 font-medium tracking-tight">
+              {SKR_LABELS[firma.skr]}
+            </dd>
+          </div>
+        </dl>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Willkommen, {session?.name}</CardTitle>
+            <CardDescription>
+              Keine Firma gefunden. Bitte Setup erneut durchlaufen oder Support
+              prüfen.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Schnellstart
+        </h2>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/app/suche"
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-          >
-            Suche
-          </Link>
-          <Link
-            href="/app/auswertungen"
-            className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
-          >
-            Auswertungen
-          </Link>
+          {QUICK_LINKS.filter(
+            (l) => kannSchreiben || !l.href.endsWith("/neu"),
+          ).map((l) => {
+            const Icon = l.icon;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  buttonVariants({ size: "sm", variant: "outline" }),
+                )}
+              >
+                <Icon aria-hidden />
+                {l.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Willkommen, {session?.name}</CardTitle>
-          <CardDescription>
-            {rollenLabel
-              ? `Angemeldet als ${rollenLabel} dieser Firma.`
-              : "Angemeldet."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-foreground">
-          {firma ? (
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Firma
-                </dt>
-                <dd className="mt-1 font-medium">{firma.name}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Steuer-Modus
-                </dt>
-                <dd className="mt-1 font-medium">
-                  {STEUERMODUS_LABELS[firma.steuermodus]}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Kontenrahmen
-                </dt>
-                <dd className="mt-1 font-medium">{SKR_LABELS[firma.skr]}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="text-muted-foreground">
-              Keine Firma gefunden. Bitte Setup erneut durchlaufen oder Support
-              prüfen.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Schnellstart</CardTitle>
-          <CardDescription>
-            Häufige Schritte im Alltag.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {QUICK_LINKS.filter(
-            (l) => kannSchreiben || !l.href.endsWith("/neu"),
-          ).map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={cn(buttonVariants({ size: "sm", variant: "secondary" }))}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </CardContent>
-      </Card>
-
       {dash ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Einnahmen (Monat)</CardDescription>
-              <CardTitle className="text-xl tabular-nums">
-                {formatMoneyDe(dash.einnahmen_brutto, { currency: true })}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Ausgaben (Monat)</CardDescription>
-              <CardTitle className="text-xl tabular-nums">
-                {formatMoneyDe(dash.ausgaben_brutto, { currency: true })}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Offene Posten</CardDescription>
-              <CardTitle className="text-xl tabular-nums">
-                {formatMoneyDe(dash.offene_posten_summe, { currency: true })}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground">
-              <Link href="/app/zahlungen" className="text-primary hover:underline">
-                {dash.offene_posten_anzahl} offen
-              </Link>
-            </CardContent>
-          </Card>
+          <KpiCard
+            label="Einnahmen (Monat)"
+            value={formatMoneyDe(dash.einnahmen_brutto, { currency: true })}
+          />
+          <KpiCard
+            label="Ausgaben (Monat)"
+            value={formatMoneyDe(dash.ausgaben_brutto, { currency: true })}
+          />
+          <KpiCard
+            label="Offene Posten"
+            value={formatMoneyDe(dash.offene_posten_summe, { currency: true })}
+          >
+            <Link href="/app/zahlungen" className="text-primary hover:underline">
+              {dash.offene_posten_anzahl} offen
+            </Link>
+          </KpiCard>
           {dash.ust_zahllast != null ? (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>USt-Zahllast light</CardDescription>
-                <CardTitle className="text-xl tabular-nums">
-                  {formatMoneyDe(dash.ust_zahllast, { currency: true })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
-                <Link href="/app/ust" className="text-primary hover:underline">
-                  USt-Übersicht
-                </Link>
-                {" · "}
-                <Link href="/app/zm" className="text-primary hover:underline">
-                  ZM-Übersicht
-                </Link>
-              </CardContent>
-            </Card>
+            <KpiCard
+              label="USt-Zahllast light"
+              value={formatMoneyDe(dash.ust_zahllast, { currency: true })}
+            >
+              <Link href="/app/ust" className="text-primary hover:underline">
+                USt-Übersicht
+              </Link>
+              {" · "}
+              <Link href="/app/zm" className="text-primary hover:underline">
+                ZM-Übersicht
+              </Link>
+            </KpiCard>
           ) : (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription>Überschuss light</CardDescription>
-                <CardTitle className="text-xl tabular-nums">
-                  {formatMoneyDe(dash.ueberschuss_brutto, { currency: true })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
-                <Link href="/app/eur" className="text-primary hover:underline">
-                  zur EÜR
-                </Link>
-              </CardContent>
-            </Card>
+            <KpiCard
+              label="Überschuss light"
+              value={formatMoneyDe(dash.ueberschuss_brutto, { currency: true })}
+            >
+              <Link href="/app/eur" className="text-primary hover:underline">
+                zur EÜR
+              </Link>
+            </KpiCard>
           )}
         </div>
       ) : null}
 
       {quietMonth ? (
-        <Card className="border-dashed">
+        <Card variant="muted" className="border-dashed">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Noch ruhiger Monat</CardTitle>
             <CardDescription>
@@ -269,5 +252,33 @@ export default async function AppHomePage() {
         </p>
       ) : null}
     </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value: string;
+  children?: ReactNode;
+}) {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="gap-2 pb-4">
+        <CardDescription className="text-xs font-medium tracking-wide">
+          {label}
+        </CardDescription>
+        <CardTitle className="text-2xl font-semibold tabular-nums tracking-tight">
+          {value}
+        </CardTitle>
+      </CardHeader>
+      {children ? (
+        <CardContent className="pt-0 text-xs text-muted-foreground">
+          {children}
+        </CardContent>
+      ) : null}
+    </Card>
   );
 }

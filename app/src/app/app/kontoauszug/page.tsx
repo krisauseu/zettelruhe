@@ -37,6 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -126,23 +127,17 @@ export default async function KontoauszugPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Kontoauszug
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Importierte Bankbewegungen zuordnen (Matching → Zahlung). Kein
-            stiller Auto-Match — Vorschlag annehmen oder Rechnung wählen.
-          </p>
-        </div>
+      <PageHeader
+        title="Kontoauszug"
+        description="Importierte Bankbewegungen zuordnen (Matching → Zahlung). Kein stiller Auto-Match — Vorschlag annehmen oder Rechnung wählen."
+      >
         <Link
           href="/app/bankkonten"
           className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
         >
           Bankkonten
         </Link>
-      </div>
+      </PageHeader>
 
       {sp.matched ? (
         <p className="text-sm text-success" role="status">
@@ -165,7 +160,7 @@ export default async function KontoauszugPage({
         </p>
       ) : null}
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
         </CardHeader>

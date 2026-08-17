@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = "force-dynamic";
 
@@ -42,16 +43,10 @@ export default async function ZahlungenPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Zahlungen
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Offene Posten — festgeschriebene Rechnungen mit Restbetrag.
-          Zahlungen erfassen Sie auf der jeweiligen Rechnung. Jede Zahlung
-          erzeugt eine Zufluss-Buchung im Journal.
-        </p>
-      </div>
+      <PageHeader
+        title="Zahlungen"
+        description="Offene Posten — festgeschriebene Rechnungen mit Restbetrag. Zahlungen erfassen Sie auf der jeweiligen Rechnung. Jede Zahlung erzeugt eine Zufluss-Buchung im Journal."
+      />
 
       <Card className="overflow-hidden">
         <CardHeader className="pb-3">

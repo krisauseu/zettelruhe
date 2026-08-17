@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { CircleAlert, CircleCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const FLASH_KEYS = [
@@ -87,17 +88,26 @@ export function FlashToast() {
 
   if (!toast) return null;
 
+  const Icon = toast.tone === "error" ? CircleAlert : CircleCheck;
+
   return (
     <div
       role="status"
       className={cn(
-        "pointer-events-auto fixed right-4 top-4 z-50 max-w-sm rounded-lg border bg-card px-4 py-3 text-sm text-foreground shadow-lg",
+        "pointer-events-auto fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border bg-card px-4 py-3 text-sm text-foreground shadow-toast",
         toast.tone === "error"
-          ? "border-destructive/40 border-l-4 border-l-destructive"
-          : "border-success/30 border-l-4 border-l-success",
+          ? "border-destructive/30"
+          : "border-success/25",
       )}
     >
       <div className="flex items-start gap-3">
+        <Icon
+          className={cn(
+            "mt-0.5 h-4 w-4 shrink-0",
+            toast.tone === "error" ? "text-destructive" : "text-success",
+          )}
+          aria-hidden
+        />
         <p className="flex-1 leading-snug">{toast.text}</p>
         <button
           type="button"

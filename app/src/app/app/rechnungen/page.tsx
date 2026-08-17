@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -78,16 +79,10 @@ export default async function RechnungenListPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Rechnungen
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Freie Rechnungen — Entwurf mit Vorschau, bei Festschreibung Nummer,
-            Original-PDF und Buchungsjournal.
-          </p>
-        </div>
+      <PageHeader
+        title="Rechnungen"
+        description="Freie Rechnungen — Entwurf mit Vorschau, bei Festschreibung Nummer, Original-PDF und Buchungsjournal."
+      >
         {session.kannSchreiben ? (
           <Link
             href="/app/rechnungen/neu"
@@ -96,9 +91,9 @@ export default async function RechnungenListPage({
             Rechnung anlegen
           </Link>
         ) : null}
-      </div>
+      </PageHeader>
 
-      <Card>
+      <Card variant="muted">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Filter</CardTitle>
           <CardDescription>

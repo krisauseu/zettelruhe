@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 /**
  * Einheitlicher leerer Listen-/Bereichszustand (de-DE, BA14).
@@ -20,17 +21,19 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-start gap-2 p-6 text-sm text-muted-foreground",
+        "flex flex-col items-start gap-2 px-8 py-12 text-sm text-muted-foreground",
         className,
       )}
       role="status"
     >
-      <p className="font-medium text-foreground">{title}</p>
-      {description ? <p className="max-w-prose leading-relaxed">{description}</p> : null}
+      <p className="text-base font-medium text-foreground">{title}</p>
+      {description ? (
+        <p className="max-w-prose leading-relaxed">{description}</p>
+      ) : null}
       {actionHref && actionLabel ? (
         <Link
           href={actionHref}
-          className="mt-1 font-medium text-primary underline-offset-4 hover:underline"
+          className={cn(buttonVariants({ size: "sm" }), "mt-3")}
         >
           {actionLabel}
         </Link>
