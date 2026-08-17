@@ -31,7 +31,9 @@
 - **Rolle Lesen** (Beispiel GmbH): beide neuen Karten sichtbar, keine „Zahlung erfassen“, keine Anlegen-Links.
 - Raster: zwei gleiche `md` 65/35-Zeilen. 390px bleibt CSS-Stack (erste Zeile Fälligkeiten zuerst). Umschalter Monat/Quartal im HTML. `/app/auswertungen` 200.
 
-Client-Hover am Donut und Viewport 390px nicht geklickt. Server-Nachtest durch kf nach Deploy. Commit/Push auf ausdrückliche Bitte.
+Client-Hover am Donut und Viewport 390px nicht geklickt. Server-Nachtest durch kf nach Deploy. Commit `3d460d5`.
+
+Nachzug: Donut-Farben — Segmente nutzen je ein Token (primary / success / warning / destructive / muted / sidebar-primary). Vorher lagen die ersten Slices in derselben Violett-Mischung (`docs/issues/dashboard-issue.png`).
 
 ## Nicht angefasst
 

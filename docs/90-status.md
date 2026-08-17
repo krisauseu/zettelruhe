@@ -39,7 +39,7 @@ _Last updated: 2026-08-17_
 - **UX/UI erster Keil (App-Layout / CSS):** Tokens (Papier-Canvas, Tinte-Sidebar, Primärfarbe an der Z-Marke), gemeinsame Primitives, PageHeader auf Alltagslisten, Übersicht und Login/Setup. M1-12 und Marke nicht zurückgebaut. Toast unten rechts. Lokal hinter Caddy nachgetestet.
 - **UX/UI Rest:** Sidebar mobil Off-Canvas (unter `md`; Desktop fest). Esc, Overlay, Nav-Link schließt, Fokus. PageHeader auf Firma, Nutzer:innen, Passwort (nur Optik) und Dokument-Details (Angebot, Rechnung, Beleg). Nav-Logik und erster Keil unangetastet. 437 Unit-Tests. Lokal hinter Caddy nachgetestet.
 - **Übersicht / Dashboard (erster Keil):** Fläche unter den KPI-Karten. Fälligkeiten (überfällig + 14 Tage, Link zur Rechnung, „Zahlung erfassen“ nur bei Schreibrecht). §-19-Jahresbalken nur unter Kleinunternehmerregelung — Grenzen aus § 19 Abs. 1 UStG (Staffel ab 2025: 25.000 / 100.000, kein 22.000-Default), Umsatz light nach Zufluss, unter Regelbesteuerung keine Karte. Verlauf 6 / Jahr / 12 Monate (SVG, kein Chart-Paket).
-- **Übersicht Follow-up:** Ausgaben nach Kategorien (Donut Top 5 + „Weitere“, Monat/Quartal; Schnappschuss am Beleg/Kassenbuch, Storno mindert die Ursprungskategorie) und letzte Buchungen (Journal-Tail, Link zum Datensatz). Zweite 65/35-Zeile, erster Keil unverändert. 462 Unit-Tests.
+- **Übersicht Follow-up:** Ausgaben nach Kategorien (Donut Top 5 + „Weitere“, Monat/Quartal; Schnappschuss am Beleg/Kassenbuch, Storno mindert die Ursprungskategorie) und letzte Buchungen (Journal-Tail, Link zum Datensatz). Zweite 65/35-Zeile, erster Keil unverändert. 462 Unit-Tests. Donut-Farben: je Kategorie ein Token (nicht Violett-in-Violett).
 
 ## What's next
 

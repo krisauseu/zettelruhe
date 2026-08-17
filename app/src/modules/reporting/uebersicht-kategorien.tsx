@@ -21,13 +21,14 @@ const FENSTER: { id: Fenster; label: string }[] = [
   { id: "quartal", label: "Quartal" },
 ];
 
+/** Je Slice ein Token — nicht color-mix aus Violett, sonst wirken zwei Segmente gleich. */
 const SLICE_COLORS = [
   "var(--primary)",
-  "color-mix(in oklch, var(--primary) 55%, var(--muted-foreground))",
-  "var(--muted-foreground)",
   "var(--success)",
   "var(--warning)",
-  "color-mix(in oklch, var(--muted-foreground) 42%, var(--border))",
+  "var(--destructive)",
+  "var(--muted-foreground)",
+  "var(--sidebar-primary)",
 ];
 
 export function UebersichtKategorien({
