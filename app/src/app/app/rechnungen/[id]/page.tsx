@@ -507,7 +507,7 @@ export default async function RechnungDetailPage({
           </Card>
 
           {zahlungsstand ? (
-            <Card>
+            <Card id="zahlung" className="scroll-mt-6">
               <CardHeader>
                 <CardTitle>Zahlungen</CardTitle>
                 <CardDescription>

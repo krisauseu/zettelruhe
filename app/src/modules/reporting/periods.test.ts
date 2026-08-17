@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  addDaysYmd,
+  daysBetweenYmd,
   isDateInZeitraum,
   lastDayOfMonth,
+  monthsInZeitraum,
   periodFromPreset,
+  periodLastNMonths,
   periodMonth,
   periodQuarter,
   periodYear,
@@ -111,5 +115,34 @@ describe("isDateInZeitraum", () => {
 describe("ymd", () => {
   it("padded", () => {
     expect(ymd(2026, 8, 5)).toBe("2026-08-05");
+  });
+});
+
+describe("Kalenderarithmetik", () => {
+  it("addDaysYmd über Monats- und Jahresgrenzen", () => {
+    expect(addDaysYmd("2026-08-17", 14)).toBe("2026-08-31");
+    expect(addDaysYmd("2026-08-20", 14)).toBe("2026-09-03");
+    expect(addDaysYmd("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("daysBetweenYmd zählt ganze Kalendertage", () => {
+    expect(daysBetweenYmd("2026-08-01", "2026-08-17")).toBe(16);
+    expect(daysBetweenYmd("2026-08-17", "2026-08-17")).toBe(0);
+  });
+
+  it("periodLastNMonths: 12 Monate bis August 2026", () => {
+    expect(periodLastNMonths(12, "2026-08-17")).toEqual({
+      von: "2025-09-01",
+      bis: "2026-08-31",
+    });
+    expect(periodLastNMonths(6, "2026-08-17")).toEqual({
+      von: "2026-03-01",
+      bis: "2026-08-31",
+    });
+  });
+
+  it("monthsInZeitraum listet Kalendermonate", () => {
+    const m = monthsInZeitraum({ von: "2026-01-15", bis: "2026-03-02" });
+    expect(m.map((x) => x.key)).toEqual(["2026-01", "2026-02", "2026-03"]);
   });
 });

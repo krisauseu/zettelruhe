@@ -32,6 +32,85 @@ export function ymd(y: number, m: number, d: number): string {
   return `${y}-${pad2(m)}-${pad2(d)}`;
 }
 
+/** Kalendermonate verschieben (Monat 1–12, Jahr kann springen). */
+export function addCalendarMonths(
+  y: number,
+  m: number,
+  delta: number,
+): { y: number; m: number } {
+  const idx = y * 12 + (m - 1) + delta;
+  const ny = Math.floor(idx / 12);
+  return { y: ny, m: idx - ny * 12 + 1 };
+}
+
+/** Kalendertage auf YYYY-MM-DD (UTC-Datumskonstruktion, keine Uhrzeit). */
+export function addDaysYmd(iso: string, days: number): string {
+  const { y, m, d } = parseYmd(iso);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  return ymd(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate());
+}
+
+/** Ganze Kalendertage von `from` bis `to` (kann negativ sein). */
+export function daysBetweenYmd(from: string, to: string): number {
+  const a = parseYmd(from);
+  const b = parseYmd(to);
+  const da = Date.UTC(a.y, a.m - 1, a.d);
+  const db = Date.UTC(b.y, b.m - 1, b.d);
+  return Math.round((db - da) / 86_400_000);
+}
+
+/**
+ * Die letzten `n` Kalendermonate inkl. Referenzmonat
+ * (n=12 → von Monat−11 bis Monatsende).
+ */
+export function periodLastNMonths(n: number, refYmd?: string): Zeitraum {
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error("Anzahl Monate muss eine ganze Zahl ≥ 1 sein.");
+  }
+  const ref = refYmd ?? todayBerlin();
+  const { y, m } = parseYmd(ref);
+  const start = addCalendarMonths(y, m, -(n - 1));
+  return {
+    von: ymd(start.y, start.m, 1),
+    bis: ymd(y, m, lastDayOfMonth(y, m)),
+  };
+}
+
+/** Kalendermonate im Zeitraum (jeweils 1. bis letzter Tag). */
+export function monthsInZeitraum(z: Zeitraum): {
+  von: string;
+  bis: string;
+  key: string;
+  jahr: number;
+  monat: number;
+}[] {
+  const valid = validateZeitraum(z);
+  const start = parseYmd(valid.von);
+  const end = parseYmd(valid.bis);
+  const out: {
+    von: string;
+    bis: string;
+    key: string;
+    jahr: number;
+    monat: number;
+  }[] = [];
+  let y = start.y;
+  let m = start.m;
+  while (y < end.y || (y === end.y && m <= end.m)) {
+    out.push({
+      von: ymd(y, m, 1),
+      bis: ymd(y, m, lastDayOfMonth(y, m)),
+      key: `${y}-${pad2(m)}`,
+      jahr: y,
+      monat: m,
+    });
+    const next = addCalendarMonths(y, m, 1);
+    y = next.y;
+    m = next.m;
+  }
+  return out;
+}
+
 /** Letzter Kalendertag des Monats (1–12) */
 export function lastDayOfMonth(y: number, m: number): number {
   // Tag 0 des Folgemonats = letzter des aktuellen (UTC-Datumskonstruktion ok für Kalenderarithmetik)

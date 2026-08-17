@@ -19,6 +19,13 @@ import {
   buildUstUebersicht,
   sumOffenePosten,
 } from "./aggregate";
+import { buildPar19Waechter, type Par19Waechter } from "./par19";
+import {
+  buildFaelligkeiten,
+  buildMonatlicheReihe,
+  type FaelligkeitenBlick,
+  type VerlaufMonat,
+} from "./uebersicht";
 import {
   buildUstvaDatensatz,
   firmaToUstvaAngaben,
@@ -28,7 +35,14 @@ import { buildZmUebersicht, serializeZmCsv } from "./zm";
 import { serializeJournalCsv, serializeBelegArchivCsv } from "./export-csv";
 import { datevFilename, serializeDatevCsv } from "./export-datev";
 import { buildZip, type ZipEntry } from "./zip";
-import { validateZeitraum } from "./periods";
+import {
+  isDateInZeitraum,
+  periodLastNMonths,
+  periodMonth,
+  periodYear,
+  todayBerlin,
+  validateZeitraum,
+} from "./periods";
 import type {
   BelegArchivMeta,
   BwaLight,
@@ -240,6 +254,58 @@ export async function getDashboardKennzahlen(
     summe,
     extra,
   );
+}
+
+export type UebersichtDashboard = {
+  kennzahlen: DashboardKennzahlen;
+  verlauf: VerlaufMonat[];
+  par19: Par19Waechter | null;
+  faelligkeiten: FaelligkeitenBlick;
+};
+
+/**
+ * Übersicht `/app`: Monatskennzahlen plus Verlauf, §-19-Wächter und Fälligkeiten.
+ * Ein Journal-Lauf über Kalenderjahr ∪ letzte 12 Monate.
+ */
+export async function getUebersichtDashboard(
+  firmaId: string,
+  refYmd?: string,
+): Promise<UebersichtDashboard> {
+  const ref = refYmd ?? todayBerlin();
+  const monat = periodMonth(ref);
+  const jahr = periodYear(ref);
+  const zwoelf = periodLastNMonths(12, ref);
+  const journalVon = jahr.von < zwoelf.von ? jahr.von : zwoelf.von;
+  const steuermodus = await loadSteuermodus(firmaId);
+  const [{ items, extra }, offene] = await Promise.all([
+    journalMitStornoKontext(firmaId, { von: journalVon, bis: monat.bis }),
+    listOffenePosten(firmaId, 1, 500),
+  ]);
+  const originale = [...extra, ...items];
+  const monthItems = items.filter((e) =>
+    isDateInZeitraum(e.buchungsdatum, monat),
+  );
+  const yearItems = items.filter((e) => isDateInZeitraum(e.buchungsdatum, jahr));
+  const summe = sumOffenePosten(offene.items);
+  const kennzahlen = buildDashboard(
+    monthItems,
+    monat,
+    steuermodus,
+    summe,
+    originale,
+  );
+  const yearBwa = buildBwaLight(yearItems, jahr, originale);
+  return {
+    kennzahlen,
+    verlauf: buildMonatlicheReihe(items, zwoelf, extra),
+    par19: buildPar19Waechter({
+      steuermodus,
+      umsatz_brutto: yearBwa.einnahmen_brutto,
+      kalenderjahr: Number.parseInt(ref.slice(0, 4), 10),
+      refYmd: ref,
+    }),
+    faelligkeiten: buildFaelligkeiten(offene.items, ref, 14),
+  };
 }
 
 export async function exportJournalCsv(

@@ -17,10 +17,10 @@ import {
   SKR_LABELS,
   STEUERMODUS_LABELS,
 } from "@/lib/labels";
-import {
-  getDashboardKennzahlen,
-  periodMonth,
-} from "@/modules/reporting";
+import { getUebersichtDashboard } from "@/modules/reporting";
+import { UebersichtPar19 } from "@/modules/reporting/uebersicht-par19";
+import { UebersichtVerlauf } from "@/modules/reporting/uebersicht-verlauf";
+import { UebersichtFaelligkeiten } from "@/modules/reporting/uebersicht-faelligkeiten";
 import {
   Card,
   CardContent,
@@ -47,18 +47,20 @@ export default async function AppHomePage() {
   const session = await getSession();
 
   let firma: Awaited<ReturnType<typeof getFirmaById>> = null;
-  let dash: Awaited<ReturnType<typeof getDashboardKennzahlen>> | null = null;
+  let uebersicht: Awaited<ReturnType<typeof getUebersichtDashboard>> | null =
+    null;
   let kannSchreiben = false;
   let rollenLabel = "";
   try {
     const s = await requireFirmaSession();
     firma = await getFirmaById(s.firmaId);
-    dash = await getDashboardKennzahlen(s.firmaId, periodMonth());
+    uebersicht = await getUebersichtDashboard(s.firmaId);
     kannSchreiben = s.kannSchreiben;
     rollenLabel = MITGLIEDSCHAFT_ROLLE_LABELS[s.mitgliedschaftRolle];
   } catch {
-    dash = null;
+    uebersicht = null;
   }
+  const dash = uebersicht?.kennzahlen ?? null;
 
   const isZeroMoney = (v: string) =>
     v === "0" || v === "0.00" || v === "0,00" || Number.parseFloat(v) === 0;
@@ -201,6 +203,30 @@ export default async function AppHomePage() {
               </Link>
             </KpiCard>
           )}
+        </div>
+      ) : null}
+
+      {uebersicht?.par19 ? (
+        <UebersichtPar19 waechter={uebersicht.par19} />
+      ) : null}
+
+      {uebersicht ? (
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1.65fr)_minmax(0,0.9fr)]">
+          <div className="order-2 min-w-0 md:order-1">
+            <UebersichtVerlauf
+              monate={uebersicht.verlauf}
+              kalenderjahr={Number.parseInt(
+                dash?.zeitraum.von.slice(0, 4) ?? "0",
+                10,
+              )}
+            />
+          </div>
+          <div className="order-1 min-w-0 md:order-2">
+            <UebersichtFaelligkeiten
+              blick={uebersicht.faelligkeiten}
+              kannSchreiben={kannSchreiben}
+            />
+          </div>
         </div>
       ) : null}
 
