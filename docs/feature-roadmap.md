@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-16):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt: DIN-ähnlicher Briefkopf, Tabelle mit Akzent, Bankzeile, GiroCode auf der Rechnung, Sichtbarkeit Header/Fuß/Zahlblock an der Firma. Als Nächstes: Logo/Favicon der Marke.
+**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt: DIN-ähnlicher Briefkopf, Tabelle mit Akzent, Bankzeile, GiroCode auf der Rechnung, Sichtbarkeit Header/Fuß/Zahlblock an der Firma. Marke (Logo/Favicon) erledigt. Als Nächstes separat: Multi-User / grobe Rechte, Ist-Versteuerung, Hybrid-PDF, Open Decisions.
 
 ### Fundament & Stammdaten
 
@@ -108,7 +108,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 **Meilenstein 2 abgeschlossen.** Zahlung erzeugt in v1 kein Journal.
 
-Als Nächstes (nicht vermischen): **Dokumenten-Layout** ← erledigt; danach Logo/Favicon der Marke. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
+Als Nächstes (nicht vermischen): **Dokumenten-Layout** ← erledigt; **Logo/Favicon der Marke** ← erledigt. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
 
 ---
 

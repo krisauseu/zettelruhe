@@ -7,6 +7,7 @@ import { FirmaSwitcher } from "@/modules/platform/firma-switcher";
 import { Button } from "@/components/ui/button";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
 import { FlashToast } from "@/components/ui/flash-toast";
 
 /** Serializable nav config (icon keys, not React components). Gruppen kollabierbar. */
@@ -63,11 +64,8 @@ export function AppShell({
             className="absolute inset-x-0 top-0 h-0.5 bg-primary"
             aria-hidden
           />
-          <Link
-            href="/app"
-            className="text-lg font-semibold tracking-tight text-primary"
-          >
-            Zettelruhe
+          <Link href="/app" className="inline-flex rounded-sm">
+            <BrandMark />
           </Link>
           <p className="mt-1 truncate text-xs text-muted-foreground">
             {session.name}

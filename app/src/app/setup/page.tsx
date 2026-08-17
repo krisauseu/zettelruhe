@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { isSetupRequired } from "@/lib/pb";
 import { SetupForm } from "./setup-form";
+import { BrandMark } from "@/components/brand-mark";
 import {
   Card,
   CardContent,
@@ -23,7 +24,8 @@ export default async function SetupPage({
   const params = await searchParams;
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-background p-6">
+    <div className="flex flex-1 flex-col items-center justify-center bg-background p-6">
+      <BrandMark size="md" className="mb-6" />
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Zettelruhe einrichten</CardTitle>

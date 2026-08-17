@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   title: "Zettelruhe",
   description:
     "Self-hosted Buchhaltung für Solo-Selbstständige in Deutschland",
+  applicationName: "Zettelruhe",
+  appleWebApp: {
+    title: "Zettelruhe",
+    capable: true,
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -1,8 +1,8 @@
 # Status — Zettelruhe
 
-_Last updated: 2026-08-16_
+_Last updated: 2026-08-17_
 
-**Last session:** 2026-08-16 — Dokumenten-Layout Angebot/Rechnung (über M1-10 light hinaus). GiroCode, Bankzeile, Sichtbarkeit Header/Fuß/Zahlblock.
+**Last session:** 2026-08-17 — Marke: Zettelruhe-Logo und Favicon in Shell, Login, Setup, Tab/PWA-light.
 
 ## What's done
 
@@ -32,20 +32,19 @@ _Last updated: 2026-08-16_
 - **Funktionstest M2** (kf, lokal + Server HTTPS): **bestanden**. Rohbericht [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md). **M2-01** (Steuersatz festgeschriebener Rechnungen ins Journal / in die USt-Auswertung) deployed und nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Arbeitsfirma auf `app.zettelruhe.de`: Kleinunternehmerregelung.
 - **Setup-verified:** Beim Anlegen der Eigentümer:in `users.verified = true`. `users.authRule` leer — Login hängt nicht an `verified` und nicht an SMTP. Bestehende unverifizierte User einmalig nachziehen; bereits verifizierte bleiben verifiziert. Multi-Firma (ADR-0018) und Setup-Wizard unverändert.
 - **Dokumenten-Layout (über M1-10 hinaus):** Angebot und Rechnung teilen ein DIN-ähnliches Gerüst (Fenstertasche, Akzent-Tabelle, Summen). Unter Kleinunternehmerregelung ohne USt-Zeilen + §-19-Hinweis; Regelbesteuerung mit Ausweis. Bankzeile aus dem ersten aktiven Bankkonto mit IBAN; GiroCode (EPC) nur auf der Rechnung. Schalter Header/Fuß/Zahlblock an der Firma. Entwurf weiter ohne Nummernkreis, mit Wasserzeichen. Bestehende Originale unverändert (ADR-0012). E-Rechnungs-XML unangetastet.
+- **Marke (Logo/Favicon):** App-Marke aus `docs/logo-512x512-transparent.png` (Z ohne Schriftzug). Shell oben links, Login und Setup; Favicon + 32×32 + Apple-Touch + PWA-Icons 192/512. Unabhängig von `firmen.logo` auf Angebot/Rechnung.
 
 ## What's next
 
 **Vereinbarte Reihenfolge (nicht vermischen):**
 
-1. **Marke** — Zettelruhe-Logo und Favicon, oben links in der Shell.
-
-Danach weiter separat: Ist-Versteuerung, Multi-User, Hybrid-PDF, Open Decisions. Dokumenten-Layout-Vertiefung (Briefpapier, Font-Upload, …) steht unter Roadmap „Später“.
+Marke (Logo/Favicon) erledigt. Danach weiter separat: Ist-Versteuerung, Multi-User, Hybrid-PDF, Open Decisions. Dokumenten-Layout-Vertiefung (Briefpapier, Font-Upload, …) steht unter Roadmap „Später“.
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt in v1 kein Journal. Eine Eigentümer:in, mehrere Firmen über die Session. de-DE im UI.
 
 ## Follow-up
 
-- **Marke:** Zettelruhe-Logo und Favicon entwerfen, oben links in der Shell einsetzen.
+- keine (Marke steht; nächste Themen bewusst separat)
 
 ## Open decisions
 
@@ -81,4 +80,4 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-16-dokumenten-layout.md`](./sessions/2026-08-16-dokumenten-layout.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-17-marke-logo-favicon.md`](./sessions/2026-08-17-marke-logo-favicon.md)
