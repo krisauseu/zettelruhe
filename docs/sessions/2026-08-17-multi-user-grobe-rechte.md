@@ -16,7 +16,7 @@ Nicht vermischt: UX/UI-Modernisierung, Marke, Dokumenten-Layout, UStVA/ZM-Logik,
 
 ## Verifikation
 
-419+ Unit-Tests + `tsc --noEmit` grün. Browser-Nachtest Rollen durch kf bestätigt. Einladungs-Mail (SMTP) auf dem Server noch zu prüfen. PB-Migration `1730001900` beim nächsten Stack-Start.
+419+ Unit-Tests + `tsc --noEmit` grün. Browser-Nachtest Rollen durch kf bestätigt. Server-Nachtest kf inkl. SMTP: keine Fehler. Commit/Push `1ae4965`.
 
 ## Nicht angefasst
 
@@ -27,4 +27,4 @@ Nicht vermischt: UX/UI-Modernisierung, Marke, Dokumenten-Layout, UStVA/ZM-Logik,
 
 ## Next step
 
-UX/UI (App-Layout / CSS-Modernisierung). Nicht vermischen.
+Zuerst dünn: **eigenes Passwort ändern** (jede:r das eigene; nicht UX/UI). Danach separat UX/UI (App-Layout / CSS-Modernisierung).

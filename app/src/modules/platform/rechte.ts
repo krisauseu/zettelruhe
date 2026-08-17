@@ -28,6 +28,14 @@ export const LETZTE_EIGENTUEMERIN_ERROR =
   "Die letzte Eigentümer:in der Firma kann nicht entfernt oder herabgestuft werden.";
 export const EIGENE_ROLLE_LETZTE_ERROR =
   "Die eigene Rolle als letzte Eigentümer:in kann nicht geändert werden.";
+export const EIGENES_PASSWORT_HIER_NICHT_ERROR =
+  "Das eigene Passwort wird hier nicht geändert.";
+export const FALSCHES_ALTES_PASSWORT_ERROR =
+  "Altes Passwort ist nicht korrekt.";
+export const PASSWOERTER_STIMMEN_NICHT_ERROR =
+  "Passwörter stimmen nicht überein.";
+export const PASSWORT_UNVERAENDERT_ERROR =
+  "Das neue Passwort muss sich vom alten unterscheiden.";
 
 export function isMitgliedschaftRolle(
   value: string,
@@ -131,4 +139,37 @@ export function validateNeuesPasswort(password: string): string {
     throw new Error("Passwort muss mindestens 8 Zeichen haben.");
   }
   return password;
+}
+
+/** Fremdes Passwort unter /app/nutzer — nie das eigene. */
+export function assertFremdesPasswortZiel(
+  handelndeUserId: string,
+  zielUserId: string,
+): void {
+  if (handelndeUserId === zielUserId) {
+    throw new Error(EIGENES_PASSWORT_HIER_NICHT_ERROR);
+  }
+}
+
+/** Eigenes Passwort: alt + neu + Bestätigung, mindestens 8 Zeichen. */
+export function validateEigenesPasswortAendern(input: {
+  altesPasswort: string;
+  neuesPasswort: string;
+  neuesPasswortConfirm: string;
+}): { altesPasswort: string; neuesPasswort: string } {
+  const altesPasswort = (input.altesPasswort ?? "").trim();
+  const neuesPasswort = (input.neuesPasswort ?? "").trim();
+  const confirm = (input.neuesPasswortConfirm ?? "").trim();
+
+  if (!altesPasswort) {
+    throw new Error("Altes Passwort ist erforderlich.");
+  }
+  validateNeuesPasswort(neuesPasswort);
+  if (neuesPasswort !== confirm) {
+    throw new Error(PASSWOERTER_STIMMEN_NICHT_ERROR);
+  }
+  if (neuesPasswort === altesPasswort) {
+    throw new Error(PASSWORT_UNVERAENDERT_ERROR);
+  }
+  return { altesPasswort, neuesPasswort };
 }

@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   BEREITS_MITGLIED_ERROR,
   EIGENE_ROLLE_LETZTE_ERROR,
+  EIGENES_PASSWORT_HIER_NICHT_ERROR,
   LETZTE_EIGENTUEMERIN_ERROR,
+  PASSWOERTER_STIMMEN_NICHT_ERROR,
+  PASSWORT_UNVERAENDERT_ERROR,
+  assertFremdesPasswortZiel,
   assertKannMitgliedschaftEntfernen,
   hatRecht,
   isMitgliedschaftRolle,
   istInstanzEigentuemer,
+  validateEigenesPasswortAendern,
   validateEinladenInput,
   validateNeuesPasswort,
   validateRollenwechsel,
@@ -172,6 +177,71 @@ describe("validateNeuesPasswort", () => {
   it("verlangt mindestens 8 Zeichen", () => {
     expect(validateNeuesPasswort("abcdefgh")).toBe("abcdefgh");
     expect(() => validateNeuesPasswort("kurz")).toThrow(/8 Zeichen/);
+  });
+});
+
+describe("assertFremdesPasswortZiel", () => {
+  it("verbietet das eigene Konto unter /app/nutzer", () => {
+    expect(() => assertFremdesPasswortZiel("u1", "u1")).toThrow(
+      EIGENES_PASSWORT_HIER_NICHT_ERROR,
+    );
+  });
+
+  it("erlaubt ein fremdes Konto", () => {
+    expect(() => assertFremdesPasswortZiel("u1", "u2")).not.toThrow();
+  });
+});
+
+describe("validateEigenesPasswortAendern", () => {
+  const base = {
+    altesPasswort: "altes-passwort",
+    neuesPasswort: "neues-passwort",
+    neuesPasswortConfirm: "neues-passwort",
+  };
+
+  it("nimmt gültige Eingaben an und trimmt", () => {
+    const v = validateEigenesPasswortAendern({
+      altesPasswort: "  altes-passwort  ",
+      neuesPasswort: "  neues-passwort  ",
+      neuesPasswortConfirm: "  neues-passwort  ",
+    });
+    expect(v.altesPasswort).toBe("altes-passwort");
+    expect(v.neuesPasswort).toBe("neues-passwort");
+  });
+
+  it("verlangt das alte Passwort", () => {
+    expect(() =>
+      validateEigenesPasswortAendern({ ...base, altesPasswort: "   " }),
+    ).toThrow(/Altes Passwort/);
+  });
+
+  it("verlangt mindestens 8 Zeichen für das neue Passwort", () => {
+    expect(() =>
+      validateEigenesPasswortAendern({
+        ...base,
+        neuesPasswort: "kurz",
+        neuesPasswortConfirm: "kurz",
+      }),
+    ).toThrow(/8 Zeichen/);
+  });
+
+  it("verlangt übereinstimmende Bestätigung", () => {
+    expect(() =>
+      validateEigenesPasswortAendern({
+        ...base,
+        neuesPasswortConfirm: "anderes-passwort",
+      }),
+    ).toThrow(PASSWOERTER_STIMMEN_NICHT_ERROR);
+  });
+
+  it("lehnt unverändertes Passwort ab", () => {
+    expect(() =>
+      validateEigenesPasswortAendern({
+        altesPasswort: "gleiches-passwort",
+        neuesPasswort: "gleiches-passwort",
+        neuesPasswortConfirm: "gleiches-passwort",
+      }),
+    ).toThrow(PASSWORT_UNVERAENDERT_ERROR);
   });
 });
 

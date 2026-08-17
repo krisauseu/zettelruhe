@@ -19,6 +19,7 @@ import {
   INSTANZ_ROLLE_NUTZER,
   assertKannMitgliedschaftEntfernen,
   isMitgliedschaftRolle,
+  assertFremdesPasswortZiel,
   validateEinladenInput,
   validateNeuesPasswort,
   validateRollenwechsel,
@@ -334,9 +335,7 @@ export async function setzeNutzerPasswort(input: {
   zielUserId: string;
   password: string;
 }): Promise<void> {
-  if (input.handelndeUserId === input.zielUserId) {
-    throw new Error("Das eigene Passwort wird hier nicht geändert.");
-  }
+  assertFremdesPasswortZiel(input.handelndeUserId, input.zielUserId);
   const password = validateNeuesPasswort(input.password);
   const user = await getUserById(input.zielUserId);
   if (!user) {

@@ -27,7 +27,7 @@ Zwei Ebenen, derselbe Fachbegriff. **Instanz-Eigentümer:in**: die Person aus de
 _Avoid_: Admin (allein als Domänenbegriff), Teammitglied
 
 **Nutzer:in**:
-Ein Login. Zugang zu Firmen nur über Mitgliedschaft. Eingeladene Konten haben `users.role=nutzer`.
+Ein Login. Zugang zu Firmen nur über Mitgliedschaft. Eingeladene Konten haben `users.role=nutzer`. Das eigene Passwort ändert jede angemeldete Person selbst.
 _Avoid_: User (im UI), Teammitglied, Mitarbeiter:in (als Rollenlabel)
 
 **Mitgliedschaft**:

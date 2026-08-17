@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { LogOut } from "lucide-react";
+import { KeyRound, LogOut } from "lucide-react";
 import type { SessionPayload } from "@/lib/session";
 import { logoutAction } from "@/modules/platform/auth-actions";
 import { FirmaSwitcher } from "@/modules/platform/firma-switcher";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BrandMark } from "@/components/brand-mark";
 import { FlashToast } from "@/components/ui/flash-toast";
 import { MITGLIEDSCHAFT_ROLLE_LABELS } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import type { MitgliedschaftRolle } from "@/modules/platform/rechte";
 
 /** Serializable nav config (icon keys, not React components). Gruppen kollabierbar. */
@@ -106,6 +107,16 @@ export function AppShell({
 
         <div className="mt-auto space-y-1 border-t border-sidebar-border p-3">
           <ThemeToggle />
+          <Link
+            href="/app/passwort"
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "w-full justify-start text-sidebar-foreground/80",
+            )}
+          >
+            <KeyRound className="h-4 w-4" aria-hidden />
+            Passwort ändern
+          </Link>
           <form action={logoutAction}>
             <Button
               type="submit"

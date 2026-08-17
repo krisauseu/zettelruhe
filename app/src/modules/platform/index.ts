@@ -4,6 +4,7 @@
  */
 export const MODULE_ID = "platform" as const;
 export { loginAction, logoutAction, setupAction } from "./auth-actions";
+export { aendereEigenesPasswortAction } from "./passwort-actions";
 export {
   createFirmaAction,
   switchFirmaAction,

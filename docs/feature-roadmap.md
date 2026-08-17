@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Als Nächstes: **UX/UI (App-Layout / CSS-Modernisierung)**. Hybrid-PDF und übrige Open Decisions bleiben separat. Dokumenten-Layout-Vertiefung unter „Später“.
+**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** **Eigenes Passwort ändern erledigt.** Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Als Nächstes: **UX/UI (App-Layout / CSS-Modernisierung)**. Hybrid-PDF und übrige Open Decisions bleiben separat. Dokumenten-Layout-Vertiefung unter „Später“.
 
 ### Fundament & Stammdaten
 
@@ -108,7 +108,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 **Meilenstein 2 abgeschlossen.**
 
-Erledigt und nicht vermischen: Kategorien, Multi-Firma dünn, UStVA/ZM light, USt-IdNr., E-Rechnungs-Versand, Dokumenten-Layout (Angebot/Rechnung über light hinaus), Marke (Logo/Favicon), Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte.
+Erledigt und nicht vermischen: Kategorien, Multi-Firma dünn, UStVA/ZM light, USt-IdNr., E-Rechnungs-Versand, Dokumenten-Layout (Angebot/Rechnung über light hinaus), Marke (Logo/Favicon), Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort.
 
 ---
 
@@ -116,8 +116,9 @@ Erledigt und nicht vermischen: Kategorien, Multi-Firma dünn, UStVA/ZM light, US
 
 Nicht durch den aktuellen Server-Stand verengen. Produktziel: Tool für jedermann — verschiedene Steuer-Modi, verschiedene Firmagrößen, mehrere Nutzer:innen. Die Arbeitsfirma auf `app.zettelruhe.de` ist Betrieb, nicht Scope-Deckel.
 
-1. **UX/UI (App-Layout / CSS-Modernisierung)** — alltägliche App: Shell, Listen, Formulare, Sidebar, Toasts usw. Eindruck heute: zu monoton / 2000er-Jahre. Nicht Marke, nicht das erledigte Dokumenten-Layout Angebot/Rechnung, nicht M1-12 UI-Akzente light. Briefpapier-Hintergrund, Font-Upload, Mehrvorlagen, CSS-Profi-Layouts der Dokumente bleiben unter „Später“.
-2. **Multi-User / grobe Rechte** ← erledigt (ADR-0025)
+1. **Eigenes Passwort ändern** ← erledigt. `/app/passwort`; jede angemeldete Nutzer:in ändert nur das eigene (alt + neu + Bestätigung, 8 Zeichen). Fremdes Passwort unter `/app/nutzer` unverändert. Next-Session bleibt gültig.
+2. **UX/UI (App-Layout / CSS-Modernisierung)** — alltägliche App: Shell, Listen, Formulare, Sidebar, Toasts usw. Eindruck heute: zu monoton / 2000er-Jahre. Nicht Marke, nicht das erledigte Dokumenten-Layout Angebot/Rechnung, nicht M1-12 UI-Akzente light. Briefpapier-Hintergrund, Font-Upload, Mehrvorlagen, CSS-Profi-Layouts der Dokumente bleiben unter „Später“.
+3. **Multi-User / grobe Rechte** ← erledigt (ADR-0025); Server-Nachtest inkl. SMTP durch kf ohne Fehler. Eigenes Passwort (Punkt 1) nachgezogen.
 
 Daneben separat: Hybrid-PDF, übrige Open Decisions (MT940, ZUGFeRD-PDF-Parsing, Kassenbuch aus Barzahlung). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024).
 

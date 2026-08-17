@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireFirmaSession } from "@/lib/session";
 import { MITGLIEDSCHAFT_ROLLE_LABELS } from "@/lib/labels";
@@ -223,7 +224,18 @@ export default async function NutzerPage({
                             Passwort setzen
                           </Button>
                         </form>
-                      ) : null}
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Eigenes Passwort unter{" "}
+                          <Link
+                            href="/app/passwort"
+                            className="underline-offset-4 hover:underline"
+                          >
+                            Passwort ändern
+                          </Link>
+                          .
+                        </p>
+                      )}
                       <ConfirmForm
                         action={entferneMitgliedschaftAction}
                         title="Mitgliedschaft entfernen?"
