@@ -258,8 +258,8 @@ export async function exportDatevCsv(
   zeitraum: Zeitraum,
 ): Promise<{ body: string; filename: string; anzahl: number }> {
   const z = validateZeitraum(zeitraum);
-  const items = await listJournalInZeitraum(firmaId, z);
-  const { csv, meta } = serializeDatevCsv(items, z);
+  const { items, extra } = await journalMitStornoKontext(firmaId, z);
+  const { csv, meta } = serializeDatevCsv(items, z, extra);
   return {
     body: csv,
     filename: datevFilename(z),

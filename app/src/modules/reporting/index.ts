@@ -51,7 +51,9 @@ export {
   buildDashboard,
   buildEur,
   buildUstUebersicht,
+  filterZuflussJournal,
   inferSteuersatzFromBetraege,
+  istZuflussRelevant,
   mapEurKategorie,
   sumOffenePosten,
 } from "./aggregate";

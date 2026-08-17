@@ -92,6 +92,22 @@ export async function storniereBuchungAction(
     stornoId = storno.id;
     if (original.quelle_typ === "rechnung" && original.quelle_id) {
       await markRechnungStorniert(firmaId, original.quelle_id);
+      const { listZahlungenForRechnung } = await import(
+        "@/modules/payments/repository"
+      );
+      const { storniereZahlungsjournaleFuerRechnung } = await import(
+        "@/modules/payments/journal"
+      );
+      const zahlungen = await listZahlungenForRechnung(
+        firmaId,
+        original.quelle_id,
+      );
+      if (zahlungen.length > 0) {
+        await storniereZahlungsjournaleFuerRechnung(firmaId, zahlungen, {
+          buchungsdatum,
+          buchungstext: `Storno Zahlung zu Rechnung ${original.quelle_id}`,
+        });
+      }
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Storno fehlgeschlagen.";
@@ -102,6 +118,8 @@ export async function storniereBuchungAction(
   revalidatePath("/app/rechnungen");
   revalidatePath("/app/auswertungen");
   revalidatePath("/app/eur");
+  revalidatePath("/app/ust");
+  revalidatePath("/app/zm");
   revalidatePath(`/app/journal/${id}`);
   redirect(`/app/journal/${stornoId}?storniert=1`);
 }

@@ -11,6 +11,7 @@ export type QuelleTyp =
   | "manuell"
   | "beleg"
   | "rechnung"
+  | "zahlung"
   | "kasse"
   | "storno"
   | "system";

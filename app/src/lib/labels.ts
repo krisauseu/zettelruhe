@@ -44,6 +44,7 @@ export const QUELLE_TYP_LABELS: Record<QuelleTyp, string> = {
   manuell: "Manuell",
   beleg: "Beleg",
   rechnung: "Rechnung",
+  zahlung: "Zahlung",
   kasse: "Kassenbuch",
   storno: "Storno",
   system: "System",

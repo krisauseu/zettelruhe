@@ -108,6 +108,17 @@ describe("validateBuchungInput", () => {
     ).toThrow(/storno/i);
   });
 
+  it("akzeptiert Quelle Zahlung", () => {
+    const v = validateBuchungInput({
+      ...base,
+      richtung: "einnahme",
+      quelle_typ: "zahlung",
+      quelle_id: "pay1",
+    });
+    expect(v.quelle_typ).toBe("zahlung");
+    expect(v.quelle_id).toBe("pay1");
+  });
+
   it("akzeptiert Storno mit Verweis", () => {
     const v = validateBuchungInput({
       ...base,

@@ -34,6 +34,7 @@ export {
   findStornoFuer,
   getJournalEintrag,
   listJournal,
+  listJournalByQuelle,
   storniereBuchung,
   updateJournalEintrag,
 } from "./repository";

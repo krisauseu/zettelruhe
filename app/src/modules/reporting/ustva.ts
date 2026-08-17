@@ -2,7 +2,7 @@
  * UStVA-Kennzahlen + ELSTER-XML light (Self-File, ADR-0019).
  *
  * Quelle: bestehende USt-Übersicht (Buchungsjournal der aktiven Firma).
- * Zahlungen erzeugen in v1 kein Journal — hier nicht still nachziehen.
+ * Einnahmen aus Rechnungen über Zahlungsjournal (Zufluss, ADR-0024).
  * Nur Regelbesteuerung; unter Kleinunternehmerregelung nicht relevant.
  *
  * Ehrliche Felder aus Journal-Sätzen 19 / 7 / Vorsteuer:
@@ -45,7 +45,7 @@ export const USTVA_FORMAT_ID = "zettelruhe-ustva-elster-xml-light-v1" as const;
 export const USTVA_HINWEIS =
   "UStVA light aus dem Buchungsjournal (Buchungsdatum). Werte selbst in Mein Elster eintragen oder XML lokal speichern — kein ELSTER-Versand, keine Abgabe aus der App. " +
   "Bemessungsgrundlagen (Kz 81/86) volle Euro, kaufmännisch; Kz 83 = 19 % × 81 + 7 % × 86 − Kz 66. " +
-  "Das kann von der Journal-Zahllast (Cent-genau) abweichen. Zahlungen erzeugen in v1 kein Journal.";
+  "Das kann von der Journal-Zahllast (Cent-genau) abweichen. Rechnungs-Einnahmen zählen mit dem Zahlungsdatum.";
 
 const MONAT_NAMEN = [
   "Januar",

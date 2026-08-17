@@ -492,6 +492,23 @@ export async function storniereRechnung(
     }
   }
 
+  const { storniereZahlungsjournaleFuerRechnung } = await import(
+    "@/modules/payments/journal"
+  );
+  const { listZahlungenForRechnung } = await import(
+    "@/modules/payments/repository"
+  );
+  const zahlungen = await listZahlungenForRechnung(firmaId, id);
+  if (zahlungen.length > 0) {
+    await storniereZahlungsjournaleFuerRechnung(firmaId, zahlungen, {
+      buchungsdatum: opts?.buchungsdatum,
+      buchungstext:
+        opts?.buchungstext ||
+        `Storno Zahlung zu Rechnung ${existing.rechnungsnummer || existing.id}`,
+      now: opts?.now,
+    });
+  }
+
   const rechnung = await markRechnungStorniert(firmaId, id);
   return { rechnung, journal };
 }

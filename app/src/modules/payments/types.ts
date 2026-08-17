@@ -1,7 +1,7 @@
 /**
  * Domain-Typen: Zahlungen (manuell, inkl. Teilzahlung)
  * Ausgleich offener Rechnungen; Grundlage für Status und späteren Bank-Match (Abschn. 11).
- * Kein Journal in Abschn. 8 — Zahlung als eigener Datensatz + Rechnungsstatus.
+ * Zahlung als eigener Datensatz + Rechnungsstatus; Zufluss-Journal (ADR-0024).
  */
 
 /** Zahlungsweg light (optional) */

@@ -41,6 +41,9 @@ const Z = { von: "2026-08-01", bis: "2026-08-31" };
 describe("mapEurKategorie", () => {
   it("ordnet Quellen zu", () => {
     expect(
+      mapEurKategorie(je({ richtung: "einnahme", betrag_brutto: "1", quelle_typ: "zahlung" })),
+    ).toBe("umsatzerloese");
+    expect(
       mapEurKategorie(je({ richtung: "einnahme", betrag_brutto: "1", quelle_typ: "rechnung" })),
     ).toBe("umsatzerloese");
     expect(
@@ -55,20 +58,20 @@ describe("mapEurKategorie", () => {
   });
 
   it("ordnet Storno der Ursprungskategorie zu", () => {
-    const rechnung = je({
-      id: "r1",
+    const zahlung = je({
+      id: "z1",
       richtung: "einnahme",
       betrag_brutto: "30.00",
-      quelle_typ: "rechnung",
+      quelle_typ: "zahlung",
     });
     const storno = je({
       id: "s1",
       richtung: "ausgabe",
       betrag_brutto: "30.00",
       quelle_typ: "storno",
-      storno_von: "r1",
+      storno_von: "z1",
     });
-    const originals = new Map([["r1", rechnung]]);
+    const originals = new Map([["z1", zahlung]]);
     expect(mapEurKategorie(storno, originals)).toBe("umsatzerloese");
     expect(isStornoEintrag(storno)).toBe(true);
   });
@@ -83,7 +86,7 @@ describe("buildEur", () => {
         betrag_brutto: "119.00",
         betrag_netto: "100.00",
         betrag_ust: "19.00",
-        quelle_typ: "rechnung",
+        quelle_typ: "zahlung",
       }),
       je({
         id: "2",
@@ -121,14 +124,14 @@ describe("buildEur", () => {
         richtung: "einnahme",
         betrag_brutto: "120.00",
         betrag_netto: "120.00",
-        quelle_typ: "rechnung",
+        quelle_typ: "zahlung",
       }),
       je({
         id: "r2",
         richtung: "einnahme",
         betrag_brutto: "30.00",
         betrag_netto: "30.00",
-        quelle_typ: "rechnung",
+        quelle_typ: "zahlung",
       }),
       je({
         id: "b1",
@@ -193,6 +196,31 @@ describe("buildEur", () => {
     expect(eur.ueberschuss_brutto).toBe("120.00");
   });
 
+  it("zählt Forderungsbuchungen der Rechnung nicht in der EÜR", () => {
+    const eur = buildEur(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "119.00",
+          betrag_netto: "100.00",
+          betrag_ust: "19.00",
+          quelle_typ: "rechnung",
+        }),
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "50.00",
+          betrag_netto: "50.00",
+          quelle_typ: "zahlung",
+        }),
+      ],
+      Z,
+    );
+    expect(eur.einnahmen.find((z) => z.id === "umsatzerloese")?.summe_brutto).toBe(
+      "50.00",
+    );
+    expect(eur.anzahl_buchungen).toBe(1);
+  });
+
   it("füllt alle Kategorien (auch 0)", () => {
     const eur = buildEur([], Z);
     expect(eur.einnahmen).toHaveLength(3);
@@ -226,7 +254,7 @@ describe("buildUstUebersicht", () => {
         betrag_netto: "100.00",
         betrag_ust: "19.00",
         steuersatz: "19",
-        quelle_typ: "rechnung",
+        quelle_typ: "zahlung",
       }),
       je({
         richtung: "ausgabe",
@@ -244,7 +272,7 @@ describe("buildUstUebersicht", () => {
     expect(u.zahllast).toBe("12.00");
   });
 
-  it("mindert USt-Einnahmen bei Rechnungs-Storno, nicht Vorsteuer", () => {
+  it("mindert USt-Einnahmen bei Zahlungs-Storno, nicht Vorsteuer", () => {
     const items = [
       je({
         id: "1",
@@ -253,7 +281,7 @@ describe("buildUstUebersicht", () => {
         betrag_netto: "100.00",
         betrag_ust: "19.00",
         steuersatz: "19",
-        quelle_typ: "rechnung",
+        quelle_typ: "zahlung",
       }),
       je({
         id: "2",
@@ -272,7 +300,7 @@ describe("buildUstUebersicht", () => {
     expect(u.zahllast).toBe("0.00");
   });
 
-  it("ordnet Rechnungs-USt ohne Journal-Satz über die Beträge dem Satz 19 % zu", () => {
+  it("ordnet Zahlungs-USt ohne Journal-Satz über die Beträge dem Satz 19 % zu", () => {
     const u = buildUstUebersicht(
       [
         je({
@@ -281,7 +309,7 @@ describe("buildUstUebersicht", () => {
           betrag_netto: "95.00",
           betrag_ust: "18.05",
           steuersatz: "",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
         je({
           richtung: "ausgabe",
@@ -344,6 +372,25 @@ describe("buildUstUebersicht", () => {
     ).toBe("13.00");
     expect(gemischt.zeilen.find((z) => z.steuersatz === "19")).toBeUndefined();
   });
+
+  it("zählt Forderungsbuchung der Rechnung nicht in der USt", () => {
+    const u = buildUstUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "119.00",
+          betrag_netto: "100.00",
+          betrag_ust: "19.00",
+          steuersatz: "19",
+          quelle_typ: "rechnung",
+        }),
+      ],
+      Z,
+      "regelbesteuerung_ist",
+    );
+    expect(u.summe_ust_einnahmen).toBe("0.00");
+    expect(u.zeilen).toHaveLength(0);
+  });
 });
 
 describe("inferSteuersatzFromBetraege", () => {
@@ -369,14 +416,14 @@ describe("buildBwaLight / Dashboard", () => {
     expect(bwa.ergebnis_brutto).toBe("120.00");
   });
 
-  it("BWA mindert Einnahmen bei Rechnungs-Storno statt Ausgaben zu erhöhen", () => {
+  it("BWA mindert Einnahmen bei Zahlungs-Storno statt Ausgaben zu erhöhen", () => {
     const bwa = buildBwaLight(
       [
         je({
           id: "1",
           richtung: "einnahme",
           betrag_brutto: "30.00",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
         je({
           id: "2",

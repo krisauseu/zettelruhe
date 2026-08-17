@@ -36,13 +36,16 @@ import type {
 } from "./types";
 
 export const JOURNAL_BASIS_HINWEIS =
-  "Grundlage ist das festgeschriebene Buchungsjournal (Belege, Rechnungen, Kasse, manuell, Storno). Zahlungen auf Rechnungen erzeugen in v1 kein Journal-Eintrag (Ist-Versteuerung Follow-up) und fließen hier nicht ein.";
+  "Grundlage ist das festgeschriebene Buchungsjournal nach Zufluss (Ist-Versteuerung / EÜR). Einnahmen aus Rechnungen zählen mit dem Zahlungsdatum (Quelle Zahlung), nicht mit dem Rechnungsdatum. Die Forderungsbuchung zur Festschreibung (Quelle Rechnung) bleibt im Journal sichtbar, fließt hier aber nicht ein. Belege, Kassenbuch und manuelle Buchungen zählen mit ihrem Buchungsdatum.";
 
 const EUR_META: Record<
   EurKategorieId,
   { label: string; richtung: "einnahme" | "ausgabe" }
 > = {
-  umsatzerloese: { label: "Umsatzerlöse (Rechnungen)", richtung: "einnahme" },
+  umsatzerloese: {
+    label: "Umsatzerlöse (Zahlungen auf Rechnungen)",
+    richtung: "einnahme",
+  },
   bareinnahmen: { label: "Bareinnahmen (Kassenbuch)", richtung: "einnahme" },
   sonstige_einnahmen: {
     label: "Sonstige Einnahmen",
@@ -60,6 +63,30 @@ export function isStornoEintrag(
   e: Pick<JournalEintrag, "quelle_typ" | "storno_von">,
 ): boolean {
   return e.quelle_typ === "storno" || Boolean(e.storno_von);
+}
+
+/**
+ * EÜR / USt / ZM / DATEV: Zufluss, keine Forderungsbuchung der Rechnung.
+ * Storno folgt dem Original (Rechnung-Storno bleibt außen vor).
+ */
+export function istZuflussRelevant(
+  e: Pick<JournalEintrag, "quelle_typ" | "storno_von">,
+  originals?: Map<string, JournalEintrag>,
+): boolean {
+  if (isStornoEintrag(e)) {
+    const orig = e.storno_von ? originals?.get(e.storno_von) : undefined;
+    if (orig) return istZuflussRelevant(orig, originals);
+    return true;
+  }
+  return e.quelle_typ !== "rechnung";
+}
+
+export function filterZuflussJournal(
+  eintraege: JournalEintrag[],
+  extraOriginale: JournalEintrag[] = [],
+): JournalEintrag[] {
+  const originals = originalsMap(eintraege, extraOriginale);
+  return eintraege.filter((e) => istZuflussRelevant(e, originals));
 }
 
 export function indexJournalById(
@@ -83,7 +110,7 @@ export function mapEurKategorieFromQuelle(
 ): EurKategorieId {
   const quelle = quelleFuerKategorie(quelle_typ);
   if (richtung === "einnahme") {
-    if (quelle === "rechnung") return "umsatzerloese";
+    if (quelle === "rechnung" || quelle === "zahlung") return "umsatzerloese";
     if (quelle === "kasse") return "bareinnahmen";
     return "sonstige_einnahmen";
   }
@@ -193,7 +220,8 @@ export function buildEur(
   for (const id of ids) map.set(id, emptyAcc());
 
   const originals = originalsMap(eintraege, extraOriginale);
-  for (const e of eintraege) {
+  const relevant = eintraege.filter((e) => istZuflussRelevant(e, originals));
+  for (const e of relevant) {
     const kat = mapEurKategorie(e, originals);
     const sign: 1 | -1 = isStornoEintrag(e) ? -1 : 1;
     accAdd(map.get(kat)!, e, sign);
@@ -228,7 +256,7 @@ export function buildEur(
     summe_einnahmen_netto: moneyToString(sumEinN),
     summe_ausgaben_netto: moneyToString(sumAusN),
     ueberschuss_netto: moneyToString(subMoney(sumEinN, sumAusN)),
-    anzahl_buchungen: eintraege.length,
+    anzahl_buchungen: relevant.length,
     hinweis_journal_basis: JOURNAL_BASIS_HINWEIS,
   };
 }
@@ -309,6 +337,7 @@ export function buildUstUebersicht(
 
   const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
+    if (!istZuflussRelevant(e, originals)) continue;
     const k = steuersatzKey(e);
     const a = get(k);
     const richtung = wirtschaftlicheRichtung(e, originals);
@@ -361,9 +390,8 @@ export function buildUstUebersicht(
     summe_vorsteuer: moneyToString(sumVst),
     zahllast: moneyToString(zahllast),
     hinweis:
-      "USt-Übersicht light aus dem Buchungsjournal (Buchungsdatum). Vorbereitung für Mein Elster — kein ELSTER-Versand. " +
-      JOURNAL_BASIS_HINWEIS +
-      " Bei Ist-Versteuerung kann die Zahllast daher von Zahlungseingängen abweichen, solange Zahlungen kein Journal erzeugen.",
+      "USt-Übersicht light aus dem Buchungsjournal (Buchungsdatum = Zufluss bei Zahlungen). Vorbereitung für Mein Elster — kein ELSTER-Versand. " +
+      JOURNAL_BASIS_HINWEIS,
   };
 }
 
@@ -376,6 +404,7 @@ export function buildBwaLight(
   let aus = money(0);
   const originals = originalsMap(eintraege, extraOriginale);
   for (const e of eintraege) {
+    if (!istZuflussRelevant(e, originals)) continue;
     const richtung = wirtschaftlicheRichtung(e, originals);
     const faktor = isStornoEintrag(e) ? -1 : 1;
     if (richtung === "einnahme") {
@@ -414,7 +443,7 @@ export function buildDashboard(
     offene_posten_summe: moneyToString(money(offenePosten.summe)),
     offene_posten_anzahl: offenePosten.anzahl,
     ust_zahllast: ust?.verfuegbar ? ust.zahllast : null,
-    anzahl_buchungen: eintraege.length,
+    anzahl_buchungen: filterZuflussJournal(eintraege, extraOriginale).length,
   };
 }
 

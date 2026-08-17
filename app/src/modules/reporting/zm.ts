@@ -2,7 +2,7 @@
  * Zusammenfassende Meldung (ZM) Übersicht (Self-File, ADR-0020).
  *
  * Quelle: Buchungsjournal der aktiven Firma + aktuelles Land am Kontakt.
- * Zahlungen erzeugen in v1 kein Journal — hier nicht still nachziehen.
+ * Einnahmen aus Rechnungen über Zahlungsjournal (Zufluss, ADR-0024).
  * Nur Regelbesteuerung; unter Kleinunternehmerregelung nicht relevant.
  *
  * Ehrliche Kandidaten: wirtschaftliche Einnahmen mit USt 0,00 € (nicht Satz 7/19)
@@ -23,6 +23,7 @@ import type { JournalEintrag } from "@/modules/journal/types";
 import type { Steuermodus } from "@/lib/pb";
 import {
   isStornoEintrag,
+  istZuflussRelevant,
   wirtschaftlicheRichtung,
 } from "./aggregate";
 import { lastDayOfMonth, parseYmd, quarterOfMonth } from "./periods";
@@ -49,7 +50,7 @@ export const ZM_HINWEIS =
   "Ein BZSt-Schnappschuss gilt nur für den Anfragezeitpunkt, nicht für den Umsatz. " +
   "Werte selbst in Mein Elster eintragen — kein ELSTER-Versand, keine Abgabe aus der App. " +
   "Rechnungsbuchungen speichern oft keinen Steuersatz; maßgeblich ist USt 0,00 €. " +
-  "Zahlungen erzeugen in v1 kein Journal. Land ist der Stammdaten-Stand, kein Historien-Schnappschuss.";
+  "Rechnungs-Einnahmen zählen mit dem Zahlungsdatum (Quelle Zahlung). Land ist der Stammdaten-Stand, kein Historien-Schnappschuss.";
 
 const MONAT_NAMEN = [
   "Januar",
@@ -369,6 +370,7 @@ export function buildZmUebersicht(
   const originals = originalsMap(eintraege, extraOriginale);
   const zeilen: ZmZeile[] = [];
   for (const e of eintraege) {
+    if (!istZuflussRelevant(e, originals)) continue;
     if (!isNullUstEinnahme(e, originals)) continue;
     zeilen.push(toZeile(e, originals, kontakte));
   }

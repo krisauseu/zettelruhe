@@ -29,7 +29,7 @@ function je(
     steuersatz: partial.steuersatz ?? "",
     konto: partial.konto ?? "",
     kontakt: partial.kontakt ?? null,
-    quelle_typ: partial.quelle_typ ?? "rechnung",
+    quelle_typ: partial.quelle_typ ?? "zahlung",
     quelle_id: partial.quelle_id ?? "",
     storno_von: partial.storno_von ?? null,
     festgeschrieben_am: "2026-08-10T10:00:00.000Z",
@@ -124,7 +124,7 @@ describe("buildZmUebersicht", () => {
     expect(zm.format_id).toBe(ZM_FORMAT_ID);
   });
 
-  it("nimmt 0-USt-Rechnung an FR-Kontakt als Kandidat, ohne Art", () => {
+  it("nimmt 0-USt-Zahlung an FR-Kontakt als Kandidat, ohne Art", () => {
     const zm = buildZmUebersicht(
       [
         je({
@@ -134,7 +134,7 @@ describe("buildZmUebersicht", () => {
           betrag_ust: "0.00",
           steuersatz: "",
           kontakt: "fr1",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
       ],
       MONAT,
@@ -149,6 +149,26 @@ describe("buildZmUebersicht", () => {
     expect(zm.kandidaten[0]?.eintrag_euro_ganz).toBe("250");
     expect(zm.kandidaten[0]?.ust_id_status).toBe("nicht_gefuehrt");
     expect(zm.nicht_gefuehrt.some((n) => n.feld === "Art")).toBe(true);
+    expect(zm.andere_nullust).toHaveLength(0);
+  });
+
+  it("nimmt 0-USt-Forderungsbuchung der Rechnung nicht als Kandidat", () => {
+    const zm = buildZmUebersicht(
+      [
+        je({
+          richtung: "einnahme",
+          betrag_brutto: "250.00",
+          betrag_netto: "250.00",
+          betrag_ust: "0.00",
+          kontakt: "fr1",
+          quelle_typ: "rechnung",
+        }),
+      ],
+      MONAT,
+      "regelbesteuerung_ist",
+      kontakte(k({ id: "fr1", land: "FR", name: "Paris SARL" })),
+    );
+    expect(zm.kandidaten).toHaveLength(0);
     expect(zm.andere_nullust).toHaveLength(0);
   });
 
@@ -251,7 +271,7 @@ describe("buildZmUebersicht", () => {
     expect(zm.kandidaten).toHaveLength(0);
   });
 
-  it("mindert Kandidaten bei Rechnungs-Storno", () => {
+  it("mindert Kandidaten bei Zahlungs-Storno", () => {
     const zm = buildZmUebersicht(
       [
         je({

@@ -1,7 +1,7 @@
 /**
  * Persistenz Zahlungen über PocketBase (Superuser).
  * Anlegen/Löschen light; Rechnungsstatus aus Zahlungen ableiten.
- * Kein Journal in Abschn. 8 (ADR Follow-up Ist-Versteuerung).
+ * Anlegen schreibt Zufluss-Journal (ADR-0024); Löschen storniert es.
  */
 
 import {
@@ -19,6 +19,13 @@ import {
   listRechnungen,
 } from "@/modules/sales/repository";
 import type { Rechnung, RechnungStatus } from "@/modules/sales/types";
+import {
+  ensureZahlungJournal,
+  ensureZahlungsjournaleFuerRechnung,
+  istVollstaendigBezahlt,
+  listAktiveZahlungsjournale,
+  storniereZahlungsjournal,
+} from "./journal";
 import {
   assertKeineUeberzahlung,
   assertRechnungZahlungsfaehig,
@@ -166,13 +173,12 @@ async function syncRechnungStatus(
 }
 
 /**
- * Zahlung anlegen + Rechnungsstatus ableiten.
- * Kein Journal (Abschn. 8 light).
+ * Zahlung anlegen + Rechnungsstatus ableiten + Zufluss-Journal (ADR-0024).
  */
 export async function createZahlung(
   firmaId: string,
   input: ZahlungInput,
-  opts?: { heute?: string },
+  opts?: { heute?: string; now?: Date },
 ): Promise<{ zahlung: Zahlung; status: RechnungStatus; offen: string }> {
   const validated = validateZahlungInput(input);
 
@@ -202,8 +208,32 @@ export async function createZahlung(
 
   const r = await createRecord<PbZahlung>(COL, body);
   const zahlung = mapZahlung(r);
-
   const alle = [...bestehende, zahlung];
+
+  try {
+    await ensureZahlungsjournaleFuerRechnung(
+      firmaId,
+      rechnung.id,
+      bestehende,
+      rechnung.betrag_brutto,
+      { now: opts?.now },
+    );
+    const bereits = (
+      await Promise.all(
+        bestehende.map((z) => listAktiveZahlungsjournale(firmaId, z.id)),
+      )
+    ).flat();
+    await ensureZahlungJournal(firmaId, zahlung, {
+      bereits,
+      vollstaendig: istVollstaendigBezahlt(rechnung.betrag_brutto, alle),
+      now: opts?.now,
+    });
+  } catch (e) {
+    await storniereZahlungsjournal(firmaId, zahlung.id).catch(() => undefined);
+    await deleteRecord(COL, zahlung.id);
+    throw e;
+  }
+
   const status = await syncRechnungStatus(firmaId, rechnung, alle, {
     heute: opts?.heute,
   });
@@ -213,13 +243,13 @@ export async function createZahlung(
 }
 
 /**
- * Zahlung löschen light (Korrektur manueller Erfassung) + Status neu ableiten.
- * Kein stilles Überschreiben von Rechnungs-PDF/Journal.
+ * Zahlung löschen light (Korrektur) + Status neu ableiten.
+ * Zahlungsjournal wird storniert (nicht still gelöscht).
  */
 export async function deleteZahlung(
   firmaId: string,
   id: string,
-  opts?: { heute?: string },
+  opts?: { heute?: string; now?: Date },
 ): Promise<{ status: RechnungStatus | null; offen: string | null }> {
   const existing = await getZahlung(firmaId, id);
   if (!existing) {
@@ -227,6 +257,12 @@ export async function deleteZahlung(
   }
 
   const rechnung = await getRechnung(firmaId, existing.rechnung);
+  await storniereZahlungsjournal(firmaId, existing.id, {
+    buchungstext: rechnung
+      ? `Storno Zahlung zu Rechnung ${rechnung.rechnungsnummer || rechnung.id}`
+      : undefined,
+    now: opts?.now,
+  });
   await deleteRecord(COL, id);
 
   if (!rechnung) {
@@ -341,6 +377,61 @@ export async function listOffenePosten(
     perPage,
     totalPages,
   };
+}
+
+const nachzugDone = new Set<string>();
+
+/**
+ * Bestehende Zahlungen ohne Journal nachziehen (idempotent).
+ * Einmal je Prozess und Firma — weitere Aufrufe sind no-op.
+ */
+export async function nachziehenZahlungsjournale(
+  firmaId: string,
+  opts?: { now?: Date; force?: boolean },
+): Promise<number> {
+  if (!firmaId) return 0;
+  if (!opts?.force && nachzugDone.has(firmaId)) return 0;
+
+  let geschrieben = 0;
+  let page = 1;
+  const byRechnung = new Map<string, Zahlung[]>();
+
+  while (page <= 50) {
+    const result = await listZahlungen(firmaId, {}, page, 200);
+    for (const z of result.items) {
+      const list = byRechnung.get(z.rechnung) ?? [];
+      list.push(z);
+      byRechnung.set(z.rechnung, list);
+    }
+    if (page >= result.totalPages || result.items.length === 0) break;
+    page += 1;
+  }
+
+  for (const [rechnungId, zahlungen] of byRechnung) {
+    const rechnung = await getRechnung(firmaId, rechnungId);
+    if (!rechnung) continue;
+    geschrieben += await ensureZahlungsjournaleFuerRechnung(
+      firmaId,
+      rechnungId,
+      zahlungen,
+      rechnung.betrag_brutto,
+      { now: opts?.now },
+    );
+  }
+
+  nachzugDone.add(firmaId);
+  return geschrieben;
+}
+
+/** Nachzug für die aktive Firma; Fehler dürfen die App nicht blockieren. */
+export async function nachziehenZahlungsjournaleEinmal(
+  firmaId: string,
+): Promise<void> {
+  try {
+    await nachziehenZahlungsjournale(firmaId);
+  } catch (e) {
+    console.error("Zahlungsjournal-Nachzug fehlgeschlagen:", e);
+  }
 }
 
 function moneyGtZero(s: string): boolean {

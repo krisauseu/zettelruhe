@@ -108,7 +108,7 @@ describe("buildUstvaDatensatz", () => {
           betrag_netto: "100.00",
           betrag_ust: "19.00",
           steuersatz: "19",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
         je({
           richtung: "ausgabe",
@@ -138,7 +138,7 @@ describe("buildUstvaDatensatz", () => {
     expect(d.zahllast_journal).toBe("12.00");
   });
 
-  it("mindert Kz 81 bei Rechnungs-Storno", () => {
+  it("mindert Kz 81 bei Zahlungs-Storno", () => {
     const ust = buildUstUebersicht(
       [
         je({
@@ -148,7 +148,7 @@ describe("buildUstvaDatensatz", () => {
           betrag_netto: "100.00",
           betrag_ust: "19.00",
           steuersatz: "19",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
         je({
           id: "2",
@@ -169,7 +169,7 @@ describe("buildUstvaDatensatz", () => {
     expect(d.kz83).toBe("0.00");
   });
 
-  it("füllt Kz 81 aus Rechnungs-USt ohne Journal-Satz (M2-01)", () => {
+  it("füllt Kz 81 aus Zahlungs-USt ohne Journal-Satz (M2-01, Zufluss)", () => {
     const ust = buildUstUebersicht(
       [
         je({
@@ -178,7 +178,7 @@ describe("buildUstvaDatensatz", () => {
           betrag_netto: "95.00",
           betrag_ust: "18.05",
           steuersatz: "",
-          quelle_typ: "rechnung",
+          quelle_typ: "zahlung",
         }),
         je({
           richtung: "ausgabe",

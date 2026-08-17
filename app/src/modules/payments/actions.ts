@@ -49,6 +49,11 @@ export async function createZahlungAction(formData: FormData): Promise<void> {
   revalidatePath("/app/rechnungen");
   revalidatePath(`/app/rechnungen/${rechnungId}`);
   revalidatePath("/app/zahlungen");
+  revalidatePath("/app/journal");
+  revalidatePath("/app/eur");
+  revalidatePath("/app/ust");
+  revalidatePath("/app/auswertungen");
+  revalidatePath("/app/zm");
   redirect(`/app/rechnungen/${rechnungId}?zahlung=1`);
 }
 
@@ -79,6 +84,11 @@ export async function deleteZahlungAction(formData: FormData): Promise<void> {
 
   revalidatePath("/app/rechnungen");
   revalidatePath("/app/zahlungen");
+  revalidatePath("/app/journal");
+  revalidatePath("/app/eur");
+  revalidatePath("/app/ust");
+  revalidatePath("/app/auswertungen");
+  revalidatePath("/app/zm");
   if (rechnungId) {
     revalidatePath(`/app/rechnungen/${rechnungId}`);
     redirect(`/app/rechnungen/${rechnungId}?zahlungGeloescht=1`);

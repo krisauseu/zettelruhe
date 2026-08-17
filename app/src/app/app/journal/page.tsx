@@ -79,6 +79,8 @@ export default async function JournalListPage({
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Unveränderbare, fortlaufende Buchungen. Anlegen = Festschreibung.
+            Zahlungen erzeugen eine Zufluss-Buchung; die Rechnung bleibt die
+            Forderungsbuchung bei Festschreibung.
           </p>
         </div>
         <Link
@@ -127,6 +129,25 @@ export default async function JournalListPage({
                 <option value="ausgabe">Ausgabe</option>
               </select>
             </div>
+            <div className="flex w-40 flex-col gap-1.5">
+              <Label htmlFor="quelle" className="text-xs text-muted-foreground">
+                Quelle
+              </Label>
+              <select
+                id="quelle"
+                name="quelle"
+                defaultValue={quelle}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+              >
+                <option value="">Alle</option>
+                <option value="zahlung">Zahlung</option>
+                <option value="rechnung">Rechnung</option>
+                <option value="beleg">Beleg</option>
+                <option value="kasse">Kassenbuch</option>
+                <option value="manuell">Manuell</option>
+                <option value="storno">Storno</option>
+              </select>
+            </div>
             <div className="flex w-36 flex-col gap-1.5">
               <Label htmlFor="von" className="text-xs text-muted-foreground">
                 Von
@@ -155,8 +176,9 @@ export default async function JournalListPage({
             >
               <p className="font-medium text-foreground">Noch keine Buchungen</p>
               <p className="max-w-prose leading-relaxed">
-                Das Journal füllt sich bei Festschreibung von Belegen, Rechnungen und
-                Kassenbuch — oder durch manuelle Buchung.
+                Das Journal füllt sich bei Festschreibung von Belegen, Rechnungen
+                und Kassenbuch, bei Zahlungen auf Rechnungen — oder durch
+                manuelle Buchung.
               </p>
               <Link
                 href="/app/journal/neu"

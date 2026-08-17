@@ -1,7 +1,7 @@
 /**
  * Persistenz Banking über PocketBase (Superuser).
  * Bankkonto-CRUD, CSV-Import mit Idempotenz, Matching → createZahlung (payments).
- * Kein Journal bei gematchter Zahlung (Abschn. 8/11).
+ * Gematchte Zahlung über payments.createZahlung (inkl. Zufluss-Journal).
  */
 
 import {

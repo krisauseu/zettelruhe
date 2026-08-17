@@ -54,8 +54,8 @@ export type EurAuswertung = {
   /** Anzahl Journal-Zeilen im Zeitraum */
   anzahl_buchungen: number;
   /**
-   * Hinweis: Auswertung basiert auf festgeschriebenem Journal.
-   * Zahlungen erzeugen kein Journal (Ist-Versteuerung Follow-up).
+   * Hinweis: Auswertung basiert auf festgeschriebenem Journal nach Zufluss
+   * (Zahlungen auf Rechnungen, nicht die Forderungsbuchung).
    */
   hinweis_journal_basis: string;
 };

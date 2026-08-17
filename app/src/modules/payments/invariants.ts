@@ -1,7 +1,8 @@
 /**
  * Reine Domain-Invarianten Zahlungen (ohne I/O).
  * Teilzahlung: Summe der Zahlungen ≤ Rechnungs-Brutto.
- * Status light aus Zahlungen + Fälligkeit ableiten (kein Journal in Abschn. 8).
+ * Status light aus Zahlungen + Fälligkeit ableiten.
+ * Journal: Zufluss je Zahlung (ADR-0024), anteilig nach Steuerstaffel.
  */
 
 import {
@@ -11,12 +12,21 @@ import {
   subMoney,
   sumMoney,
 } from "@/lib/money";
+import type { JournalBuchungInput, Steuersatz } from "@/modules/journal/types";
 import {
   isValidIsoDate,
   normalizeBetragInput,
   todayBerlin,
 } from "@/modules/journal/invariants";
-import type { Rechnung, RechnungStatus } from "@/modules/sales/types";
+import {
+  einheitlicherSteuersatz,
+  ustStaffelAusPositionen,
+} from "@/modules/sales/invariants";
+import type {
+  Rechnung,
+  RechnungStatus,
+  Rechnungsposition,
+} from "@/modules/sales/types";
 import type { Zahlung, ZahlungInput, Zahlungsweg } from "./types";
 
 export { isValidIsoDate, todayBerlin, normalizeBetragInput };
@@ -199,4 +209,232 @@ export function parseZahlungsweg(raw: string): Zahlungsweg | "" {
   return VALID_ZAHLUNGSWEG.has(raw as Zahlungsweg)
     ? (raw as Zahlungsweg)
     : "";
+}
+
+/** Steueranteil einer Zahlung (eine Journal-Zeile). */
+export type ZahlungSteueranteil = {
+  steuersatz: Steuersatz | "";
+  betrag_netto: string;
+  betrag_ust: string;
+  betrag_brutto: string;
+};
+
+const ZAHLUNGSWEG_TEXT: Record<Zahlungsweg, string> = {
+  bar: "Bar",
+  ueberweisung: "Überweisung",
+  sonstiges: "Sonstiges",
+};
+
+function staffelMitBrutto(
+  rows: Array<{
+    steuersatz: Steuersatz | "";
+    betrag_netto: string;
+    betrag_ust: string;
+    betrag_brutto?: string;
+  }>,
+): ZahlungSteueranteil[] {
+  return rows.map((r) => ({
+    steuersatz: r.steuersatz,
+    betrag_netto: moneyToString(roundMoney(money(r.betrag_netto))),
+    betrag_ust: moneyToString(roundMoney(money(r.betrag_ust))),
+    betrag_brutto: moneyToString(
+      roundMoney(
+        r.betrag_brutto != null && r.betrag_brutto !== ""
+          ? money(r.betrag_brutto)
+          : sumMoney(r.betrag_netto, r.betrag_ust),
+      ),
+    ),
+  }));
+}
+
+/** Rechnungs-Staffel für die Zahlungsaufteilung (Positionen, sonst Kopf). */
+export function rechnungStaffelFuerZahlung(
+  rechnung: Pick<
+    Rechnung,
+    "betrag_netto" | "betrag_ust" | "betrag_brutto" | "steuermodus"
+  >,
+  positionen: Array<
+    Pick<Rechnungsposition, "steuersatz" | "betrag_netto" | "betrag_ust">
+  >,
+): ZahlungSteueranteil[] {
+  if (positionen.length > 0) {
+    return staffelMitBrutto(ustStaffelAusPositionen(positionen));
+  }
+  return staffelMitBrutto([
+    {
+      steuersatz: einheitlicherSteuersatz([], rechnung.steuermodus),
+      betrag_netto: rechnung.betrag_netto,
+      betrag_ust: rechnung.betrag_ust,
+      betrag_brutto: rechnung.betrag_brutto,
+    },
+  ]);
+}
+
+function summiereAnteile(
+  lines: ZahlungSteueranteil[],
+): Map<string, ZahlungSteueranteil> {
+  const map = new Map<
+    string,
+    { netto: ReturnType<typeof money>; ust: ReturnType<typeof money>; brutto: ReturnType<typeof money> }
+  >();
+  for (const l of lines) {
+    const cur = map.get(l.steuersatz) ?? {
+      netto: money(0),
+      ust: money(0),
+      brutto: money(0),
+    };
+    cur.netto = cur.netto.plus(money(l.betrag_netto));
+    cur.ust = cur.ust.plus(money(l.betrag_ust));
+    cur.brutto = cur.brutto.plus(money(l.betrag_brutto));
+    map.set(l.steuersatz, cur);
+  }
+  const out = new Map<string, ZahlungSteueranteil>();
+  for (const [satz, v] of map) {
+    out.set(satz, {
+      steuersatz: satz as Steuersatz | "",
+      betrag_netto: moneyToString(roundMoney(v.netto)),
+      betrag_ust: moneyToString(roundMoney(v.ust)),
+      betrag_brutto: moneyToString(roundMoney(v.brutto)),
+    });
+  }
+  return out;
+}
+
+/**
+ * Teilt einen Zahlungs-Bruttobetrag auf die offene Steuerstaffel.
+ * Letzte Zahlung (vollstaendig) nimmt den Rest je Satz — kein Cent-Drift.
+ */
+export function allocateZahlungAufStaffel(opts: {
+  zahlungsbetrag: string;
+  rechnungStaffel: ZahlungSteueranteil[];
+  bereits: ZahlungSteueranteil[];
+  vollstaendig: boolean;
+}): ZahlungSteueranteil[] {
+  const invoice = staffelMitBrutto(opts.rechnungStaffel);
+  if (invoice.length === 0) {
+    throw new Error("Keine Steuerstaffel für die Zahlung.");
+  }
+
+  const already = summiereAnteile(opts.bereits);
+  const remaining: ZahlungSteueranteil[] = [];
+  for (const row of invoice) {
+    const done = already.get(row.steuersatz);
+    const netto = money(row.betrag_netto).minus(money(done?.betrag_netto ?? 0));
+    const ust = money(row.betrag_ust).minus(money(done?.betrag_ust ?? 0));
+    const brutto = money(row.betrag_brutto).minus(money(done?.betrag_brutto ?? 0));
+    if (netto.lte(0) && ust.lte(0) && brutto.lte(0)) continue;
+    remaining.push({
+      steuersatz: row.steuersatz,
+      betrag_netto: moneyToString(roundMoney(netto)),
+      betrag_ust: moneyToString(roundMoney(ust)),
+      betrag_brutto: moneyToString(roundMoney(brutto)),
+    });
+  }
+
+  const remainingBrutto = remaining.reduce(
+    (acc, r) => acc.plus(money(r.betrag_brutto)),
+    money(0),
+  );
+  const pay = money(opts.zahlungsbetrag);
+  if (remaining.length === 0 || remainingBrutto.lte(0)) {
+    throw new Error("Keine offene Steuerstaffel für die Zahlung.");
+  }
+
+  if (opts.vollstaendig || pay.gte(remainingBrutto)) {
+    return remaining.filter((r) => money(r.betrag_brutto).gt(0));
+  }
+
+  const result: ZahlungSteueranteil[] = [];
+  let allocatedBrutto = money(0);
+  for (let i = 0; i < remaining.length; i++) {
+    const row = remaining[i]!;
+    const isLast = i === remaining.length - 1;
+    const brutto = isLast
+      ? roundMoney(pay.minus(allocatedBrutto))
+      : roundMoney(
+          money(row.betrag_brutto).times(pay).dividedBy(remainingBrutto),
+        );
+    if (!isLast) {
+      allocatedBrutto = allocatedBrutto.plus(brutto);
+    }
+    if (brutto.lte(0)) continue;
+
+    const rowBrutto = money(row.betrag_brutto);
+    const netto = rowBrutto.isZero()
+      ? money(0)
+      : roundMoney(money(row.betrag_netto).times(brutto).dividedBy(rowBrutto));
+    const ust = roundMoney(brutto.minus(netto));
+    result.push({
+      steuersatz: row.steuersatz,
+      betrag_netto: moneyToString(netto),
+      betrag_ust: moneyToString(ust),
+      betrag_brutto: moneyToString(brutto),
+    });
+  }
+  return result;
+}
+
+export function buildBuchungstextFromZahlung(opts: {
+  rechnungsnummer: string;
+  zahlungsweg?: Zahlungsweg | "";
+  steuersatz?: Steuersatz | "";
+  mehrereSaetze?: boolean;
+}): string {
+  const nr = opts.rechnungsnummer.trim() || "Rechnung";
+  const weg =
+    opts.zahlungsweg && opts.zahlungsweg in ZAHLUNGSWEG_TEXT
+      ? ZAHLUNGSWEG_TEXT[opts.zahlungsweg]
+      : "";
+  const kopf = weg ? `Zahlung (${weg}) zu Rechnung ${nr}` : `Zahlung zu Rechnung ${nr}`;
+  if (opts.mehrereSaetze && opts.steuersatz) {
+    return `${kopf} — ${opts.steuersatz} %`.slice(0, 500);
+  }
+  return kopf.slice(0, 500);
+}
+
+/** Journal-Eingaben einer Zahlung (eine Zeile je offenem Steuersatz). */
+export function buildJournalInputsFromZahlung(opts: {
+  zahlung: Pick<Zahlung, "id" | "datum" | "betrag" | "zahlungsweg">;
+  rechnung: Pick<
+    Rechnung,
+    | "rechnungsnummer"
+    | "rechnungsdatum"
+    | "kunde"
+    | "betrag_netto"
+    | "betrag_ust"
+    | "betrag_brutto"
+    | "steuermodus"
+  >;
+  positionen: Array<
+    Pick<Rechnungsposition, "steuersatz" | "betrag_netto" | "betrag_ust">
+  >;
+  bereits: ZahlungSteueranteil[];
+  vollstaendig: boolean;
+}): JournalBuchungInput[] {
+  const staffel = rechnungStaffelFuerZahlung(opts.rechnung, opts.positionen);
+  const anteile = allocateZahlungAufStaffel({
+    zahlungsbetrag: opts.zahlung.betrag,
+    rechnungStaffel: staffel,
+    bereits: opts.bereits,
+    vollstaendig: opts.vollstaendig,
+  });
+  const mehrere = anteile.length > 1;
+  return anteile.map((a) => ({
+    buchungsdatum: opts.zahlung.datum,
+    belegdatum: opts.rechnung.rechnungsdatum,
+    buchungstext: buildBuchungstextFromZahlung({
+      rechnungsnummer: opts.rechnung.rechnungsnummer,
+      zahlungsweg: opts.zahlung.zahlungsweg,
+      steuersatz: a.steuersatz,
+      mehrereSaetze: mehrere,
+    }),
+    richtung: "einnahme" as const,
+    betrag_netto: a.betrag_netto,
+    betrag_ust: a.betrag_ust,
+    betrag_brutto: a.betrag_brutto,
+    steuersatz: a.steuersatz,
+    kontakt: opts.rechnung.kunde,
+    quelle_typ: "zahlung",
+    quelle_id: opts.zahlung.id,
+  }));
 }

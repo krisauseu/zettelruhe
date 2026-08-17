@@ -514,8 +514,9 @@ export default async function RechnungDetailPage({
                 <CardTitle>Zahlungen</CardTitle>
                 <CardDescription>
                   Manuelle Zahlungen und Teilzahlungen. Offener Betrag =
-                  Rechnungs-Brutto abzüglich erfasster Zahlungen. Kein
-                  Bank-Import in diesem Abschnitt.
+                  Rechnungs-Brutto abzüglich erfasster Zahlungen. Jede Zahlung
+                  erzeugt eine Zufluss-Buchung im Journal (Ist-Versteuerung /
+                  EÜR). Löschen storniert diese Buchung.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -640,15 +641,16 @@ export default async function RechnungDetailPage({
               <CardHeader>
                 <CardTitle>Storno</CardTitle>
                 <CardDescription>
-                  Erzeugt eine Gegenbuchung im Journal und setzt den Status auf
-                  storniert. Die Originalrechnung und das PDF bleiben erhalten.
+                  Erzeugt Gegenbuchungen zur Rechnungs- und zu den
+                  Zahlungsbuchungen und setzt den Status auf storniert. Die
+                  Originalrechnung und das PDF bleiben erhalten.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ConfirmForm
                   action={storniereRechnungAction}
                   title="Rechnung stornieren?"
-                  message={`Rechnung ${rechnung.rechnungsnummer || ""} wird storniert. Es entsteht eine Gegenbuchung; das Original bleibt unverändert.`}
+                  message={`Rechnung ${rechnung.rechnungsnummer || ""} wird storniert. Es entstehen Gegenbuchungen zur Rechnungs- und zu den Zahlungsbuchungen; das Original bleibt unverändert.`}
                   confirmLabel="Jetzt stornieren"
                   className="flex flex-col gap-4"
                 >

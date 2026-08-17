@@ -24,7 +24,7 @@ function je(partial: Partial<JournalEintrag> = {}): JournalEintrag {
     steuersatz: partial.steuersatz ?? "19",
     konto: partial.konto ?? "8400",
     kontakt: null,
-    quelle_typ: partial.quelle_typ ?? "rechnung",
+    quelle_typ: partial.quelle_typ ?? "zahlung",
     quelle_id: partial.quelle_id ?? "r1",
     storno_von: null,
     festgeschrieben_am: "2026-08-10T10:00:00.000Z",
@@ -73,6 +73,23 @@ describe("DATEV light", () => {
     expect(csv).toContain(";H;");
     expect(csv).toContain(";S;");
     expect(csv).toContain("119,00");
+  });
+
+  it("lässt Forderungsbuchungen der Rechnung aus dem DATEV-Export", () => {
+    const { csv, meta } = serializeDatevCsv(
+      [
+        je({ quelle_typ: "rechnung", betrag_brutto: "200.00" }),
+        je({
+          id: "z1",
+          quelle_typ: "zahlung",
+          betrag_brutto: "119.00",
+        }),
+      ],
+      { von: "2026-08-01", bis: "2026-08-31" },
+    );
+    expect(meta.anzahl_zeilen).toBe(1);
+    expect(csv).toContain("zahlung");
+    expect(csv).not.toContain(";rechnung;");
   });
 });
 

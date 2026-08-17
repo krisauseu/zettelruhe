@@ -48,7 +48,8 @@ export default async function ZahlungenPage({
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Offene Posten — festgeschriebene Rechnungen mit Restbetrag.
-          Zahlungen erfassen Sie auf der jeweiligen Rechnung.
+          Zahlungen erfassen Sie auf der jeweiligen Rechnung. Jede Zahlung
+          erzeugt eine Zufluss-Buchung im Journal.
         </p>
       </div>
 

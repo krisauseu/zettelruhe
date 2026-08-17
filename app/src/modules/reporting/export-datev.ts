@@ -19,6 +19,7 @@
 
 import type { JournalEintrag } from "@/modules/journal/types";
 import type { DatevExportMeta, Zeitraum } from "./types";
+import { filterZuflussJournal } from "./aggregate";
 import { moneyDe } from "./export-csv";
 
 export const DATEV_FORMAT_ID = "zettelruhe-datev-csv-light-v1" as const;
@@ -131,18 +132,20 @@ function buSchluessel(e: JournalEintrag): string {
 export function serializeDatevCsv(
   items: JournalEintrag[],
   zeitraum: Zeitraum,
+  extraOriginale: JournalEintrag[] = [],
 ): { csv: string; meta: DatevExportMeta } {
+  const exportItems = filterZuflussJournal(items, extraOriginale);
   const comment = [
     `# ${DATEV_FORMAT_ID}`,
     `# Zettelruhe DATEV-Export light — kein DATEV-Zertifizierungs-Claim`,
     `# Zeitraum ${zeitraum.von} bis ${zeitraum.bis}`,
-    `# Quelle: Buchungsjournal (festgeschrieben); Zahlungen ohne Journal`,
+    `# Quelle: Buchungsjournal nach Zufluss (Zahlungen statt Rechnungs-Festschreibung)`,
   ].join("\r\n");
 
   const header = DATEV_HEADERS.map(esc).join(";");
   const lines: string[] = [header];
 
-  for (const e of items) {
+  for (const e of exportItems) {
     const umsatz = moneyDe(e.betrag_brutto);
     const cells = new Array<string>(DATEV_HEADERS.length).fill("");
     cells[0] = umsatz;
@@ -170,7 +173,7 @@ export function serializeDatevCsv(
       delimiter: ";",
       encoding_hint: "utf-8-bom",
       zeitraum,
-      anzahl_zeilen: items.length,
+      anzahl_zeilen: exportItems.length,
     },
   };
 }

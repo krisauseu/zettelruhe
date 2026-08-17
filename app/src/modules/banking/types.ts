@@ -1,7 +1,7 @@
 /**
  * Domain-Typen: Bankkonten, Kontoauszugs-Import, Matching light
  * Bauabschnitt 11 — getrennt vom Kassenbuch (CONTEXT).
- * Matching erzeugt Zahlung über payments; kein Journal, kein PSD2.
+ * Matching erzeugt Zahlung über payments (inkl. Zufluss-Journal); kein PSD2.
  */
 
 /** Richtung der Auszugszeile (aus Sicht der Firma) */

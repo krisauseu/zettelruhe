@@ -184,8 +184,10 @@ export default async function ExportPage({
             Repository. Keine GoBD-Zertifizierung.
           </p>
           <p className="mt-2">
-            Zahlungen erzeugen in v1 kein Journal — DATEV/EÜR basieren auf
-            gebuchten Journal-Zeilen (Beleg, Rechnung, Kasse, manuell, Storno).
+            DATEV und EÜR nutzen das Journal nach Zufluss: Zahlungen auf
+            Rechnungen, Belege, Kassenbuch, manuelle Buchungen. Die
+            Forderungsbuchung zur Rechnungs-Festschreibung bleibt im Journal,
+            nicht in DATEV/EÜR.
           </p>
         </CardContent>
       </Card>

@@ -1,7 +1,7 @@
 /**
  * Modul: banking — Bankkonten, Kontoauszugs-Import (CSV), Matching light
  * Bauabschnitt 11: getrennt vom Kassenbuch; Matching → payments.createZahlung;
- * kein Journal, kein PSD2. MT940: Follow-up (Format-Enum vorbereitet).
+ * Journal über payments.createZahlung, kein PSD2. MT940: Follow-up (Format-Enum vorbereitet).
  */
 
 export const MODULE_ID = "banking" as const;

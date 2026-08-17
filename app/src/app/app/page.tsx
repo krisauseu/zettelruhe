@@ -249,8 +249,8 @@ export default async function AppHomePage() {
 
       {dash ? (
         <p className="text-xs text-muted-foreground">
-          Kennzahlen basieren auf dem Buchungsjournal (Einnahmen/Ausgaben) bzw.
-          Zahlungen (offene Posten). Zahlungen erzeugen in v1 kein Journal.
+          Kennzahlen basieren auf dem Buchungsjournal nach Zufluss (Einnahmen
+          aus Rechnungen mit Zahlungsdatum) bzw. Zahlungen (offene Posten).
         </p>
       ) : null}
     </div>

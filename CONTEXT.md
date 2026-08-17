@@ -91,7 +91,7 @@ Firma-gebundene Auswahlliste für Belege und Kassenbuch (`/app/kategorien`). Am 
 _Avoid_: Tag, Label (im UI)
 
 **Zahlung**:
-Ausgleich einer offenen Rechnung; manuell markierbar (inkl. Teilzahlung) oder per Kontoauszugs-Import (CSV/MT940) gematcht.
+Ausgleich einer offenen Rechnung; manuell markierbar (inkl. Teilzahlung) oder per Kontoauszugs-Import (CSV/MT940) gematcht. Erzeugt eine Zufluss-Buchung im Journal (Ist-Versteuerung / EÜR); die Forderungsbuchung der Rechnung bleibt bei der Festschreibung.
 _Avoid_: Transaction (allein)
 
 **Nummernkreis**:
@@ -104,7 +104,7 @@ Einnahmen-Überschuss-Rechnung als primäres Auswertungsziel — nicht Bilanz/Gu
 _Avoid_: Doppelte Buchführung (als Nutzerversprechen v1), Bilanzbuchhaltung
 
 **Buchungsjournal**:
-Unveränderbare, fortlaufende Aufzeichnung der Buchungen aus Belegen, Rechnungen und Kasse; Grundlage unter der belegorientierten UX.
+Unveränderbare, fortlaufende Aufzeichnung der Buchungen aus Belegen, Rechnungen, Zahlungen und Kasse; Grundlage unter der belegorientierten UX. Auswertungen (EÜR, USt, ZM, DATEV) zählen Einnahmen aus Rechnungen nach Zufluss (Quelle Zahlung), nicht nach der Forderungsbuchung der Festschreibung.
 _Avoid_: Ledger (im UI), Hauptbuch (als v1-Versprechen)
 
 **Kassenbuch**:
@@ -146,5 +146,5 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
-- **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand. Checkliste: `docs/funktionstest-m2.md`. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Funktionstest M2 (lokal + Server) **bestanden**; M2-01 nachgetestet. Freigabe **M2 Alltag trägt**. Blocker keine. Zahlung erzeugt in v1 kein Journal. Dokumenten-Layout Angebot/Rechnung (über light hinaus) steht; Vertiefung (Briefpapier, Font-Upload, …) unter Roadmap „Später“. Marke (Logo/Favicon der App, nicht firmen.logo) steht.
+- **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand. Checkliste: `docs/funktionstest-m2.md`. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Funktionstest M2 (lokal + Server) **bestanden**; M2-01 nachgetestet. Freigabe **M2 Alltag trägt**. Blocker keine. Dokumenten-Layout Angebot/Rechnung (über light hinaus) steht; Vertiefung (Briefpapier, Font-Upload, …) unter Roadmap „Später“. Marke (Logo/Favicon der App, nicht firmen.logo) steht. **Ist-Versteuerung:** Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024).
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

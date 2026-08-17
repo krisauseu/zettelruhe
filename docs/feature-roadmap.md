@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt: DIN-ähnlicher Briefkopf, Tabelle mit Akzent, Bankzeile, GiroCode auf der Rechnung, Sichtbarkeit Header/Fuß/Zahlblock an der Firma. Marke (Logo/Favicon) erledigt. Als Nächstes separat: Multi-User / grobe Rechte, Ist-Versteuerung, Hybrid-PDF, Open Decisions.
+**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. **Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt.** Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` (Kleinunternehmerregelung, eine Eigentümer:in) verengt das nicht. Als Nächstes gleichwertig priorisierbar: **UX/UI (App-Layout / CSS-Modernisierung)**, **Multi-User / grobe Rechte**. Hybrid-PDF und übrige Open Decisions bleiben separat. Dokumenten-Layout-Vertiefung unter „Später“.
 
 ### Fundament & Stammdaten
 
@@ -59,9 +59,9 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 - Datei-Upload am Beleg (PDF/Bild)
 - Filterbare Belegübersicht + CSV
 - **Kassenbuch**: Bareinnahmen/-ausgaben, fortlaufender Saldo, Belegnummern
-- **Buchungsjournal** unveränderbar (Belege + Kasse + Rechnungsbuchungen)
-- Zahlung manuell markieren (inkl. Teilzahlung)
-- Bank: CSV/MT940-Import je Bankkonto + Matching gegen offene Rechnungen/Belege
+- **Buchungsjournal** unveränderbar (Belege + Kasse + Rechnungs-Festschreibung + Zahlungs-Zufluss)
+- Zahlung manuell markieren (inkl. Teilzahlung); **Zufluss-Journal** (Ist-Versteuerung / EÜR, ADR-0024)
+- Bank: CSV/MT940-Import je Bankkonto + Matching gegen offene Rechnungen/Belege (Match schreibt Zahlung inkl. Journal)
 
 ### E-Rechnung
 
@@ -106,9 +106,22 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 6. E-Rechnungs-Versand robust (Profile, Validierung, Fehlerfeedback) ← erledigt (ADR-0022); Browser kf 2026-08-15 ohne Fehler
 7. Funktionstest M2 ← **bestanden** ([`funktionstest-m2.md`](./funktionstest-m2.md), [`issues/ergebnis-funktionstest-m2.md`](./issues/ergebnis-funktionstest-m2.md)); HTTPS ADR-0023 in Betrieb. **M2-01** nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine.
 
-**Meilenstein 2 abgeschlossen.** Zahlung erzeugt in v1 kein Journal.
+**Meilenstein 2 abgeschlossen.**
 
-Als Nächstes (nicht vermischen): **Dokumenten-Layout** ← erledigt; **Logo/Favicon der Marke** ← erledigt. Später: Multi-User / grobe Rechte. Ist-Versteuerung / Hybrid-PDF / Open Decisions bleiben später.
+Erledigt und nicht vermischen: Kategorien, Multi-Firma dünn, UStVA/ZM light, USt-IdNr., E-Rechnungs-Versand, Dokumenten-Layout (Angebot/Rechnung über light hinaus), Marke (Logo/Favicon), Ist-Versteuerung (Journal-Nachzug Zahlungen).
+
+---
+
+## Nach Meilenstein 2 — gleichwertig priorisierbar
+
+Nicht durch den aktuellen Server-Stand verengen. Produktziel: Tool für jedermann — verschiedene Steuer-Modi, verschiedene Firmagrößen, mehrere Nutzer:innen. Die Arbeitsfirma auf `app.zettelruhe.de` (Kleinunternehmerregelung, eine Eigentümer:in) ist Betrieb, nicht Scope-Deckel.
+
+Reihenfolge der zwei Punkte untereinander offen. Nicht vermischen mit Erledigtem oben und nicht mit Roadmap „Später“.
+
+1. **UX/UI (App-Layout / CSS-Modernisierung)** — alltägliche App: Shell, Listen, Formulare, Sidebar, Toasts usw. Eindruck heute: zu monoton / 2000er-Jahre. Eigenständiger, sichtbarer Punkt auf derselben Ebene wie Multi-User. Nicht Marke, nicht das erledigte Dokumenten-Layout Angebot/Rechnung, nicht M1-12 UI-Akzente light. Briefpapier-Hintergrund, Font-Upload, Mehrvorlagen, CSS-Profi-Layouts der Dokumente bleiben unter „Später“.
+2. **Multi-User / grobe Rechte** — über die eine Eigentümer:in hinaus; Einladen und Rollen im UI. Schema ist vorgesehen (ADR-0018 lässt die Mitgliedschaft bewusst für diesen Schnitt). Eigenständiger Punkt, gleiche Ebene wie UX/UI.
+
+Daneben separat: Hybrid-PDF, übrige Open Decisions (MT940, ZUGFeRD-PDF-Parsing, Kassenbuch aus Barzahlung). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024).
 
 ---
 

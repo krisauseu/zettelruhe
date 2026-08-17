@@ -24,6 +24,7 @@ const VALID_QUELLE = new Set<QuelleTyp>([
   "manuell",
   "beleg",
   "rechnung",
+  "zahlung",
   "kasse",
   "storno",
   "system",

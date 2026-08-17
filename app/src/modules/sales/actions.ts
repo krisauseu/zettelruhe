@@ -201,6 +201,8 @@ export async function storniereRechnungAction(
   revalidatePath("/app/journal");
   revalidatePath("/app/auswertungen");
   revalidatePath("/app/eur");
+  revalidatePath("/app/ust");
+  revalidatePath("/app/zm");
   revalidatePath(`/app/rechnungen/${id}`);
   redirect(`/app/rechnungen/${id}?storniert=1`);
 }

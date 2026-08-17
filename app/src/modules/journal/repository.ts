@@ -56,6 +56,7 @@ const VALID_QUELLE = new Set([
   "manuell",
   "beleg",
   "rechnung",
+  "zahlung",
   "kasse",
   "storno",
   "system",
@@ -233,6 +234,24 @@ export async function getJournalEintrag(
   } catch {
     return null;
   }
+}
+
+/** Journal-Zeilen einer Quelle (z. B. alle Staffel-Zeilen einer Zahlung). */
+export async function listJournalByQuelle(
+  firmaId: string,
+  quelle_typ: QuelleTyp,
+  quelle_id: string,
+): Promise<JournalEintrag[]> {
+  const id = quelle_id.trim();
+  if (!id || !VALID_QUELLE.has(quelle_typ)) return [];
+
+  const result = await listRecords<PbJournal>(COL, {
+    page: 1,
+    perPage: 50,
+    filter: `${pbEq("firma", firmaId)} && ${pbEq("quelle_typ", quelle_typ)} && ${pbEq("quelle_id", id)}`,
+    sort: "laufende_nr",
+  });
+  return result.items.map(mapEintrag);
 }
 
 export async function listJournal(

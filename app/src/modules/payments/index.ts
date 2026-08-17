@@ -1,6 +1,6 @@
 /**
  * Modul: payments — manuelle Zahlungen (inkl. Teilzahlung)
- * Bauabschnitt 8: Zahlung auf offene Rechnung; Status light; kein Bank-Match, kein Journal.
+ * Ausgleich offener Rechnungen; Zufluss-Journal bei Zahlung (ADR-0024).
  */
 
 export const MODULE_ID = "payments" as const;
@@ -15,13 +15,17 @@ export type {
 } from "./types";
 
 export {
+  allocateZahlungAufStaffel,
   assertKeineUeberzahlung,
   assertRechnungZahlungsfaehig,
+  buildBuchungstextFromZahlung,
+  buildJournalInputsFromZahlung,
   deriveRechnungStatus,
   isValidIsoDate,
   normalizeBetragInput,
   offenerBetrag,
   parseZahlungsweg,
+  rechnungStaffelFuerZahlung,
   sumZahlungen,
   todayBerlin,
   validateZahlungInput,
@@ -31,6 +35,7 @@ export {
   ZAHLUNG_UEBERZAHLUNG_ERROR,
   ZAHLUNGSFAEHIGE_STATUS,
 } from "./invariants";
+export type { ZahlungSteueranteil } from "./invariants";
 
 export {
   createZahlung,
@@ -40,7 +45,15 @@ export {
   listOffenePosten,
   listZahlungen,
   listZahlungenForRechnung,
+  nachziehenZahlungsjournale,
+  nachziehenZahlungsjournaleEinmal,
   refreshRechnungZahlungsstatus,
 } from "./repository";
+
+export {
+  ensureZahlungJournal,
+  listZahlungsjournal,
+  storniereZahlungsjournal,
+} from "./journal";
 
 export { createZahlungAction, deleteZahlungAction } from "./actions";
