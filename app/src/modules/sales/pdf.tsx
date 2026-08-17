@@ -257,20 +257,22 @@ function addressLines(opts: {
 function colWidths(showUst: boolean) {
   return showUst
     ? {
-        pos: "7%",
-        bez: "35%",
-        menge: "14%",
-        preis: "16%",
-        ust: "10%",
+        pos: "6%",
+        bez: "30%",
+        menge: "10%",
+        einheit: "12%",
+        preis: "15%",
+        ust: "9%",
         summe: "18%",
       }
     : {
-        pos: "8%",
-        bez: "42%",
-        menge: "16%",
-        preis: "17%",
+        pos: "7%",
+        bez: "36%",
+        menge: "11%",
+        einheit: "14%",
+        preis: "16%",
         ust: "0%",
-        summe: "17%",
+        summe: "16%",
       };
 }
 
@@ -406,6 +408,7 @@ function Positionstabelle({
         <Text style={{ width: w.pos }}>Pos</Text>
         <Text style={{ width: w.bez }}>Beschreibung</Text>
         <Text style={{ width: w.menge, textAlign: "right" }}>Menge</Text>
+        <Text style={{ width: w.einheit, paddingLeft: 6 }}>Einheit</Text>
         <Text style={{ width: w.preis, textAlign: "right" }}>
           {showUst ? "Einzelpreis (Netto)" : "Einzelpreis"}
         </Text>
@@ -417,9 +420,8 @@ function Positionstabelle({
         </Text>
       </View>
       {sorted.map((p, i) => {
-        const menge = [p.menge.replace(".", ","), p.einheit]
-          .filter((x) => x && x !== "—")
-          .join(" ");
+        const menge = (p.menge ?? "").replace(".", ",");
+        const einheit = (p.einheit ?? "").trim();
         return (
           <View
             key={p.id || `${p.sortierung}-${p.bezeichnung}`}
@@ -433,6 +435,9 @@ function Positionstabelle({
             <Text style={{ width: w.bez }}>{p.bezeichnung}</Text>
             <Text style={{ width: w.menge, textAlign: "right" }}>
               {menge || "—"}
+            </Text>
+            <Text style={{ width: w.einheit, paddingLeft: 6 }}>
+              {einheit || "—"}
             </Text>
             <Text style={{ width: w.preis, textAlign: "right" }}>
               {formatMoneyDe(p.einzelpreis, { currency: true })}
