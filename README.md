@@ -3,7 +3,7 @@
 Self-hosted Open-Source-Buchhaltung für Solo-Selbstständige in Deutschland  
 Website: [zettelruhe.de](https://zettelruhe.de)
 
-Papierkram-Alternative mit 80%-Fokus (EÜR, DE; eine Eigentümer:in, mehrere Firmen in einer Instanz).
+EÜR, UStG, DATEV, XRechnung/ZUGFeRD. Eine Instanz, eine oder mehrere Firmen, Nutzer:innen über Mitgliedschaft.
 
 Lizenz: [AGPL-3.0](./LICENSE)
 
@@ -13,10 +13,10 @@ Lizenz: [AGPL-3.0](./LICENSE)
 |------------|--------|
 | **Next.js 16** (App Router, Server Actions) | UI + Domain + Session-Gate |
 | **PocketBase** (SQLite) | Auth-Quelle, Daten, Dateien |
-| **Caddy** | Reverse Proxy + Security-Header light (lokal im Compose; Server nativ auf dem Host, ADR-0023) |
-| **Docker Compose** | Caddy + Next + PocketBase lokal; auf dem Server Next + PocketBase hinter Host-Caddy, Volume `zettelruhe_pb_data` |
+| **Caddy** | Reverse Proxy + Security-Header light |
+| **Docker Compose** | Caddy + Next + PocketBase, Volume `zettelruhe_pb_data` |
 
-Finanz-Writes laufen nur über Next (nicht per Client-PB-SDK). Details: `docs/adr/`.  
+Finanz-Writes laufen nur über Next (nicht per Client-PB-SDK). Details: [`docs/adr/`](./docs/adr/).  
 Betrieb (Backup, Secrets, Health): [`docs/betrieb.md`](./docs/betrieb.md).
 
 ## Schnellstart
@@ -31,7 +31,7 @@ cp .env.example .env
 # Pflicht setzen:
 #   SESSION_SECRET  → openssl rand -base64 48  (≥ 32 Zeichen)
 #   PB_SUPERUSER_EMAIL / PB_SUPERUSER_PASSWORD  → starke, einzigartige Werte
-# Server: APP_URL=https://app.zettelruhe.de  (ADR-0023)
+#   APP_URL         → öffentliche URL, ohne Slash (lokal z. B. http://localhost)
 
 docker compose up --build
 ```
@@ -39,13 +39,7 @@ docker compose up --build
 App: [http://localhost](http://localhost) (Caddy Port `CADDY_HTTP_PORT`, default 80)  
 Health: [http://localhost/health](http://localhost/health)
 
-**Server** (Host-Caddy, Let’s Encrypt, `app.zettelruhe.de`): Site-Block [`deploy/Caddyfile.host`](./deploy/Caddyfile.host), Stack mit Overlay:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.server.yml up -d --build
-```
-
-Details: [`docs/betrieb.md`](./docs/betrieb.md) Abschnitt 5, ADR-0023.
+Produktion: `APP_URL` auf die öffentliche HTTPS-URL setzen. TLS vor der App terminieren (eigener Reverse Proxy). Der Compose-Default bleibt HTTP auf Port 80.
 
 Beim ersten Start:
 
@@ -53,8 +47,7 @@ Beim ersten Start:
 2. Die leere Instanz zeigt den **Setup-Wizard** (Eigentümer:in, erste Firma, Steuer-Modus)
 3. Danach Login/Logout über httpOnly Session-Cookie; weitere Firmen unter `/app/firma/neu`, Wechsel in der Shell
 
-PocketBase-Admin (Betrieb/Schema, **nicht** App-Login): [http://localhost/_/](http://localhost/_/)  
-Auf `app.zettelruhe.de` bewusst über denselben Host (`/_/`). Superuser stark halten.
+PocketBase-Admin (Betrieb/Schema, **nicht** App-Login): [http://localhost/_/](http://localhost/_/). Superuser stark halten.
 
 ### Umgebungsvariablen
 
@@ -123,10 +116,8 @@ Details und Empfehlungen: [`docs/betrieb.md`](./docs/betrieb.md).
 ```
 app/                      Next.js (src/modules/*, src/lib/*)
 pocketbase/               Dockerfile, pb_migrations/
-Caddyfile                 lokal (HTTP :80)
+Caddyfile                 Reverse Proxy (HTTP :80)
 docker-compose.yml
-docker-compose.server.yml Server-Overlay (kein Compose-Caddy)
-deploy/Caddyfile.host     Host-Caddy + TLS
 .env.example
 docs/                     Roadmap, ADRs, Status, Betrieb, Verfahrensdoku
 CONTEXT.md                Domain-Sprache
@@ -141,32 +132,27 @@ LICENSE                   AGPL-3.0
 | [`docs/feature-roadmap.md`](./docs/feature-roadmap.md) | v1 / M2 / später |
 | [`docs/betrieb.md`](./docs/betrieb.md) | Backup, Secrets, Health, Updates |
 | [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) | Manueller Funktionstest Meilenstein 1 |
-| [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md) | Manueller Funktionstest Meilenstein 2 (M2-Keile) |
+| [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md) | Manueller Funktionstest Meilenstein 2 |
 | [`docs/verfahrensdokumentation.md`](./docs/verfahrensdokumentation.md) | GoBD-Vorlage |
 | [`docs/adr/`](./docs/adr/) | Architekturentscheidungen |
 | [`docs/90-status.md`](./docs/90-status.md) | Projektstand |
 
 ## Status
 
-**v1 Meilenstein 1 (Bauabschnitte 1–14)** — fachlich und betrieblich hartbar abgeschlossen  
-(Happy Path Solo-DE inkl. Reporting/Export, Backup/Security light, UX-Polish).  
-Funktionstest: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) — bestanden mit Mängeln.
+**Meilenstein 1** (Bauabschnitte 1–14) — abgeschlossen.  
+Funktionstest: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md).
 
-**Meilenstein 2 (Steuer & Compliance)** — Keile gebaut:
+**Meilenstein 2** (Steuer & Compliance) — abgeschlossen.  
+Funktionstest lokal und unter HTTPS **bestanden**. Freigabe Alltag trägt. Tag [`meilenstein-2`](https://github.com/krisauseu/zettelruhe/releases/tag/meilenstein-2).
 
 | Keil | Ort | Hinweis |
 |------|-----|---------|
 | Kategorien | `/app/kategorien` | gemeinsame Liste Beleg + Kassenbuch |
-| Multi-Firma dünn | Shell + `/app/firma/neu` | eine Eigentümer:in, Session wechselt |
+| Multi-Firma | Shell + `/app/firma/neu` | Session wechselt die aktive Firma |
 | UStVA / ELSTER-XML light | `/app/ust` | Self-File, kein Versand |
 | ZM-Übersicht | `/app/zm` | Self-File, kein Versand |
 | USt-IdNr.-Prüfung (BZSt) | Firma + Kontakt | Schnappschuss, kein Dauer-Stempel |
-| E-Rechnungs-Versand | festgeschriebene Rechnung | XRechnung-UBL / ZUGFeRD-CII als XML, kein Hybrid-PDF (ADR-0026) |
+| E-Rechnungs-Versand | festgeschriebene Rechnung | XRechnung-UBL / ZUGFeRD-CII als XML |
 
-Browser-Nachtest Versand durch kf (2026-08-15): keine Fehler. Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR und steht zusammen mit dem **Server-Nachtest M2** aus.
-
-Manuelle Checkliste: [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md) (M1 bleibt [`funktionstest-m1.md`](./docs/funktionstest-m1.md)).
-
-**Als Nächstes:** Host-Caddy auf dem Server aktivieren (`app.zettelruhe.de`, Overlay + `deploy/Caddyfile.host`), dann **Server-Nachtest** inkl. BZSt-Klick ([`funktionstest-m2.md`](./docs/funktionstest-m2.md) Abschnitt 8). Follow-ups ohne diese Prio: Setup-`verified`, Dokumenten-Layout, Logo/Favicon.
-
-Details: [`docs/90-status.md`](./docs/90-status.md).
+Checklisten: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md), [`docs/funktionstest-m2.md`](./docs/funktionstest-m2.md).  
+Stand im Repo: [`docs/90-status.md`](./docs/90-status.md).
