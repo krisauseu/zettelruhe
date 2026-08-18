@@ -159,6 +159,7 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 
 - **Produkt**: Zettelruhe / zettelruhe.de
 - **v1-Betrieb**: Self-hosted; Instanz-Eigentümer:in plus eingeladene Nutzer:innen mit groben Rechten je Firma (Mitgliedschaft); mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
+- **Repo-Grenze**: Dieses Repository ist der Open-Source-Kern (eine PocketBase-Instanz, `docker compose up`). SaaS-Plattform (Stripe, Mandanten-Provisioning, Subdomains, Cloud-OCR/PSD2, Kundenportal) gehört in ein separates Control-Plane-Projekt. Keine Shared-Database-Multi-Tenancy für Finanzen. Einzige vorbereitete Kern-Schnittstelle: stateless PocketBase-URL-Adapter, nicht gebaut (ADR-0030).
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
 - **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV/MT940) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export

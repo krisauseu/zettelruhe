@@ -1,7 +1,8 @@
 # Betrieb — Zettelruhe (self-hosted Solo)
 
 Praxishinweise für eine Instanz mit **Instanz-Eigentümer:in**, optional weiteren Nutzer:innen (Mitgliedschaft je Firma) und einer oder mehreren Firmen (Session wechselt die aktive Firma).  
-Stack: Caddy + Next.js + PocketBase (SQLite), Named Volume `zettelruhe_pb_data` (ADR-0007).
+Stack: Caddy + Next.js + PocketBase (SQLite), Named Volume `zettelruhe_pb_data` (ADR-0007).  
+Dieses Repo liefert **eine** Instanz (ein Next, ein PocketBase). Mandanten-Provisioning, Stripe und Subdomain-Verwaltung gehören nicht hierher (ADR-0030).
 
 ---
 

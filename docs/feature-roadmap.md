@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-18):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** **Eigenes Passwort ändern erledigt.** **UX/UI erster Keil und Rest erledigt** (Tokens/Shell/Listen; Sidebar mobil Off-Canvas; Detailköpfe). **Übersicht / Dashboard erster Keil und Follow-up erledigt** (Fälligkeiten, §-19-Wächter, Verlauf; Donut Kategorien, letzte Buchungen). **Hybrid-PDF:** Schnitt dokumentiert, **kein Bau** (ADR-0026). **Kassenbuch aus Barzahlung:** Schnitt dokumentiert, **kein Bau** (ADR-0027) — Zufluss bleibt an der Zahlung; kein automatischer Kassenbuch-Eintrag. **MT940:** klassisches SWIFT/STA, eigener Parser (ADR-0028); CSV bleibt Alltagsimport. **ZUGFeRD-Empfang:** PDF-Anhang Flate (ADR-0029). Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Open Decisions nach M2 leer. Dokumenten-Layout-Vertiefung unter „Später“.
+**Status (2026-08-18):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** **Eigenes Passwort ändern erledigt.** **UX/UI erster Keil und Rest erledigt** (Tokens/Shell/Listen; Sidebar mobil Off-Canvas; Detailköpfe). **Übersicht / Dashboard erster Keil und Follow-up erledigt** (Fälligkeiten, §-19-Wächter, Verlauf; Donut Kategorien, letzte Buchungen). **Hybrid-PDF:** Schnitt dokumentiert, **kein Bau** (ADR-0026). **Kassenbuch aus Barzahlung:** Schnitt dokumentiert, **kein Bau** (ADR-0027) — Zufluss bleibt an der Zahlung; kein automatischer Kassenbuch-Eintrag. **MT940:** klassisches SWIFT/STA, eigener Parser (ADR-0028); CSV bleibt Alltagsimport. **ZUGFeRD-Empfang:** PDF-Anhang Flate (ADR-0029). **Release-Tag** `meilenstein-2` auf `d469f02`. **OS-Kern vs. Cloud:** Schnitt dokumentiert, **kein Bau** (ADR-0030) — SaaS/Control Plane nicht in diesem Repo; PB-URL-Adapter entschieden, nicht gebaut. Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Open Decisions nach M2 leer. Dokumenten-Layout-Vertiefung unter „Später“ (Kern). Cloud-Plattform ist ein separates Projekt.
 
 ### Fundament & Stammdaten
 
@@ -121,32 +121,42 @@ Nicht durch den aktuellen Server-Stand verengen. Produktziel: Tool für jederman
 3. **Multi-User / grobe Rechte** ← erledigt (ADR-0025); Server-Nachtest inkl. SMTP durch kf ohne Fehler. Eigenes Passwort (Punkt 1) nachgezogen.
 4. **Übersicht / Dashboard** — erster Keil erledigt: Fälligkeiten, §-19-Jahresbalken (nur Kleinunternehmerregelung, Grenzen aus geltendem § 19 Abs. 1), Verlauf 6/Jahr/12. Follow-up erledigt: Ausgaben nach Kategorien (Donut, Monat/Quartal), letzte Buchungen aus dem Journal.
 
-Daneben separat: **Kassenbuch aus Barzahlung** ← erledigt als Schnitt, kein Bau (ADR-0027). **MT940** ← erledigt (ADR-0028, klassisches SWIFT/STA). **ZUGFeRD-Empfang-Parsing** ← erledigt (ADR-0029, PDF-Attachment Flate). Hybrid-PDF Schnitt erledigt, Bau zurückgestellt (ADR-0026). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024). Open Decisions nach M2 leer.
+Daneben separat: **Kassenbuch aus Barzahlung** ← erledigt als Schnitt, kein Bau (ADR-0027). **MT940** ← erledigt (ADR-0028, klassisches SWIFT/STA). **ZUGFeRD-Empfang-Parsing** ← erledigt (ADR-0029, PDF-Attachment Flate). Hybrid-PDF Schnitt erledigt, Bau zurückgestellt (ADR-0026). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024). **OS-Kern vs. Cloud-Control-Plane** ← erledigt als Schnitt, kein Bau (ADR-0030); Release-Tag `meilenstein-2`. Open Decisions nach M2 leer.
 
 ---
 
-## Später — Komfort & Skalierung
+## Später — Core-Komfort (dieses Repo)
 
-- OCR / KI-Belegerkennung
-- REST-API (Shop-Anbindung etc.)
-- Live-Bank PSD2
+- Dokumenten-Layout nochmal ansehen (Schnitt 2026-08-16 bewusst schlank): Briefpapier-Hintergrund (PNG sowie PDF-Stempel Seite 1 / Folgeseiten), Schrift-Upload und mitgelieferte Hausschrift, Inhaber:in an der Firma, Kunden-Nr. am Kontakt, Ansprechpartner „z. Hd.“ auf dem PDF, AGB als weitere Seiten, Live-Vorschau/Studio in den Einstellungen, Mehrvorlagen, CSS-Profi-Layouts
 - Automatischer Mahnlauf (1.–3., Gebühren, Zinsen)
 - Abschlags- & Schlussrechnungskette
 - Lieferscheine
-- Kundenportal (Angebot annehmen, Rechnung laden, Pay-Link)
-- PayPal/Stripe-Zahllinks
-- Dokumenten-Layout nochmal ansehen (Schnitt 2026-08-16 bewusst schlank): Briefpapier-Hintergrund (PNG sowie PDF-Stempel Seite 1 / Folgeseiten), Schrift-Upload und mitgelieferte Hausschrift, Inhaber:in an der Firma, Kunden-Nr. am Kontakt, Ansprechpartner „z. Hd.“ auf dem PDF, AGB als weitere Seiten, Live-Vorschau/Studio in den Einstellungen, Mehrvorlagen, CSS-Profi-Layouts
 - SEPA-Mandate
 - Verpflegungspauschalen / erweiterte Reisekosten
 - Anlagenverzeichnis, GWG, AfA
 - Projekt-Budgets / Stundendeckel
-- Steuerberater-Lesezugriff / DATEV-Services-Push
 - Mobile-optimierte Erfassung (PWA o. Ä.)
+- Steuerberater-Lesezugriff / DATEV-Services-Push
+- REST-API (Shop-Anbindung etc.)
+- Stateless PocketBase-URL-Adapter (ADR-0030) — nur wenn die Cloud-Control-Plane ihn braucht; Default bleibt `PB_URL`
+
+---
+
+## Separates Projekt: Cloud-Plattform (Control Plane & Managed Hosting)
+
+Nicht in diesem Repository (ADR-0030). Geplantes privates Projekt (`zettelruhe-cloud`):
+
+- Stripe Checkout & Subscription Billing
+- Tenant Provisioner (Docker- und Volume-Management pro Mandant, eine PocketBase-Instanz je Mandant)
+- Caddy-API für Wildcard-Subdomains (`kunde.app.zettelruhe.de`)
+- Cloud-Zusatzdienste: KI-OCR-Belegerkennung, Live-Bank-PSD2-Gateway
+- Kundenportal / Pay-Links
 
 ---
 
 ## Bewusst nicht (vorerst)
 
+- Shared-Database-Multi-Tenancy für Finanzen (physische DB-Isolation bleibt gesetzt, ADR-0030)
 - Feature-Parität zu Papierkram
 - Bilanz / vollständige doppelte Buchführung als Produktversprechen
 - Soll-Versteuerung
@@ -154,7 +164,7 @@ Daneben separat: **Kassenbuch aus Barzahlung** ← erledigt als Schnitt, kein Ba
 - Mitarbeiter-HR / Lohn
 - Kanzlei-Mandantenverwaltung
 - GoBD-Zertifikat als Kaufargument v1
-- Managed SaaS als Pflicht (Self-hosted first; Cloud optional später)
+- SaaS-Plattform-Code in diesem Repo (Self-hosted first; Cloud nur als separates Projekt, ADR-0030)
 - „Kleingewerbe“ als eigener Gewerberecht-Workflow (Handelsregister o. Ä.) — steuermäßig zählt der **Steuer-Modus** (§ 19 vs. Regelbesteuerung), nicht der Gewerbestatus-Label
 
 ---

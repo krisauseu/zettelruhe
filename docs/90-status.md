@@ -2,11 +2,11 @@
 
 _Last updated: 2026-08-18_
 
-**Last session:** 2026-08-18 — ZUGFeRD-Empfang-Parsing (ADR-0029): PDF-Attachment Flate.
+**Last session:** 2026-08-18 — ADR-0030 (OS-Kern vs. Cloud-Control-Plane) und Release-Tag `meilenstein-2`.
 
 ## What's done
 
-- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0028
+- Funktionsumfang und Tech-Stack (Grill-with-Docs); DOMAIN/ADRs 0001–0030
 - **Bauabschnitt 1–14** erledigt (Fundament → Härten)
 - **Funktionstest M1** manuell durchgeführt: **bestanden mit Mängeln** — Rohbericht [`issues/ergebnis-funktionstest-m1.md`](./issues/ergebnis-funktionstest-m1.md)
 - **M1-Nachzug** aus dem Test:
@@ -44,6 +44,8 @@ _Last updated: 2026-08-18_
 - **Kassenbuch aus Barzahlung (ADR-0027):** Schnitt, kein Bau. Zahlung mit Zahlungsweg `bar` erzeugt keinen Kassenbuch-Eintrag. Zufluss bleibt allein `quelle_typ=zahlung` (ADR-0024). Manuelles Kassenbuch unverändert (`quelle_typ=kasse`). Formular-Hinweis warnt vor doppelter Bareinnahme. Kein Hook, kein Nachzug, keine EÜR-Entkopplung.
 - **MT940-Parser (ADR-0028):** klassisches SWIFT-MT940 / STA (`:20:` / `:25:` / `:61:` / `:86:` / `:62F:`). Eigener Parser nach `ParsedBankZeile`; Persistenz und Idempotenz wie CSV; Lauf `format=mt940`. Valuta und C/D/RC/RD nur aus `:61:`. `:25:`-IBAN nach Ländercode (DE = 22), angehängtes `EUR` gehört nicht zur Konto-ID. bunq-`:86:` `/IBAN/` `/NAME/` `/REMI/`: Liste zeigt REMI oder NAME, gespeichert bleibt der volle Text. Encoding UTF-8 oder Windows-1252. Kein CAMT.053, kein MT942, keine Lib. Matching unverändert (Bestätigung, `createZahlung`). Import-Erfolg-`redirect` liegt außerhalb von `try` (dieser Pfad, M1-15). 489 Unit-Tests. Commits `2341199`, `c769bcd`.
 - **ZUGFeRD-Empfang-Parsing (ADR-0029):** PDF-Anhang `/Type /EmbeddedFile`, Filter keiner oder Flate (`zlib`). Bekannte Dateinamen wählen, sonst erstes CII-/UBL-XML. Unkomprimierter Fallback bleibt. Verschlüsselte PDFs und Scan-PDF ohne Anhang scheitern ehrlich. DTO und Beleg-Entwurf unverändert; Original archiviert; kein Inbox-Nachparse. Kein `pdf-lib`, kein Mustang, kein Hybrid-Schreiben (ADR-0026). 494 Unit-Tests.
+- **Release-Tag Meilenstein 2:** annotated Tag `meilenstein-2` auf `d469f02` (ADR-0029, Alltag trägt).
+- **OS-Kern vs. Cloud-Control-Plane (ADR-0030):** Dieses Repo bleibt der self-hosted Open-Source-Kern (`docker compose up`, eine PocketBase-Instanz). SaaS (Stripe, Provisioner, Caddy-API, Cloud-OCR/PSD2, Kundenportal) liegt in einem geplanten separaten Control-Plane-Projekt. Einzige Kern-Schnittstelle: stateless PocketBase-URL-Adapter (Default `PB_URL`; optional Header/Subdomain), **entschieden, nicht gebaut**. Keine Shared-Database-Multi-Tenancy für Finanzen. ADR-0011 (flaches Kern-Monorepo) unangetastet.
 
 ## What's next
 
@@ -52,9 +54,10 @@ Zettelruhe soll ein Tool für jedermann werden — verschiedene Steuer-Modi, ver
 
 **Als Nächstes sichtbar, noch nicht gebaut** (nicht vermischen mit Erledigtem):
 
-- nichts aus der Open-Decision-Liste nach M2. Nächster Schnitt nur auf Wunsch (Roadmap „Später“) — nicht von selbst in OCR, PSD2, Mahnlauf oder Briefpapier.
+- **Zwei-Instanzen-Testbetrieb** — zuerst das, bevor Adapter oder Control Plane gebaut werden.
+- sonst nichts aus der Open-Decision-Liste nach M2. Weiterer Schnitt nur auf Wunsch (Roadmap „Später“ im Kern, oder Control Plane im separaten Repo) — nicht von selbst in OCR, PSD2, Mahnlauf, Briefpapier oder den PB-URL-Adapter.
 
-Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung (XML-Versand), Hybrid-Schnitt (kein Bau, ADR-0026), Kassenbuch aus Barzahlung (kein Bau, ADR-0027), MT940 (ADR-0028), ZUGFeRD-Empfang-Parsing (ADR-0029), Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen), UX/UI Rest (Sidebar mobil, Detailköpfe), Übersicht erster Keil (Fälligkeiten, §-19-Wächter, Verlauf), Übersicht Follow-up (Donut Kategorien, letzte Buchungen).
+Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung (XML-Versand), Hybrid-Schnitt (kein Bau, ADR-0026), Kassenbuch aus Barzahlung (kein Bau, ADR-0027), MT940 (ADR-0028), ZUGFeRD-Empfang-Parsing (ADR-0029), Core-vs-Cloud-Schnitt (kein Bau, ADR-0030), Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen), UX/UI Rest (Sidebar mobil, Detailköpfe), Übersicht erster Keil (Fälligkeiten, §-19-Wächter, Verlauf), Übersicht Follow-up (Donut Kategorien, letzte Buchungen).
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). Zugang zu Firmen über Mitgliedschaft (ADR-0025). de-DE im UI.
 
@@ -64,6 +67,8 @@ Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokument
 - Hybrid-PDF — erledigt als Schnitt (kein Bau); später nur mit eigener PDF/A-3-Pipeline (ADR-0026)
 - Kassenbuch aus Barzahlung — erledigt als Schnitt (kein Bau, ADR-0027)
 - MT940 — erledigt (ADR-0028, klassisches SWIFT/STA)
+- OS-Kern vs. Cloud — erledigt als Schnitt (kein Bau, ADR-0030); Adapter und Control Plane nicht in diesem Repo bauen
+- Release-Tag `meilenstein-2` — auf `d469f02`; mit diesem Stand nach origin
 
 ## Open decisions
 
@@ -96,4 +101,4 @@ keine (nach M2). UX/UI erster Keil und Rest stehen. Die Liste hier ist kein Tunn
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-18-zugferd-empfang-parsing.md`](./sessions/2026-08-18-zugferd-empfang-parsing.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-18-adr-0030-m2-tag.md`](./sessions/2026-08-18-adr-0030-m2-tag.md)
