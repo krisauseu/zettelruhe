@@ -33,8 +33,9 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 5. **Manuelle Journal-Buchung**: Anlegen = Festschreibung.
 6. **Storno**: Gegenbuchung mit Verweis `storno_von`; Original bleibt erhalten. Rechnungs-Storno storniert auch die Zahlungsjournale.
 7. **Zahlungen**: Manuell oder per Bank-Match; erzeugen eine Zufluss-Buchung (`quelle_typ=zahlung`, Buchungsdatum = Zahlungsdatum). Teilzahlungen anteilig nach Steuerstaffel. Löschen storniert die Zufluss-Buchung (ADR-0024).
+7a. **Bank-Import**: CSV (de-DE) oder klassisches SWIFT-MT940/STA je aktivem Bankkonto der Session-Firma. Idempotenz über SHA-256; Re-Import derselben Zeile legt keine zweite Bewegung und keine zweite Zahlung an. `:25:` mit IBAN muss zum gewählten Konto passen. Match nur nach Bestätigung in der UI (ADR-0028).
 8. **E-Rechnung Empfang**: Original archivieren → optional Beleg-Entwurf → Festschreibung wie Beleg.
-9. **E-Rechnung Versand**: aus festgeschriebener Rechnung XML (XRechnung-UBL oder ZUGFeRD-CII) erzeugen und unveränderbar ablegen; Rechnungs-PDF bleibt unangetastet. Kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim.
+9. **E-Rechnung Versand**: aus festgeschriebener Rechnung XML (XRechnung-UBL oder ZUGFeRD-CII) erzeugen und unveränderbar ablegen; Rechnungs-PDF bleibt unangetastet. Kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim (ADR-0026: Hybrid erst mit eigener PDF/A-3-Pipeline).
 10. **USt-IdNr.**: eigene an der Firma, fremde am Kontakt; BZSt-Bestätigung auf Klick als unveränderlicher Schnappschuss (kein Stamm-Stempel, keine Änderung festgeschriebener Belege).
 
 ## 4. Unveränderbarkeit und Korrekturen
@@ -52,7 +53,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 | UStVA / ELSTER-XML light | Kz 81/86/66/83 aus Journal | Self-File (`zettelruhe-ustva-elster-xml-light-v1`); kein Versand; Monat/Quartal |
 | ZM-Übersicht | 0-USt-Einnahmen + Kontakt-Land + Stamm-USt-Id | Self-File (`zettelruhe-zm-uebersicht-v2`); Kandidaten, keine Art; USt-Id Stamm/Notiz/Schnappschuss, kein Versand |
 | USt-IdNr. / BZSt | Eigene Nummer an der Firma, fremde am Kontakt | eVatR-REST-Schnappschuss (`ust_id_pruefungen`); kein Dauer-Stempel, kein Versand |
-| E-Rechnung Versand | XML aus festgeschriebener Rechnung | Profile XRechnung-UBL / ZUGFeRD-CII (`e_rechnungen_versand`); kein Hybrid-PDF, kein KoSIT-Claim |
+| E-Rechnung Versand | XML aus festgeschriebener Rechnung | Profile XRechnung-UBL / ZUGFeRD-CII (`e_rechnungen_versand`); kein Hybrid-PDF, kein KoSIT-Claim (ADR-0026) |
 | DATEV light CSV | Journal-Zeilen EXTF-ähnlich | Format-ID `zettelruhe-datev-csv-light-v1`, **nicht** DATEV-zertifiziert |
 | Journal-CSV | Alle Felder der Journal-Zeilen | Semikolon, UTF-8 BOM |
 | Belegarchiv-ZIP | Metadaten + Dateien festgeschriebener Belege | Zeitraum nach Belegdatum |

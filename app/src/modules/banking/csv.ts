@@ -10,7 +10,7 @@
  * - Delimiter: `;` oder `,` (auto)
  * - Betrag: de-DE (1.234,56) oder Punkt; negativ = Ausgang
  * - Optional: Spalte Richtung / Soll / Haben
- * - MT940: nicht in v1-Parser (Follow-up; Enum bank_import_laeufe.format vorbereitet)
+ * - MT940: eigener Parser in mt940.ts, nicht hier
  */
 
 import {

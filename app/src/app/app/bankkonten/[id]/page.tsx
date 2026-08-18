@@ -84,12 +84,14 @@ export default async function BankkontoDetailPage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/app/bankkonten/${id}/import`}
-            className={cn(buttonVariants({ size: "sm" }))}
-          >
-            CSV importieren
-          </Link>
+          {session.kannSchreiben ? (
+            <Link
+              href={`/app/bankkonten/${id}/import`}
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              Auszug importieren
+            </Link>
+          ) : null}
           <Link
             href={`/app/kontoauszug?bankkonto=${id}`}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
@@ -149,7 +151,7 @@ export default async function BankkontoDetailPage({
                 href={`/app/bankkonten/${id}/import`}
                 className="underline hover:text-foreground"
               >
-                CSV importieren
+                CSV oder MT940 importieren
               </Link>
             </p>
           ) : (

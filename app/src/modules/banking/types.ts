@@ -10,7 +10,7 @@ export type BankBewegungRichtung = "eingang" | "ausgang";
 /** Match-Status der Auszugszeile */
 export type BankBewegungStatus = "offen" | "gematcht" | "ignoriert";
 
-/** Importformat (CSV produktionsfähig; MT940 Enum vorbereitet / Follow-up) */
+/** Importformat (CSV und klassisches SWIFT-MT940 / STA) */
 export type BankImportFormat = "csv" | "mt940";
 
 /** Stammdaten Bankkonto (Zahlweg unbar) */

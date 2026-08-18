@@ -9,7 +9,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 *Happy Path ohne OCR, PSD2, API, Kundenportal, automatischen Mahnlauf.*
 
-**Status (2026-08-17):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** **Eigenes Passwort ändern erledigt.** **UX/UI erster Keil und Rest erledigt** (Tokens/Shell/Listen; Sidebar mobil Off-Canvas; Detailköpfe). **Übersicht / Dashboard erster Keil und Follow-up erledigt** (Fälligkeiten, §-19-Wächter, Verlauf; Donut Kategorien, letzte Buchungen). Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Als Nächstes: Hybrid-PDF (Kickoff [`sessions/2026-08-17-hybrid-pdf-prompt.md`](./sessions/2026-08-17-hybrid-pdf-prompt.md)) oder übrige Open Decisions — separat. Dokumenten-Layout-Vertiefung unter „Später“.
+**Status (2026-08-18):** Meilenstein 1 ist **hartbar abgeschlossen**. Meilenstein 2 ist **abgeschlossen**. Funktionstest M2 (lokal + HTTPS) **bestanden**; M2-01 nachgetestet (`13da9e7`). Freigabe **M2 Alltag trägt**. Blocker keine. Setup-verified erledigt. Dokumenten-Layout (Angebot/Rechnung über light hinaus) erledigt. Marke (Logo/Favicon) erledigt. Ist-Versteuerung (Journal-Nachzug Zahlungen, ADR-0024) erledigt. **Multi-User / grobe Rechte (ADR-0025) erledigt.** **Eigenes Passwort ändern erledigt.** **UX/UI erster Keil und Rest erledigt** (Tokens/Shell/Listen; Sidebar mobil Off-Canvas; Detailköpfe). **Übersicht / Dashboard erster Keil und Follow-up erledigt** (Fälligkeiten, §-19-Wächter, Verlauf; Donut Kategorien, letzte Buchungen). **Hybrid-PDF:** Schnitt dokumentiert, **kein Bau** (ADR-0026). **Kassenbuch aus Barzahlung:** Schnitt dokumentiert, **kein Bau** (ADR-0027) — Zufluss bleibt an der Zahlung; kein automatischer Kassenbuch-Eintrag. **MT940:** klassisches SWIFT/STA, eigener Parser (ADR-0028); CSV bleibt Alltagsimport. Ausblick: Tool für jedermann (verschiedene Steuer-Modi, Firmagrößen, mehrere Nutzer:innen) — die Arbeitsfirma auf `app.zettelruhe.de` verengt das nicht. Als Nächstes: übrige Open Decision (robustes ZUGFeRD-Empfang-Parsing). Dokumenten-Layout-Vertiefung unter „Später“.
 
 ### Fundament & Stammdaten
 
@@ -58,7 +58,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 - Manuelle Belegerfassung (Datum, Lieferant, Kategorie aus gemeinsamer Stammliste, Beträge; USt/Vorsteuer nur unter Regelbesteuerung sinnvoll erfassbar)
 - Datei-Upload am Beleg (PDF/Bild)
 - Filterbare Belegübersicht + CSV
-- **Kassenbuch**: Bareinnahmen/-ausgaben, fortlaufender Saldo, Belegnummern
+- **Kassenbuch**: Bareinnahmen/-ausgaben, fortlaufender Saldo, Belegnummern; manuell, nicht aus Rechnungs-Barzahlung (ADR-0027)
 - **Buchungsjournal** unveränderbar (Belege + Kasse + Rechnungs-Festschreibung + Zahlungs-Zufluss)
 - Zahlung manuell markieren (inkl. Teilzahlung); **Zufluss-Journal** (Ist-Versteuerung / EÜR, ADR-0024)
 - Bank: CSV/MT940-Import je Bankkonto + Matching gegen offene Rechnungen/Belege (Match schreibt Zahlung inkl. Journal)
@@ -67,7 +67,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 - **Empfang**: XRechnung / ZUGFeRD parsen → Beleg vorbefüllen
 - Revisionssicheres Ablegen der Originaldatei
-- **Versand**: XRechnung-UBL / ZUGFeRD-CII als XML-Original aus festgeschriebener Rechnung; Validierung mit Fehlerliste; kein Hybrid-PDF/A-3
+- **Versand**: XRechnung-UBL / ZUGFeRD-CII als XML-Original aus festgeschriebener Rechnung; Validierung mit Fehlerliste; kein Hybrid-PDF/A-3 (ADR-0026: erst mit eigener PDF/A-3-Pipeline)
 
 ### Auswertungen & Export
 
@@ -121,7 +121,7 @@ Nicht durch den aktuellen Server-Stand verengen. Produktziel: Tool für jederman
 3. **Multi-User / grobe Rechte** ← erledigt (ADR-0025); Server-Nachtest inkl. SMTP durch kf ohne Fehler. Eigenes Passwort (Punkt 1) nachgezogen.
 4. **Übersicht / Dashboard** — erster Keil erledigt: Fälligkeiten, §-19-Jahresbalken (nur Kleinunternehmerregelung, Grenzen aus geltendem § 19 Abs. 1), Verlauf 6/Jahr/12. Follow-up erledigt: Ausgaben nach Kategorien (Donut, Monat/Quartal), letzte Buchungen aus dem Journal.
 
-Daneben separat: Hybrid-PDF, übrige Open Decisions (MT940, ZUGFeRD-PDF-Parsing, Kassenbuch aus Barzahlung). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024).
+Daneben separat: **Kassenbuch aus Barzahlung** ← erledigt als Schnitt, kein Bau (ADR-0027). **MT940** ← erledigt (ADR-0028, klassisches SWIFT/STA). Übrige Open Decision: ZUGFeRD-PDF-Parsing. Hybrid-PDF Schnitt erledigt, Bau zurückgestellt (ADR-0026). Ist-Versteuerung (Journal-Nachzug) ist erledigt (ADR-0024).
 
 ---
 

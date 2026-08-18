@@ -1,7 +1,7 @@
 /**
  * Persistenz Banking über PocketBase (Superuser).
- * Bankkonto-CRUD, CSV-Import mit Idempotenz, Matching → createZahlung (payments).
- * Gematchte Zahlung über payments.createZahlung (inkl. Zufluss-Journal).
+ * Bankkonto-CRUD, Auszugs-Import (CSV/MT940) mit Idempotenz,
+ * Matching → createZahlung (payments, inkl. Zufluss-Journal).
  */
 
 import {
@@ -31,6 +31,11 @@ import {
   scoreMatch,
   validateBankkontoInput,
 } from "./invariants";
+import {
+  detectBankImportFormat,
+  parseMt940,
+  pruefeMt940KontoIds,
+} from "./mt940";
 import type {
   BankBewegung,
   BankBewegungFilter,
@@ -350,15 +355,15 @@ async function findByIdempotenz(
   return mapBewegung(result.items[0]!);
 }
 
-/**
- * CSV-Import: speichert neue Bewegungen; Duplikate (Idempotenz) werden übersprungen.
- */
-export async function importBankCsv(
+export type BankImportParseExtra = {
+  parseFehler: Array<{ zeile: number; meldung: string }>;
+  warnungen: string[];
+};
+
+async function requireAktivesBankkonto(
   firmaId: string,
   bankkontoId: string,
-  csvText: string,
-  opts?: { dateiname?: string; now?: Date },
-): Promise<ImportErgebnis & { parseFehler: Array<{ zeile: number; meldung: string }> }> {
+): Promise<Bankkonto> {
   const konto = await getBankkonto(firmaId, bankkontoId);
   if (!konto) {
     throw new Error("Bankkonto nicht gefunden.");
@@ -366,34 +371,35 @@ export async function importBankCsv(
   if (!konto.aktiv) {
     throw new Error("Bankkonto ist deaktiviert.");
   }
+  return konto;
+}
 
-  const parsed = parseBankCsv(csvText);
-  if (parsed.zeilen.length === 0 && parsed.fehler.length > 0) {
-    throw new Error(
-      parsed.fehler[0]?.meldung ?? "CSV konnte nicht gelesen werden.",
-    );
-  }
-
+async function persistBankZeilen(
+  firmaId: string,
+  bankkontoId: string,
+  format: BankImportFormat,
+  zeilen: ParsedBankZeile[],
+  opts?: { dateiname?: string; now?: Date; notiz?: string },
+): Promise<ImportErgebnis> {
   const now = opts?.now ?? new Date();
   const importiert_am = now.toISOString();
 
-  // Import-Lauf zuerst anlegen (Zähler werden am Ende aktualisiert)
   const laufRaw = await createRecord<PbImportLauf>(COL_LAUF, {
     firma: firmaId,
     bankkonto: bankkontoId,
-    format: "csv",
+    format,
     dateiname: (opts?.dateiname ?? "").slice(0, 255),
     importiert_am,
     zeilen_gesamt: "0",
     zeilen_neu: "0",
     zeilen_duplikat: "0",
-    notiz: "",
+    notiz: (opts?.notiz ?? "").slice(0, 2000),
   });
 
   let neu = 0;
   let duplikat = 0;
 
-  for (const zeile of parsed.zeilen) {
+  for (const zeile of zeilen) {
     const key = buildIdempotenzSchluessel(bankkontoId, zeile);
     const existing = await findByIdempotenz(firmaId, bankkontoId, key);
     if (existing) {
@@ -418,7 +424,7 @@ export async function importBankCsv(
     neu += 1;
   }
 
-  const gesamt = parsed.zeilen.length;
+  const gesamt = zeilen.length;
   const laufUpdated = await updateRecord<PbImportLauf>(COL_LAUF, laufRaw.id, {
     zeilen_gesamt: String(gesamt),
     zeilen_neu: String(neu),
@@ -430,8 +436,83 @@ export async function importBankCsv(
     neu,
     duplikat,
     gesamt,
-    parseFehler: parsed.fehler,
   };
+}
+
+/**
+ * CSV-Import: speichert neue Bewegungen; Duplikate (Idempotenz) werden übersprungen.
+ */
+export async function importBankCsv(
+  firmaId: string,
+  bankkontoId: string,
+  csvText: string,
+  opts?: { dateiname?: string; now?: Date },
+): Promise<ImportErgebnis & BankImportParseExtra> {
+  await requireAktivesBankkonto(firmaId, bankkontoId);
+
+  const parsed = parseBankCsv(csvText);
+  if (parsed.zeilen.length === 0 && parsed.fehler.length > 0) {
+    throw new Error(
+      parsed.fehler[0]?.meldung ?? "CSV konnte nicht gelesen werden.",
+    );
+  }
+
+  const result = await persistBankZeilen(
+    firmaId,
+    bankkontoId,
+    "csv",
+    parsed.zeilen,
+    opts,
+  );
+  return { ...result, parseFehler: parsed.fehler, warnungen: [] };
+}
+
+/**
+ * MT940/STA-Import. :25: mit IBAN muss zum gewählten Bankkonto passen.
+ * Bestehende Bewegungen werden nicht geändert.
+ */
+export async function importBankMt940(
+  firmaId: string,
+  bankkontoId: string,
+  text: string,
+  opts?: { dateiname?: string; now?: Date },
+): Promise<ImportErgebnis & BankImportParseExtra> {
+  const konto = await requireAktivesBankkonto(firmaId, bankkontoId);
+  const parsed = parseMt940(text);
+  if (parsed.zeilen.length === 0) {
+    throw new Error(
+      parsed.fehler[0]?.meldung ?? "MT940 konnte nicht gelesen werden.",
+    );
+  }
+
+  const check = pruefeMt940KontoIds(parsed.kontoIds, konto.iban);
+  if (check.ablehnen) {
+    throw new Error(check.ablehnen);
+  }
+
+  const warnungen = [...parsed.warnungen, ...check.warnungen];
+  const result = await persistBankZeilen(
+    firmaId,
+    bankkontoId,
+    "mt940",
+    parsed.zeilen,
+    { ...opts, notiz: warnungen.join(" · ") },
+  );
+  return { ...result, parseFehler: parsed.fehler, warnungen };
+}
+
+/** Erkennt CSV vs. MT940 und schreibt über denselben Persistenzpfad. */
+export async function importBankAuszug(
+  firmaId: string,
+  bankkontoId: string,
+  text: string,
+  opts?: { dateiname?: string; now?: Date },
+): Promise<ImportErgebnis & BankImportParseExtra> {
+  const format = detectBankImportFormat(text, opts?.dateiname);
+  if (format === "mt940") {
+    return importBankMt940(firmaId, bankkontoId, text, opts);
+  }
+  return importBankCsv(firmaId, bankkontoId, text, opts);
 }
 
 // --- Matching ---

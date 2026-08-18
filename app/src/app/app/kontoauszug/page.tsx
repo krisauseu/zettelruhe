@@ -420,7 +420,7 @@ export default async function KontoauszugPage({
               <Link href="/app/bankkonten" className="underline">
                 Bankkonten
               </Link>{" "}
-              CSV importieren.
+              CSV oder MT940 importieren.
             </p>
           ) : (
             <Table>

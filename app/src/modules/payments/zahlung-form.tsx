@@ -85,8 +85,11 @@ export function ZahlungForm({
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
-          „Bar“ ist nur eine Markierung am Zahlungseingang — kein automatischer
-          Kassenbuch-Eintrag.
+          Zahlungsweg „Bar“ markiert den Eingang. Der Zufluss steht im
+          Zahlungsjournal (EÜR, USt, DATEV). Es entsteht kein
+          Kassenbuch-Eintrag. Dieselbe Barzahlung nicht zusätzlich als
+          Bareinnahme im Kassenbuch erfassen — das würde die Einnahme
+          verdoppeln.
         </p>
       </div>
 

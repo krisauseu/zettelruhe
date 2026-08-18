@@ -95,8 +95,8 @@ Manuell erzeugtes Mahn-Dokument bei überfälliger Rechnung; kein automatischer 
 _Avoid_: Mahnlauf (als v1-Automatik)
 
 **E-Rechnung**:
-Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang archiviert das Original unverändert. Versand erzeugt XML-Originale (XRechnung-UBL / ZUGFeRD-CII) aus der festgeschriebenen Rechnung — kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim.
-_Avoid_: PDF-Rechnung (als Synonym — PDF allein ist keine E-Rechnung)
+Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang archiviert das Original unverändert. Versand erzeugt XML-Originale (XRechnung-UBL / ZUGFeRD-CII) aus der festgeschriebenen Rechnung — kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim. Ein Factur-X-/ZUGFeRD-Hybrid erst, wenn eine eigene PDF/A-3-Pipeline das Niveau hält (ADR-0026); kein XML-Anhang auf dem Alltags-PDF als Ersatz.
+_Avoid_: PDF-Rechnung (als Synonym — PDF allein ist keine E-Rechnung), ZUGFeRD-PDF (solange kein PDF/A-3-Hybrid existiert)
 
 **Beleg**:
 Nachweis einer Ausgabe oder Einnahme (Datei + Metadaten), der ins Buchungsjournal eingeht.
@@ -161,6 +161,6 @@ _Avoid_: ELSTER (als v1-Kernfeature)
 - **v1-Betrieb**: Self-hosted; Instanz-Eigentümer:in plus eingeladene Nutzer:innen mit groben Rechten je Firma (Mitgliedschaft); mehrere Firmen in einer Instanz (Session wechselt die aktive Firma); Schema firma-gebunden
 - **Markt**: Deutschland (UStG, EÜR, DATEV, XRechnung/ZUGFeRD, GoBD-Mindeststandard ohne externe Zertifizierung)
 - **Steuer v1**: Kleinunternehmerregelung (§ 19, kein USt-Ausweis/Abführen) **oder** Regelbesteuerung nur Ist-Versteuerung; Wechsel muss in Einstellungen und allen Dokument-/Auswertungsflüssen greifen
-- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
+- **v1-Happy-Path**: Stammdaten inkl. Steuer-Modus → Kontakte/optionale Projekte → Zeiten/Fahrten → Angebot/Rechnung (inkl. wiederkehrend, Nummern erst bei Senden) → Belege + Kassenbuch (Kategorie aus Stammliste) + Bankkonten → Zahlung (manuell/CSV/MT940) → E-Rechnung-Empfang → EÜR (+ USt-Übersicht und ZM-Übersicht nur bei Regelbesteuerung) → DATEV + Journal + Belegarchiv-Export
 - **Meilenstein 2**: Kategorien, Multi-Firma dünn, UStVA/ELSTER-XML light, ZM-Übersicht, USt-IdNr.-Prüfung und E-Rechnungs-Versand. Checkliste: `docs/funktionstest-m2.md`. HTTPS: Host-Caddy, `app.zettelruhe.de` (ADR-0023). Funktionstest M2 (lokal + Server) **bestanden**; M2-01 nachgetestet. Freigabe **M2 Alltag trägt**. Blocker keine. Dokumenten-Layout Angebot/Rechnung (über light hinaus) steht; Vertiefung (Briefpapier, Font-Upload, …) unter Roadmap „Später“. Marke (Logo/Favicon der App, nicht firmen.logo) steht. **Ist-Versteuerung:** Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). **Multi-User / grobe Rechte:** Mitgliedschaft je Firma, Einladen und Rollen im UI (ADR-0025).
 - **Nicht v1**: Soll-Versteuerung, Abschlagskette, automatischer Mahnlauf, PSD2, OCR-Pflicht, REST-API-Pflicht, Kundenportal, Lieferschein, CSS-Profi-Layouts, SEPA-Mandate, PayPal/Stripe-Links, Verpflegungspauschalen, Anlagen/AfA-Vollmodul, Steuerberater-Portal, Bilanz, DACH

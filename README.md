@@ -161,7 +161,7 @@ Funktionstest: [`docs/funktionstest-m1.md`](./docs/funktionstest-m1.md) — best
 | UStVA / ELSTER-XML light | `/app/ust` | Self-File, kein Versand |
 | ZM-Übersicht | `/app/zm` | Self-File, kein Versand |
 | USt-IdNr.-Prüfung (BZSt) | Firma + Kontakt | Schnappschuss, kein Dauer-Stempel |
-| E-Rechnungs-Versand | festgeschriebene Rechnung | XRechnung-UBL / ZUGFeRD-CII als XML, kein Hybrid-PDF |
+| E-Rechnungs-Versand | festgeschriebene Rechnung | XRechnung-UBL / ZUGFeRD-CII als XML, kein Hybrid-PDF (ADR-0026) |
 
 Browser-Nachtest Versand durch kf (2026-08-15): keine Fehler. Die BZSt-Klick-Prüfung braucht ausgehenden HTTPS-Zugang zum eVatR und steht zusammen mit dem **Server-Nachtest M2** aus.
 

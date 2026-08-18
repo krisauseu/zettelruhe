@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSchreibenSession } from "@/lib/session";
+import { decodeBankImportBytes } from "./encoding";
 import {
   createBankkonto,
   deleteBankkonto,
   ignoreBankBewegung,
-  importBankCsv,
+  importBankAuszug,
   matchBewegungToRechnung,
   reopenBankBewegung,
   updateBankkonto,
@@ -92,7 +93,9 @@ export async function deleteBankkontoAction(formData: FormData): Promise<void> {
   redirect("/app/bankkonten?deleted=1");
 }
 
-export async function importBankCsvAction(formData: FormData): Promise<void> {
+export async function importBankAuszugAction(
+  formData: FormData,
+): Promise<void> {
   const firmaId = await requireFirmaId();
   const bankkontoId = formString(formData, "bankkonto");
   if (!bankkontoId) redirect("/app/bankkonten");
@@ -100,40 +103,51 @@ export async function importBankCsvAction(formData: FormData): Promise<void> {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     redirect(
-      `/app/bankkonten/${bankkontoId}/import?error=${encodeURIComponent("Bitte eine CSV-Datei wählen.")}`,
+      `/app/bankkonten/${bankkontoId}/import?error=${encodeURIComponent("Bitte eine CSV- oder MT940-Datei wählen.")}`,
     );
   }
 
   let text: string;
   try {
-    text = await file.text();
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    text = decodeBankImportBytes(bytes).text;
   } catch {
     redirect(
       `/app/bankkonten/${bankkontoId}/import?error=${encodeURIComponent("Datei konnte nicht gelesen werden.")}`,
     );
   }
 
+  let result;
   try {
-    const result = await importBankCsv(firmaId, bankkontoId, text, {
+    result = await importBankAuszug(firmaId, bankkontoId, text, {
       dateiname: file.name,
     });
-    const msg = `Import: ${result.neu} neu, ${result.duplikat} Duplikat(e), ${result.gesamt} Zeile(n)${
-      result.parseFehler.length
-        ? ` · ${result.parseFehler.length} Zeile(n) übersprungen`
-        : ""
-    }`;
-    revalidatePath("/app/bankkonten");
-    revalidatePath(`/app/bankkonten/${bankkontoId}`);
-    revalidatePath("/app/kontoauszug");
-    redirect(
-      `/app/bankkonten/${bankkontoId}?import=${encodeURIComponent(msg)}`,
-    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Import fehlgeschlagen.";
     redirect(
       `/app/bankkonten/${bankkontoId}/import?error=${encodeURIComponent(msg)}`,
     );
   }
+
+  const formatLabel = result.lauf.format === "mt940" ? "MT940" : "CSV";
+  const msg = `${formatLabel}: ${result.neu} neu, ${result.duplikat} Duplikat(e), ${result.gesamt} Zeile(n)${
+    result.parseFehler.length
+      ? ` · ${result.parseFehler.length} Zeile(n) übersprungen`
+      : ""
+  }${
+    result.warnungen.length ? ` · ${result.warnungen.join(" · ")}` : ""
+  }`;
+  revalidatePath("/app/bankkonten");
+  revalidatePath(`/app/bankkonten/${bankkontoId}`);
+  revalidatePath("/app/kontoauszug");
+  redirect(
+    `/app/bankkonten/${bankkontoId}?import=${encodeURIComponent(msg)}`,
+  );
+}
+
+/** Alias: bestehender Form-Name, derselbe Auszug-Import. */
+export async function importBankCsvAction(formData: FormData): Promise<void> {
+  return importBankAuszugAction(formData);
 }
 
 export async function matchBewegungAction(formData: FormData): Promise<void> {
