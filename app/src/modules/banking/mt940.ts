@@ -141,13 +141,38 @@ export function parseSwiftYymmdd(raw: string): string {
   return iso;
 }
 
+/**
+ * ISO-13616-Längen. Ohne sie würde `:25:DE… EUR` als IBAN+EUR gelesen.
+ */
+const IBAN_LAENGE: Record<string, number> = {
+  AD: 24, AE: 23, AL: 28, AT: 20, AZ: 28, BA: 20, BE: 16, BG: 22,
+  BH: 22, BR: 29, BY: 28, CH: 21, CR: 22, CY: 28, CZ: 24, DE: 22,
+  DK: 18, DO: 28, EE: 20, EG: 29, ES: 24, FI: 18, FO: 18, FR: 27,
+  GB: 22, GE: 22, GI: 23, GL: 18, GR: 27, GT: 28, HR: 21, HU: 28,
+  IE: 22, IL: 23, IQ: 23, IS: 26, IT: 27, JO: 30, KW: 30, KZ: 20,
+  LB: 28, LC: 32, LI: 21, LT: 20, LU: 20, LV: 21, LY: 25, MC: 27,
+  MD: 24, ME: 22, MK: 19, MR: 27, MT: 31, MU: 30, NL: 18, NO: 15,
+  PK: 24, PL: 28, PS: 29, PT: 25, QA: 29, RO: 24, RS: 22, SA: 24,
+  SE: 24, SI: 19, SK: 24, SM: 27, TN: 24, TR: 26, UA: 29, VA: 22,
+  VG: 24, XK: 20,
+};
+
 export function extractIbanFromKontoId(raw: string): string | null {
   const t = raw.toUpperCase().replace(/[\s/\-]/g, "");
   for (let i = 0; i <= t.length - 15; i++) {
     if (!/^[A-Z]{2}[0-9]{2}/.test(t.slice(i, i + 4))) continue;
+    const cc = t.slice(i, i + 2);
+    const expected = IBAN_LAENGE[cc];
+    if (expected) {
+      const cand = t.slice(i, i + expected);
+      if (cand.length === expected && isPlausibleIban(cand)) return cand;
+      continue;
+    }
     for (let len = Math.min(34, t.length - i); len >= 15; len--) {
       const cand = t.slice(i, i + len);
-      if (isPlausibleIban(cand)) return cand;
+      if (!isPlausibleIban(cand)) continue;
+      const rest = t.slice(i + len);
+      if (rest === "" || /^[A-Z]{3}$/.test(rest)) return cand;
     }
   }
   return null;
@@ -330,6 +355,71 @@ function parseField61(
   return { datum, richtung, betrag, referenz, zusatz };
 }
 
+/**
+ * bunq/SEPA-Schrägstrich in :86: (`/IBAN/` `/NAME/` `/REMI/` …).
+ * Nur lesen, was im File steht — keine IBAN aus anderen Feldern bauen.
+ */
+export function parseSlashInfo86(raw: string): {
+  structured: boolean;
+  vwz: string;
+  name: string;
+  iban: string;
+  eref: string;
+} {
+  const compact = raw.replace(/\r?\n/g, "").trim();
+  const keyRe = /\/([A-Z]{2,8})\//g;
+  const keys: Array<{ key: string; start: number; end: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = keyRe.exec(compact)) !== null) {
+    keys.push({ key: m[1]!, start: m.index, end: m.index + m[0].length });
+  }
+  if (keys.length === 0 || keys[0]!.start > 1) {
+    return { structured: false, vwz: compact, name: "", iban: "", eref: "" };
+  }
+
+  const map = new Map<string, string[]>();
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i]!;
+    const valueEnd = i + 1 < keys.length ? keys[i + 1]!.start : compact.length;
+    const val = compact.slice(k.end, valueEnd).trim();
+    const list = map.get(k.key) ?? [];
+    if (val) list.push(val);
+    map.set(k.key, list);
+  }
+
+  const names = [
+    ...(map.get("NAME") ?? []),
+    ...(map.get("BENM") ?? []),
+  ];
+  const remi = (map.get("REMI") ?? []).join(" ").trim();
+  const ibanRaw = normalizeIban((map.get("IBAN") ?? [])[0] ?? "");
+  return {
+    structured: true,
+    vwz: remi,
+    name: names.join(" · "),
+    iban: ibanRaw && isPlausibleIban(ibanRaw) ? ibanRaw : "",
+    eref: ((map.get("EREF") ?? [])[0] ?? "").trim(),
+  };
+}
+
+/** Listen-Text: REMI/NAME aus Schrägstrich-:86:, sonst der gespeicherte Zweck. */
+export function anzeigeVerwendungszweck(zeile: {
+  verwendungszweck?: string;
+  gegenkonto_name?: string;
+}): string {
+  const raw = (zeile.verwendungszweck ?? "").trim();
+  const slash = parseSlashInfo86(raw);
+  if (slash.structured) {
+    return (
+      slash.vwz ||
+      slash.name ||
+      (zeile.gegenkonto_name ?? "").trim() ||
+      raw
+    );
+  }
+  return raw || (zeile.gegenkonto_name ?? "").trim();
+}
+
 export function parseMt940Info86(raw: string): {
   vwz: string;
   name: string;
@@ -337,6 +427,13 @@ export function parseMt940Info86(raw: string): {
 } {
   const compact = raw.replace(/\r?\n/g, "");
   if (!/\?\d{2}/.test(compact)) {
+    const slash = parseSlashInfo86(compact);
+    if (slash.structured) {
+      // Voller :86:-Text bleibt Verwendungszweck (Idempotenz der schon
+      // importierten bunq-Zeilen). Name separat; IBAN nicht persistieren
+      // — sie steht im Hash.
+      return { vwz: compact.trim(), name: slash.name, iban: "" };
+    }
     return { vwz: compact.trim(), name: "", iban: "" };
   }
 

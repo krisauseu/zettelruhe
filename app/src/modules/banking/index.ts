@@ -53,12 +53,14 @@ export {
 export { decodeBankImportBytes } from "./encoding";
 
 export {
+  anzeigeVerwendungszweck,
   detectBankImportFormat,
   extractIbanFromKontoId,
   looksLikeMt940,
   MT940_DIALEKT_HINWEIS,
   parseMt940,
   parseMt940Info86,
+  parseSlashInfo86,
   pruefeMt940KontoIds,
 } from "./mt940";
 

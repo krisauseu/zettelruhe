@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { decodeBankImportBytes } from "./encoding";
 import { buildIdempotenzSchluessel } from "./invariants";
 import {
+  MT940_BUNQ_AEHNLICH,
   MT940_KLASSISCH,
   MT940_KONTO_OHNE_IBAN,
   MT940_MEHRSATZ,
@@ -9,11 +10,13 @@ import {
   MT940_SWIFT_HUELLE,
 } from "./mt940.fixtures";
 import {
+  anzeigeVerwendungszweck,
   detectBankImportFormat,
   extractIbanFromKontoId,
   looksLikeMt940,
   parseMt940,
   parseMt940Info86,
+  parseSlashInfo86,
   parseSwiftYymmdd,
   pruefeMt940KontoIds,
 } from "./mt940";
@@ -133,6 +136,16 @@ describe("parseMt940Info86", () => {
     });
   });
 
+  it("Schrägstrich-:86: behält vollen Text (Idempotenz), Name separat", () => {
+    const raw =
+      "/IBAN/DE02120300000000202051/NAME/Muster GmbH/REMI/Rechnung R-0001";
+    expect(parseMt940Info86(raw)).toEqual({
+      vwz: raw,
+      name: "Muster GmbH",
+      iban: "",
+    });
+  });
+
   it("rät keine IBAN aus BLZ/Konto", () => {
     const r = parseMt940Info86(
       "?00GUTSCHRIFT?20Rechnung?3037040044?310532013000?32Kunde",
@@ -140,6 +153,48 @@ describe("parseMt940Info86", () => {
     expect(r.iban).toBe("");
     expect(r.name).toBe("Kunde");
     expect(r.vwz).toBe("Rechnung");
+  });
+});
+
+describe("bunq-ähnliches STA", () => {
+  it("akzeptiert :25: mit EUR und parst C6,", () => {
+    const r = parseMt940(MT940_BUNQ_AEHNLICH);
+    expect(r.fehler).toEqual([]);
+    expect(r.zeilen).toHaveLength(2);
+    expect(extractIbanFromKontoId(r.kontoIds[0] ?? "")).toBe(
+      "DE89370400440532013000",
+    );
+    expect(pruefeMt940KontoIds(r.kontoIds, "DE89370400440532013000").ablehnen).toBeUndefined();
+    expect(r.zeilen[0]).toMatchObject({
+      datum: "2026-08-02",
+      richtung: "eingang",
+      betrag: "6.00",
+      gegenkonto_name: "Muster GmbH",
+    });
+    expect(r.zeilen[0]!.verwendungszweck.startsWith("/IBAN/")).toBe(true);
+    expect(anzeigeVerwendungszweck(r.zeilen[0]!)).toBe("Muster GmbH");
+    expect(anzeigeVerwendungszweck(r.zeilen[1]!)).toBe("Rechnung R-0001");
+  });
+});
+
+describe("parseSlashInfo86 / Anzeige", () => {
+  it("nimmt REMI, sonst NAME — nicht den IBAN-Anfang", () => {
+    expect(
+      parseSlashInfo86(
+        "/IBAN/DE02120300000000202051/NAME/Muster GmbH/REMI/Umbuchung",
+      ),
+    ).toMatchObject({
+      structured: true,
+      vwz: "Umbuchung",
+      name: "Muster GmbH",
+      iban: "DE02120300000000202051",
+    });
+    expect(
+      anzeigeVerwendungszweck({
+        verwendungszweck:
+          "/IBAN/DE14700500000002034300/NAME/Stadtwerke/REMI/",
+      }),
+    ).toBe("Stadtwerke");
   });
 });
 
@@ -167,6 +222,20 @@ describe(":25: gegen Stammdaten-IBAN", () => {
       "DE89370400440532013000",
     );
     expect(extractIbanFromKontoId("37040044/0532013000")).toBeNull();
+  });
+
+  it("hängt EUR in :25: nicht an die IBAN", () => {
+    expect(extractIbanFromKontoId("DE89370400440532013000 EUR")).toBe(
+      "DE89370400440532013000",
+    );
+    expect(extractIbanFromKontoId("DE89370400440532013000EUR")).toBe(
+      "DE89370400440532013000",
+    );
+    const r = pruefeMt940KontoIds(
+      ["DE89370400440532013000EUR"],
+      "DE89370400440532013000",
+    );
+    expect(r.ablehnen).toBeUndefined();
   });
 
   it("lehnt abweichende IBAN ab", () => {

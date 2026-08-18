@@ -51,6 +51,22 @@ export const MT940_OHNE_SCHLUSSSALDO = [
   ":86:Unvollständig",
 ].join("\n");
 
+/** bunq-ähnlich: :25: mit Währung, :86: Schrägstrich, Betrag `6,`. Synthetisch. */
+export const MT940_BUNQ_AEHNLICH = [
+  "BUNQDE82",
+  "940",
+  ":20:STARTUMS",
+  ":25:DE89370400440532013000 EUR",
+  ":28:00002",
+  ":60F:C260801EUR0,",
+  ":61:2608020802C6,NTRFNONREF",
+  ":86:/IBAN/DE02120300000000202051/NAME/Muster GmbH/REMI/",
+  ":61:2608030803D25,50NTRFNONREF",
+  ":86:/IBAN/DE02120300000000202051/NAME/Muster GmbH/REMI/Rechnung R-0001",
+  ":62F:C260803EUR0,00",
+  "-",
+].join("\n");
+
 export const MT940_KONTO_OHNE_IBAN = [
   ":20:STARTUMS",
   ":25:37040044/0532013000",

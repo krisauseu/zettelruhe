@@ -8,6 +8,7 @@ import {
   formatDateDe,
 } from "@/lib/labels";
 import {
+  anzeigeVerwendungszweck,
   deleteBankkontoAction,
   getBankkonto,
   listBankBewegungen,
@@ -178,8 +179,13 @@ export default async function BankkontoDetailPage({
                       {b.richtung === "ausgang" ? "−" : ""}
                       {formatMoneyDe(b.betrag, { currency: true })}
                     </TableCell>
-                    <TableCell className="max-w-[14rem] truncate text-sm">
-                      {b.verwendungszweck || "—"}
+                    <TableCell
+                      className="max-w-[22rem] text-sm"
+                      title={b.verwendungszweck || undefined}
+                    >
+                      <span className="line-clamp-2 break-words">
+                        {anzeigeVerwendungszweck(b) || "—"}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <Badge
