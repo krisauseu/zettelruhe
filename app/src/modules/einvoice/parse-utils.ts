@@ -1,6 +1,6 @@
 /**
  * Hilfen für XML-Parse (namespaces strippen, Beträge/Daten normalisieren).
- * Keine externe Parser-Lib — light, austauschbar hinter Adapter (ADR-0015).
+ * PDF-Attachments: parse-pdf-xml.ts (ADR-0029). Keine Parser-Lib (ADR-0015).
  */
 
 import { money, moneyToString } from "@/lib/money";
@@ -121,33 +121,10 @@ export function mapTaxPercentToSteuersatz(raw: string): Steuersatz | "" {
   return "";
 }
 
-/**
- * Versucht eingebettetes XML aus PDF-Bytes (ZUGFeRD/Factur-X light).
- * Kein vollständiger PDF-Parser — sucht typische Invoice-XML-Blöcke.
- */
-export function extractXmlFromPdf(bytes: Uint8Array): string | null {
-  // latin1 behält Byte-Werte 0–255 als Zeichen
-  const asLatin1 = Buffer.from(bytes).toString("latin1");
-
-  const patterns: RegExp[] = [
-    /<\?xml[\s\S]*?<\/rsm:CrossIndustryInvoice>/i,
-    /<\?xml[\s\S]*?<\/CrossIndustryInvoice>/i,
-    /<rsm:CrossIndustryInvoice[\s\S]*?<\/rsm:CrossIndustryInvoice>/i,
-    /<CrossIndustryInvoice[\s\S]*?<\/CrossIndustryInvoice>/i,
-    /<\?xml[\s\S]*?<\/ubl:Invoice>/i,
-    /<\?xml[\s\S]*?<\/Invoice>/i,
-    /<Invoice[\s\S]*?xmlns[\s\S]*?<\/Invoice>/i,
-  ];
-
-  for (const re of patterns) {
-    const m = asLatin1.match(re);
-    if (m && m[0].length > 200) {
-      // PDF escaped streams manchmal mit \n — bereinigen
-      return m[0].replace(/\\n/g, "\n").replace(/\\r/g, "");
-    }
-  }
-  return null;
-}
+export {
+  extractUncompressedXmlFromPdf,
+  extractXmlFromPdf,
+} from "./parse-pdf-xml";
 
 export function isLikelyXml(text: string): boolean {
   const t = text.trimStart();

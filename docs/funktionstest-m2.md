@@ -247,7 +247,7 @@ Nicht als Fehler werten:
 - ELSTER-**Versand**, UStVA-**Abgabe**, ZM-**Abgabe**
 - Hybrid-ZUGFeRD-PDF/A-3, KoSIT-/Schematron-/Zertifizierungs-Claim
 - Multi-User, Einladen, Rechte-UI
-- Open Decisions (Journal-Nachzug Zahlungen, Kassenbuch aus Barzahlung, MT940, robustes ZUGFeRD-PDF-Parsing)
+- Open Decisions nach M2 (erledigt: Journal-Nachzug, Kassenbuch-Schnitt, MT940, ZUGFeRD-Empfang ADR-0029)
 - M1-15 (`NEXT_REDIRECT`)
 - Setup-`verified` (eigener Schnitt nach M2-Freigabe; nicht Teil dieses Protokolls)
 - Dokumenten-Profi-Layout, Logo/Favicon der Marke

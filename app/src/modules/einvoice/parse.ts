@@ -1,21 +1,22 @@
 /**
  * Parser-Fassade: Datei-Bytes → ParsedEInvoice (ADR-0015 Anti-Corruption-Layer).
  *
- * Produktionsfähig in BA12:
- * - XRechnung / UBL-XML (primär)
- * - ZUGFeRD/Factur-X CII-XML (standalone XML)
- * - ZUGFeRD-PDF: light Embedded-XML-Extraktion (kein Mustang, kein vollständiger PDF-Parser)
+ * - XRechnung / UBL-XML
+ * - ZUGFeRD/Factur-X CII-XML (standalone)
+ * - PDF: /EmbeddedFiles + Flate (ADR-0029); unkomprimiertes XML als Fallback
  *
- * Keine Live-Netzwerk-Abhängigkeit; austauschbare Adapter hinter stabilem DTO.
+ * Kein Mustang, kein pdf-lib, keine Live-Netzwerk-Abhängigkeit.
  */
 
 import { parseCiiXml } from "./parse-cii";
-import { parseUblXml } from "./parse-ubl";
 import {
-  detectXmlFormat,
   extractXmlFromPdf,
-  isLikelyXml,
-} from "./parse-utils";
+  isPdfEncrypted,
+  PDF_OHNE_XML_ERROR,
+  PDF_VERSCHLUESSELT_ERROR,
+} from "./parse-pdf-xml";
+import { parseUblXml } from "./parse-ubl";
+import { detectXmlFormat, isLikelyXml } from "./parse-utils";
 import type { ParseEInvoiceResult } from "./types";
 
 export type ParseFileInput = {
@@ -55,12 +56,18 @@ export function parseEInvoiceFile(input: ParseFileInput): ParseEInvoiceResult {
   let xml: string | null = null;
 
   if (isPdf) {
+    if (isPdfEncrypted(bytes)) {
+      return {
+        ok: false,
+        error: PDF_VERSCHLUESSELT_ERROR,
+        format: "unbekannt",
+      };
+    }
     xml = extractXmlFromPdf(bytes);
     if (!xml) {
       return {
         ok: false,
-        error:
-          "PDF ohne erkennbares eingebettetes E-Rechnungs-XML (ZUGFeRD/Factur-X). Original wurde archiviert. Bitte XRechnung-XML hochladen oder Beleg manuell anlegen.",
+        error: PDF_OHNE_XML_ERROR,
         format: "unbekannt",
       };
     }

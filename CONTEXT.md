@@ -95,7 +95,7 @@ Manuell erzeugtes Mahn-Dokument bei überfälliger Rechnung; kein automatischer 
 _Avoid_: Mahnlauf (als v1-Automatik)
 
 **E-Rechnung**:
-Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang archiviert das Original unverändert. Versand erzeugt XML-Originale (XRechnung-UBL / ZUGFeRD-CII) aus der festgeschriebenen Rechnung — kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim. Ein Factur-X-/ZUGFeRD-Hybrid erst, wenn eine eigene PDF/A-3-Pipeline das Niveau hält (ADR-0026); kein XML-Anhang auf dem Alltags-PDF als Ersatz.
+Strukturierte elektronische Rechnung nach EN 16931 (XRechnung und/oder ZUGFeRD). Empfang archiviert das Original unverändert und parst XRechnung-UBL, CII-XML sowie PDF-Anhänge (`factur-x.xml` / `zugferd-invoice.xml`, auch Flate; ADR-0029). Ein Scan-PDF ohne Anhang ist keine E-Rechnung. Versand erzeugt XML-Originale (XRechnung-UBL / ZUGFeRD-CII) aus der festgeschriebenen Rechnung — kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim. Ein Factur-X-/ZUGFeRD-Hybrid erst, wenn eine eigene PDF/A-3-Pipeline das Niveau hält (ADR-0026); kein XML-Anhang auf dem Alltags-PDF als Ersatz.
 _Avoid_: PDF-Rechnung (als Synonym — PDF allein ist keine E-Rechnung), ZUGFeRD-PDF (solange kein PDF/A-3-Hybrid existiert)
 
 **Beleg**:

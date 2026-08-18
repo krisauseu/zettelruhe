@@ -1,6 +1,6 @@
 /**
  * Modul: einvoice — E-Rechnung Empfang und Versand
- * Empfang: Upload/Archiv Original, Parse → ParsedEInvoice, Beleg-Entwurf.
+ * Empfang: Upload/Archiv Original, Parse (XML + PDF-Anhang, ADR-0029) → ParsedEInvoice, Beleg-Entwurf.
  * Versand: XML aus festgeschriebener Rechnung (ADR-0022). Kein Mustang-Sidecar.
  */
 

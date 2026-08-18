@@ -34,7 +34,7 @@ Ausgangspunkt für die individuelle Verfahrensdokumentation gedacht.
 6. **Storno**: Gegenbuchung mit Verweis `storno_von`; Original bleibt erhalten. Rechnungs-Storno storniert auch die Zahlungsjournale.
 7. **Zahlungen**: Manuell oder per Bank-Match; erzeugen eine Zufluss-Buchung (`quelle_typ=zahlung`, Buchungsdatum = Zahlungsdatum). Teilzahlungen anteilig nach Steuerstaffel. Löschen storniert die Zufluss-Buchung (ADR-0024).
 7a. **Bank-Import**: CSV (de-DE) oder klassisches SWIFT-MT940/STA je aktivem Bankkonto der Session-Firma. Idempotenz über SHA-256; Re-Import derselben Zeile legt keine zweite Bewegung und keine zweite Zahlung an. `:25:` mit IBAN muss zum gewählten Konto passen. Match nur nach Bestätigung in der UI (ADR-0028).
-8. **E-Rechnung Empfang**: Original archivieren → optional Beleg-Entwurf → Festschreibung wie Beleg.
+8. **E-Rechnung Empfang**: Original archivieren → Parse (XRechnung-UBL, CII-XML, PDF-Anhang auch Flate) → optional Beleg-Entwurf → Festschreibung wie Beleg. Scan-PDF ohne Anhang: Parse-Fehler, Original bleibt, Beleg manuell (ADR-0029).
 9. **E-Rechnung Versand**: aus festgeschriebener Rechnung XML (XRechnung-UBL oder ZUGFeRD-CII) erzeugen und unveränderbar ablegen; Rechnungs-PDF bleibt unangetastet. Kein Hybrid-PDF/A-3, kein Zertifizierungs-Claim (ADR-0026: Hybrid erst mit eigener PDF/A-3-Pipeline).
 10. **USt-IdNr.**: eigene an der Firma, fremde am Kontakt; BZSt-Bestätigung auf Klick als unveränderlicher Schnappschuss (kein Stamm-Stempel, keine Änderung festgeschriebener Belege).
 

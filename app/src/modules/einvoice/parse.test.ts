@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { deflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import {
   assertCanCreateBeleg,
@@ -16,7 +17,12 @@ import {
 } from "./mapping";
 import { parseEInvoiceFile, parseEInvoiceXml } from "./parse";
 import {
+  extractUncompressedXmlFromPdf,
   extractXmlFromPdf,
+  PDF_OHNE_XML_ERROR,
+  PDF_VERSCHLUESSELT_ERROR,
+} from "./parse-pdf-xml";
+import {
   mapTaxPercentToSteuersatz,
   normalizeEInvoiceAmount,
   normalizeEInvoiceDate,
@@ -111,8 +117,7 @@ describe("parse ZUGFeRD CII", () => {
     expect(result.data.steuersatz).toBe("19");
   });
 
-  it("extrahiert XML aus PDF-Bytes light", () => {
-    // Minimal: %PDF + eingebettetes CII-Fragment
+  it("extrahiert XML aus PDF-Bytes light (unkomprimiert)", () => {
     const pdfLike = Buffer.from(
       `%PDF-1.4\n1 0 obj\n<<>>\nendobj\n${ciiXml}\n%%EOF`,
       "latin1",
@@ -124,6 +129,56 @@ describe("parse ZUGFeRD CII", () => {
     const result = parseEInvoiceFile({
       bytes: pdfLike,
       filename: "zugferd.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.rechnungsnummer).toBe("ZF-2026-0007");
+  });
+
+  it("liest Flate-Attachment factur-x.xml", () => {
+    const pdf = buildPdfWithAttachments([
+      { name: "factur-x.xml", xml: ciiXml, flate: true },
+    ]);
+    expect(extractUncompressedXmlFromPdf(pdf)).toBeNull();
+    const extracted = extractXmlFromPdf(pdf);
+    expect(extracted).toContain("ZF-2026-0007");
+
+    const result = parseEInvoiceFile({
+      bytes: pdf,
+      filename: "rechnung.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.format).toBe("zugferd_cii");
+    expect(result.data.rechnungsnummer).toBe("ZF-2026-0007");
+    expect(result.data.betrag_brutto).toBe("59.50");
+    expect(result.data.lieferant.name).toBe("ZUGFeRD Hosting AG");
+  });
+
+  it("liest Flate trotz umbrochenem /Type und verschachteltem /Params", () => {
+    const pdf = buildIntarsysLikeFlatePdf(ciiXml);
+    expect(extractUncompressedXmlFromPdf(pdf)).toBeNull();
+    const result = parseEInvoiceFile({
+      bytes: pdf,
+      filename: "einfach.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.rechnungsnummer).toBe("ZF-2026-0007");
+  });
+
+  it("bevorzugt factur-x.xml wenn mehrere Anhänge Invoice-XML sind", () => {
+    const other = ciiXml.replace("ZF-2026-0007", "OTHER-1");
+    const pdf = buildPdfWithAttachments([
+      { name: "notes.xml", xml: other, flate: true },
+      { name: "factur-x.xml", xml: ciiXml, flate: true },
+    ]);
+    const result = parseEInvoiceFile({
+      bytes: pdf,
+      filename: "zwei.pdf",
       mimeType: "application/pdf",
     });
     expect(result.ok).toBe(true);
@@ -157,7 +212,81 @@ describe("unparseable Guard", () => {
     });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.error).toMatch(/XML|archiviert/i);
+    expect(result.error).toBe(PDF_OHNE_XML_ERROR);
+  });
+
+  it("Flate-Content ohne /EmbeddedFile ist kein E-Rechnungs-XML", () => {
+    const compressed = deflateSync(Buffer.from(ciiXml, "utf8"));
+    const pdf = Buffer.concat([
+      Buffer.from(
+        `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Filter /FlateDecode /Length ${compressed.length} >>
+stream
+`,
+        "latin1",
+      ),
+      compressed,
+      Buffer.from(
+        `
+endstream
+endobj
+trailer
+<< /Root 1 0 R >>
+%%EOF
+`,
+        "latin1",
+      ),
+    ]);
+    const result = parseEInvoiceFile({
+      bytes: pdf,
+      filename: "nur-inhalt.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe(PDF_OHNE_XML_ERROR);
+  });
+
+  it("verschlüsseltes PDF → ehrlicher Fehler, kein XML-Raten", () => {
+    const pdf = Buffer.from(
+      `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Encrypt 5 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>
+endobj
+5 0 obj
+<< /Filter /Standard /V 1 /R 2 /O (x) /U (y) /P -4 >>
+endobj
+${ciiXml}
+trailer
+<< /Root 1 0 R /Encrypt 5 0 R >>
+%%EOF
+`,
+      "latin1",
+    );
+    const result = parseEInvoiceFile({
+      bytes: pdf,
+      filename: "geheim.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toBe(PDF_VERSCHLUESSELT_ERROR);
   });
 });
 
@@ -289,3 +418,93 @@ describe("invariants", () => {
     expect(back?.betrag_brutto).toBe("119.00");
   });
 });
+
+type TestAttachment = { name: string; xml: string; flate?: boolean };
+
+/** Minimales PDF mit /EmbeddedFiles. Fixtures synthetisch, kein Corpus. */
+function buildPdfWithAttachments(files: TestAttachment[]): Buffer {
+  const parts: Buffer[] = [];
+  const namePairs: string[] = [];
+  const filespecObjs: string[] = [];
+  let nextObj = 6;
+  const fileSpecs: { specObj: number; streamObj: number; name: string }[] = [];
+
+  const streams: { obj: number; header: string; payload: Buffer }[] = [];
+
+  for (const file of files) {
+    const specObj = nextObj++;
+    const streamObj = nextObj++;
+    fileSpecs.push({ specObj, streamObj, name: file.name });
+    namePairs.push(`(${file.name}) ${specObj} 0 R`);
+    filespecObjs.push(
+      `${specObj} 0 obj\n<< /Type /Filespec /F (${file.name}) /UF (${file.name}) /EF << /F ${streamObj} 0 R >> /AFRelationship /Alternative >>\nendobj\n`,
+    );
+    const raw = Buffer.from(file.xml, "utf8");
+    const payload = file.flate ? deflateSync(raw) : raw;
+    const filter = file.flate ? "/Filter /FlateDecode " : "";
+    streams.push({
+      obj: streamObj,
+      header: `${streamObj} 0 obj\n<< /Type /EmbeddedFile /Subtype /text#2Fxml ${filter}/Length ${payload.length} >>\nstream\n`,
+      payload,
+    });
+  }
+
+  const catalog = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles 5 0 R >> /AF [ ${fileSpecs.map((f) => `${f.specObj} 0 R`).join(" ")} ] >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>
+endobj
+5 0 obj
+<< /Names [ ${namePairs.join(" ")} ] >>
+endobj
+`;
+
+  parts.push(Buffer.from(catalog, "latin1"));
+  for (const spec of filespecObjs) {
+    parts.push(Buffer.from(spec, "latin1"));
+  }
+  for (const s of streams) {
+    parts.push(Buffer.from(s.header, "latin1"));
+    parts.push(s.payload);
+    parts.push(Buffer.from("\nendstream\nendobj\n", "latin1"));
+  }
+  parts.push(Buffer.from("trailer\n<< /Root 1 0 R >>\n%%EOF\n", "latin1"));
+  return Buffer.concat(parts);
+}
+
+/** Wie intarsys: /Type umbrochen, /Params verschachtelt, Flate. */
+function buildIntarsysLikeFlatePdf(xml: string): Buffer {
+  const payload = deflateSync(Buffer.from(xml, "utf8"));
+  const header = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles 5 0 R >> /AF [4 0 R] >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] >>
+endobj
+4 0 obj
+<< /Type /Filespec /F (zugferd-invoice.xml) /EF << /F 6 0 R >> >>
+endobj
+5 0 obj
+<< /Names [ (zugferd-invoice.xml) 4 0 R ] >>
+endobj
+6 0 obj
+<</Filter /FlateDecode /Length ${payload.length} /Params
+  <</ModDate (D:20260818120000+00'00')>> /Subtype /text#2Fxml /Type
+  /EmbeddedFile>>
+stream
+`;
+  return Buffer.concat([
+    Buffer.from(header, "latin1"),
+    payload,
+    Buffer.from("\nendstream\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n", "latin1"),
+  ]);
+}

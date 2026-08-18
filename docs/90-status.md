@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-18_
 
-**Last session:** 2026-08-18 — MT940 bunq-Nachzug (`c769bcd`): `:25:` ohne Währung, `:86:` REMI/NAME.
+**Last session:** 2026-08-18 — ZUGFeRD-Empfang-Parsing (ADR-0029): PDF-Attachment Flate.
 
 ## What's done
 
@@ -43,6 +43,7 @@ _Last updated: 2026-08-18_
 - **Hybrid-PDF (ADR-0026):** Schnitt, kein Bau. Factur-X/ZUGFeRD-Hybrid verlangt PDF/A-3; `@react-pdf/renderer` liefert das nicht, `pdf-lib` macht es nicht ehrlich, Mustang/Chromium bleiben ausgeschlossen. Versand bleibt XML-Original (ADR-0022) neben dem Festschreibungs-PDF. Kein Kleber ohne Claim.
 - **Kassenbuch aus Barzahlung (ADR-0027):** Schnitt, kein Bau. Zahlung mit Zahlungsweg `bar` erzeugt keinen Kassenbuch-Eintrag. Zufluss bleibt allein `quelle_typ=zahlung` (ADR-0024). Manuelles Kassenbuch unverändert (`quelle_typ=kasse`). Formular-Hinweis warnt vor doppelter Bareinnahme. Kein Hook, kein Nachzug, keine EÜR-Entkopplung.
 - **MT940-Parser (ADR-0028):** klassisches SWIFT-MT940 / STA (`:20:` / `:25:` / `:61:` / `:86:` / `:62F:`). Eigener Parser nach `ParsedBankZeile`; Persistenz und Idempotenz wie CSV; Lauf `format=mt940`. Valuta und C/D/RC/RD nur aus `:61:`. `:25:`-IBAN nach Ländercode (DE = 22), angehängtes `EUR` gehört nicht zur Konto-ID. bunq-`:86:` `/IBAN/` `/NAME/` `/REMI/`: Liste zeigt REMI oder NAME, gespeichert bleibt der volle Text. Encoding UTF-8 oder Windows-1252. Kein CAMT.053, kein MT942, keine Lib. Matching unverändert (Bestätigung, `createZahlung`). Import-Erfolg-`redirect` liegt außerhalb von `try` (dieser Pfad, M1-15). 489 Unit-Tests. Commits `2341199`, `c769bcd`.
+- **ZUGFeRD-Empfang-Parsing (ADR-0029):** PDF-Anhang `/Type /EmbeddedFile`, Filter keiner oder Flate (`zlib`). Bekannte Dateinamen wählen, sonst erstes CII-/UBL-XML. Unkomprimierter Fallback bleibt. Verschlüsselte PDFs und Scan-PDF ohne Anhang scheitern ehrlich. DTO und Beleg-Entwurf unverändert; Original archiviert; kein Inbox-Nachparse. Kein `pdf-lib`, kein Mustang, kein Hybrid-Schreiben (ADR-0026). 494 Unit-Tests.
 
 ## What's next
 
@@ -51,24 +52,22 @@ Zettelruhe soll ein Tool für jedermann werden — verschiedene Steuer-Modi, ver
 
 **Als Nächstes sichtbar, noch nicht gebaut** (nicht vermischen mit Erledigtem):
 
-- Robustes ZUGFeRD-Empfang-Parsing — Kickoff: [`sessions/2026-08-18-zugferd-empfang-parsing-prompt.md`](./sessions/2026-08-18-zugferd-empfang-parsing-prompt.md).
+- nichts aus der Open-Decision-Liste nach M2. Nächster Schnitt nur auf Wunsch (Roadmap „Später“) — nicht von selbst in OCR, PSD2, Mahnlauf oder Briefpapier.
 
-Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung (XML-Versand), Hybrid-Schnitt (kein Bau, ADR-0026), Kassenbuch aus Barzahlung (kein Bau, ADR-0027), MT940 (ADR-0028), Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen), UX/UI Rest (Sidebar mobil, Detailköpfe), Übersicht erster Keil (Fälligkeiten, §-19-Wächter, Verlauf), Übersicht Follow-up (Donut Kategorien, letzte Buchungen).
+Erledigt und hier nicht wieder aufmachen: Marke, Dokumenten-Layout (über light hinaus), UStVA/ZM light, E-Rechnung (XML-Versand), Hybrid-Schnitt (kein Bau, ADR-0026), Kassenbuch aus Barzahlung (kein Bau, ADR-0027), MT940 (ADR-0028), ZUGFeRD-Empfang-Parsing (ADR-0029), Multi-Firma dünn, Ist-Versteuerung (Journal-Nachzug Zahlungen), Multi-User / grobe Rechte, eigenes Passwort, UX/UI erster Keil (Tokens/Shell/Listen), UX/UI Rest (Sidebar mobil, Detailköpfe), Übersicht erster Keil (Fälligkeiten, §-19-Wächter, Verlauf), Übersicht Follow-up (Donut Kategorien, letzte Buchungen).
 
 Invarianten unverändert: Anlegen ≠ stilles Ändern festgeschriebener Dokumente. Rechnungsnummer und Journal erst bei Festschreibung. Zahlung erzeugt eine Zufluss-Buchung im Journal (ADR-0024). Zugang zu Firmen über Mitgliedschaft (ADR-0025). de-DE im UI.
 
 ## Follow-up
 
-- Übrige Open Decision (ZUGFeRD-Empfang-Parsing) — weiter separat
+- ZUGFeRD-Empfang-Parsing — erledigt (ADR-0029, PDF-Attachment Flate)
 - Hybrid-PDF — erledigt als Schnitt (kein Bau); später nur mit eigener PDF/A-3-Pipeline (ADR-0026)
 - Kassenbuch aus Barzahlung — erledigt als Schnitt (kein Bau, ADR-0027)
 - MT940 — erledigt (ADR-0028, klassisches SWIFT/STA)
 
 ## Open decisions
 
-UX/UI erster Keil und Rest (mobil Off-Canvas, Detailköpfe) stehen. Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
-
-- Robustes ZUGFeRD-PDF-Attachment-Parsing — light Scan in BA12, Follow-up möglich
+keine (nach M2). UX/UI erster Keil und Rest stehen. Die Liste hier ist kein Tunnelblick auf die aktuelle Kleinunternehmer-Arbeitsfirma.
 
 ## Blockers
 
@@ -97,4 +96,4 @@ UX/UI erster Keil und Rest (mobil Off-Canvas, Detailköpfe) stehen. Die Liste hi
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-18-mt940-bunq.md`](./sessions/2026-08-18-mt940-bunq.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-18-zugferd-empfang-parsing.md`](./sessions/2026-08-18-zugferd-empfang-parsing.md)

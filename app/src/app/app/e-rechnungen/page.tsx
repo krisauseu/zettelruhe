@@ -80,7 +80,7 @@ export default async function ERechnungenListPage({
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <PageHeader
         title="E-Rechnungen"
-        description="Empfang: XRechnung/ZUGFeRD hochladen, Original archivieren, Beleg vorbefüllen. Versand einer E-Rechnung von der festgeschriebenen Rechnung aus."
+        description="Empfang: XRechnung-XML, CII-XML oder PDF mit eingebettetem XML (auch Flate). Original archivieren, Beleg vorbefüllen. Versand von der festgeschriebenen Rechnung aus."
       >
         {session.kannSchreiben ? (
           <Link

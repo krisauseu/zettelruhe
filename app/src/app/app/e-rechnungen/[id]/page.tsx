@@ -150,8 +150,8 @@ export default async function ERechnungDetailPage({
               Parse-Fehler
             </CardTitle>
             <CardDescription>
-              Das Original ist trotzdem archiviert. Beleg manuell unter Belege
-              anlegen.
+              Das Original ist trotzdem archiviert. XML hochladen oder Beleg
+              manuell anlegen.
             </CardDescription>
           </CardHeader>
           <CardContent>

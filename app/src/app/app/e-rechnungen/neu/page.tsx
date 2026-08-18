@@ -48,9 +48,11 @@ export default async function ERechnungNeuPage({
         <CardHeader>
           <CardTitle>Datei hochladen</CardTitle>
           <CardDescription>
-            XRechnung als XML (UBL) oder ZUGFeRD/Factur-X als PDF mit
-            eingebettetem XML bzw. reines CII-XML. Max. 15&nbsp;MB. Kein
-            Versand aus Zettelruhe in diesem Schritt.
+            XRechnung als XML (UBL) oder ZUGFeRD/Factur-X als CII-XML.
+            PDF nur, wenn ein E-Rechnungs-XML als Anhang steckt (auch
+            Flate-komprimiert, etwa factur-x.xml). Ein Scan-PDF ohne Anhang
+            ist keine E-Rechnung — dann XML hochladen oder Beleg manuell.
+            Max. 15&nbsp;MB. Kein Versand in diesem Schritt.
           </CardDescription>
         </CardHeader>
         <CardContent>
