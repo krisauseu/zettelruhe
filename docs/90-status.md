@@ -2,7 +2,7 @@
 
 _Last updated: 2026-08-18_
 
-**Last session:** 2026-08-18 — MT940-Parser: klassisches SWIFT/STA (ADR-0028).
+**Last session:** 2026-08-18 — MT940 bunq-Nachzug (`c769bcd`): `:25:` ohne Währung, `:86:` REMI/NAME.
 
 ## What's done
 
@@ -42,7 +42,7 @@ _Last updated: 2026-08-18_
 - **Übersicht Follow-up:** Ausgaben nach Kategorien (Donut Top 5 + „Weitere“, Monat/Quartal; Schnappschuss am Beleg/Kassenbuch, Storno mindert die Ursprungskategorie) und letzte Buchungen (Journal-Tail, Link zum Datensatz). Zweite 65/35-Zeile, erster Keil unverändert. 462 Unit-Tests. Donut-Farben: je Kategorie ein Token (nicht Violett-in-Violett).
 - **Hybrid-PDF (ADR-0026):** Schnitt, kein Bau. Factur-X/ZUGFeRD-Hybrid verlangt PDF/A-3; `@react-pdf/renderer` liefert das nicht, `pdf-lib` macht es nicht ehrlich, Mustang/Chromium bleiben ausgeschlossen. Versand bleibt XML-Original (ADR-0022) neben dem Festschreibungs-PDF. Kein Kleber ohne Claim.
 - **Kassenbuch aus Barzahlung (ADR-0027):** Schnitt, kein Bau. Zahlung mit Zahlungsweg `bar` erzeugt keinen Kassenbuch-Eintrag. Zufluss bleibt allein `quelle_typ=zahlung` (ADR-0024). Manuelles Kassenbuch unverändert (`quelle_typ=kasse`). Formular-Hinweis warnt vor doppelter Bareinnahme. Kein Hook, kein Nachzug, keine EÜR-Entkopplung.
-- **MT940-Parser (ADR-0028):** klassisches SWIFT-MT940 / STA (`:20:` / `:25:` / `:61:` / `:86:` / `:62F:`). Eigener Parser nach `ParsedBankZeile`; Persistenz und Idempotenz wie CSV; Lauf `format=mt940`. Valuta und C/D/RC/RD nur aus `:61:`. `:25:`-IBAN muss zum gewählten Bankkonto passen (sonst Abbruch); ohne IBAN Warnung. Encoding UTF-8 oder Windows-1252. Kein CAMT.053, kein MT942, keine Lib. Matching unverändert (Bestätigung, `createZahlung`). Import-Erfolg-`redirect` liegt außerhalb von `try` (dieser Pfad, M1-15). 485 Unit-Tests.
+- **MT940-Parser (ADR-0028):** klassisches SWIFT-MT940 / STA (`:20:` / `:25:` / `:61:` / `:86:` / `:62F:`). Eigener Parser nach `ParsedBankZeile`; Persistenz und Idempotenz wie CSV; Lauf `format=mt940`. Valuta und C/D/RC/RD nur aus `:61:`. `:25:`-IBAN nach Ländercode (DE = 22), angehängtes `EUR` gehört nicht zur Konto-ID. bunq-`:86:` `/IBAN/` `/NAME/` `/REMI/`: Liste zeigt REMI oder NAME, gespeichert bleibt der volle Text. Encoding UTF-8 oder Windows-1252. Kein CAMT.053, kein MT942, keine Lib. Matching unverändert (Bestätigung, `createZahlung`). Import-Erfolg-`redirect` liegt außerhalb von `try` (dieser Pfad, M1-15). 489 Unit-Tests. Commits `2341199`, `c769bcd`.
 
 ## What's next
 
@@ -97,4 +97,4 @@ UX/UI erster Keil und Rest (mobil Off-Canvas, Detailköpfe) stehen. Die Liste hi
 2. `docs/feature-roadmap.md`
 3. `docs/betrieb.md` (Betrieb/Backup)
 4. `docs/adr/*.md`
-5. Diese Datei · letzte Session: [`sessions/2026-08-18-mt940.md`](./sessions/2026-08-18-mt940.md)
+5. Diese Datei · letzte Session: [`sessions/2026-08-18-mt940-bunq.md`](./sessions/2026-08-18-mt940-bunq.md)
