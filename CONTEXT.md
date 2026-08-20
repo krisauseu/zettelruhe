@@ -58,6 +58,10 @@ _Avoid_: Client, Buyer
 Ein Kontakt, von dem Ausgabenbelege stammen.
 _Avoid_: Vendor, Creditor (im UI)
 
+**Kontaktnummer**:
+Fortlaufende Nummer je Kontakt der Firma (Kund:in und Lieferant:in), vergeben bei Neuanlage aus dem Nummernkreis der Firma. Die PocketBase-ID bleibt die interne Verknüpfung.
+_Avoid_: Kundennummer (als alleiniger Name), Debitorennummer, Account-Nr.
+
 ### Arbeit & Abrechnung
 
 **Projekt**:
@@ -111,7 +115,7 @@ Ausgleich einer offenen Rechnung; manuell markierbar (inkl. Teilzahlung) oder pe
 _Avoid_: Transaction (allein)
 
 **Nummernkreis**:
-Konfigurierbare, fortlaufende Nummerierung je Dokumentart (Angebot, Rechnung, Gutschrift/Storno, optional Beleg, Kassenbuch-Belegnummer).
+Konfigurierbare, fortlaufende Nummerierung je Dokumentart (Angebot, Rechnung, Gutschrift/Storno, optional Beleg, Kassenbuch-Belegnummer) und für die Kontaktnummer.
 
 ### Buchhaltung & Compliance
 

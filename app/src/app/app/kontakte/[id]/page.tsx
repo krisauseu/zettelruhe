@@ -87,6 +87,11 @@ export default async function KontaktDetailPage({
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
           {kontakt.name}
         </h1>
+        {kontakt.kontaktnummer ? (
+          <p className="mt-1 font-mono text-sm tabular-nums text-muted-foreground">
+            {kontakt.kontaktnummer}
+          </p>
+        ) : null}
         {sp.saved ? (
           <p className="mt-1 text-sm text-success">Gespeichert.</p>
         ) : null}

@@ -3,6 +3,7 @@
  */
 
 import {
+  allocateKontaktnummer,
   createRecord,
   deleteRecord,
   getRecord,
@@ -27,6 +28,7 @@ type PbKontakt = {
   id: string;
   firma: string;
   name: string;
+  kontaktnummer?: string;
   ist_kunde?: boolean;
   ist_lieferant?: boolean;
   strasse?: string;
@@ -59,6 +61,7 @@ function mapKontakt(r: PbKontakt): Kontakt {
     id: r.id,
     firma: r.firma,
     name: r.name,
+    kontaktnummer: r.kontaktnummer ?? "",
     ist_kunde: Boolean(r.ist_kunde),
     ist_lieferant: Boolean(r.ist_lieferant),
     strasse: r.strasse ?? "",
@@ -126,7 +129,7 @@ export async function listKontakte(
   const q = filter.q?.trim();
   if (q) {
     parts.push(
-      `(${pbLike("name", q)} || ${pbLike("email", q)} || ${pbLike("ort", q)} || ${pbLike("telefon", q)} || ${pbLike("ust_id", q)})`,
+      `(${pbLike("name", q)} || ${pbLike("email", q)} || ${pbLike("ort", q)} || ${pbLike("telefon", q)} || ${pbLike("ust_id", q)} || ${pbLike("kontaktnummer", q)})`,
     );
   }
 
@@ -163,11 +166,22 @@ export async function createKontakt(
   firmaId: string,
   input: KontaktInput,
 ): Promise<Kontakt> {
-  const r = await createRecord<PbKontakt>(
-    COL_KONTAKTE,
-    toPbBody(input, firmaId),
-  );
-  return mapKontakt(r);
+  const vorgegeben = (input.kontaktnummer ?? "").trim();
+  const kontaktnummer =
+    vorgegeben || (await allocateKontaktnummer(firmaId));
+  try {
+    const r = await createRecord<PbKontakt>(COL_KONTAKTE, {
+      ...toPbBody(input, firmaId),
+      kontaktnummer,
+    });
+    return mapKontakt(r);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/unique/i.test(msg) || /must be unique/i.test(msg)) {
+      throw new Error("Kontaktnummer ist bereits vergeben.");
+    }
+    throw e;
+  }
 }
 
 export async function updateKontakt(

@@ -28,6 +28,7 @@ const kunde: Kontakt = {
   id: "k1",
   firma: "f1",
   name: "Acme Software Solutions GmbH",
+  kontaktnummer: "KT-0001",
   ist_kunde: true,
   ist_lieferant: false,
   strasse: "Innovationspark 12",

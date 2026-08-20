@@ -4,6 +4,8 @@ export type Kontakt = {
   id: string;
   firma: string;
   name: string;
+  /** Fortlaufende Nummer der Firma; nicht die PocketBase-ID. */
+  kontaktnummer: string;
   ist_kunde: boolean;
   ist_lieferant: boolean;
   strasse: string;
@@ -26,6 +28,8 @@ export type KontaktInput = {
   name: string;
   ist_kunde: boolean;
   ist_lieferant: boolean;
+  /** Nur Neuanlage/Import; leer = Auto-vergabe. Update ändert sie nicht. */
+  kontaktnummer?: string;
   strasse?: string;
   plz?: string;
   ort?: string;

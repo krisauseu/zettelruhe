@@ -69,6 +69,18 @@ describe("parseKontakteCsv", () => {
     expect(result.items[0].leitweg_id).toBe("99-TEST-0000-00");
   });
 
+  it("liest Kontaktnummer und Alias Kundennummer", () => {
+    const csv = "name;kundennummer\nAlpha GmbH;KT-0042\n";
+    const result = parseKontakteCsv(csv);
+    expect(result.items[0].kontaktnummer).toBe("KT-0042");
+  });
+
+  it("lässt leere Kontaktnummer weg (Auto-vergabe)", () => {
+    const csv = "name;kontaktnummer\nNeu;\n";
+    const result = parseKontakteCsv(csv);
+    expect(result.items[0].kontaktnummer).toBeUndefined();
+  });
+
   it("akzeptiert Alias Firma als name", () => {
     const csv = "Firma;Kunde\nTestfirma;ja\n";
     const result = parseKontakteCsv(csv);
@@ -97,6 +109,7 @@ describe("serializeKontakteCsv", () => {
         id: "1",
         firma: "f",
         name: "Test; Firma",
+        kontaktnummer: "KT-0001",
         ist_kunde: true,
         ist_lieferant: false,
         strasse: "A 1",
@@ -119,6 +132,7 @@ describe("serializeKontakteCsv", () => {
     expect(result.items[0].iban).toBe("DE89370400440532013000");
     expect(result.items[0].ust_id).toBe("ATU12345678");
     expect(result.items[0].notiz).toBe('Zeile "eins"');
+    expect(result.items[0].kontaktnummer).toBe("KT-0001");
   });
 
   it("exportiert und importiert den ersten Ansprechpartner", () => {
@@ -127,6 +141,7 @@ describe("serializeKontakteCsv", () => {
         id: "1",
         firma: "f",
         name: "Alpha GmbH",
+        kontaktnummer: "KT-0002",
         ist_kunde: true,
         ist_lieferant: false,
         strasse: "",

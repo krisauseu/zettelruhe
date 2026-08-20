@@ -27,6 +27,24 @@ export function KontaktForm({ action, kontakt, submitLabel, error }: Props) {
         />
       </div>
 
+      {kontakt?.kontaktnummer ? (
+        <div className="flex flex-col gap-1.5">
+          <Label>Kontaktnummer</Label>
+          <p className="font-mono text-sm tabular-nums text-foreground">
+            {kontakt.kontaktnummer}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Wird bei Neuanlage vergeben und bleibt unverändert. Prefix unter
+            Firma.
+          </p>
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Kontaktnummer wird beim Anlegen automatisch vergeben (Prefix unter
+          Firma).
+        </p>
+      )}
+
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-medium text-foreground">Rollen</legend>
         <p className="text-xs text-muted-foreground">

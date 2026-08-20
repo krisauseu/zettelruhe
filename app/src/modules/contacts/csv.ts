@@ -11,6 +11,7 @@ import type {
 
 export const KONTAKTE_CSV_HEADERS = [
   "name",
+  "kontaktnummer",
   "ist_kunde",
   "ist_lieferant",
   "strasse",
@@ -38,6 +39,14 @@ const HEADER_ALIASES: Record<string, KontakteCsvHeader> = {
   firma: "name",
   "name/firma": "name",
   bezeichnung: "name",
+  kontaktnummer: "kontaktnummer",
+  "kontakt-nr": "kontaktnummer",
+  "kontakt-nr.": "kontaktnummer",
+  kundennummer: "kontaktnummer",
+  "kunden-nr": "kontaktnummer",
+  "kunden-nr.": "kontaktnummer",
+  kunden_nr: "kontaktnummer",
+  knr: "kontaktnummer",
   ist_kunde: "ist_kunde",
   kunde: "ist_kunde",
   "kund:in": "ist_kunde",
@@ -230,6 +239,7 @@ export function parseKontakteCsv(text: string): CsvParseResult {
     const apName = cell("ansprechpartner_name");
     const item: KontaktCsvItem = {
       name,
+      kontaktnummer: cell("kontaktnummer") || undefined,
       ist_kunde,
       ist_lieferant,
       strasse: cell("strasse"),
@@ -289,6 +299,7 @@ export function serializeKontakteCsv(
     const weitere = aps.slice(1);
     const values = [
       k.name,
+      k.kontaktnummer,
       formatBool(k.ist_kunde),
       formatBool(k.ist_lieferant),
       k.strasse,
@@ -320,6 +331,7 @@ export function kontakteCsvTemplate(): string {
     id: "",
     firma: "",
     name: "Muster GmbH",
+    kontaktnummer: "",
     ist_kunde: true,
     ist_lieferant: false,
     strasse: "Beispielstraße 1",

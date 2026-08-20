@@ -90,7 +90,8 @@ export default async function KontaktePage({
         <CardHeader className="pb-3">
           <CardTitle className="text-base">Suche & Filter</CardTitle>
           <CardDescription>
-            Nach Name, E-Mail, Ort, Telefon oder USt-IdNr. filtern.
+            Nach Name, Kontaktnummer, E-Mail, Ort, Telefon oder USt-IdNr.
+            filtern.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -103,7 +104,7 @@ export default async function KontaktePage({
                 id="q"
                 name="q"
                 defaultValue={q}
-                placeholder="Name, E-Mail …"
+                placeholder="Name, Nr., E-Mail …"
               />
             </div>
             <div className="flex min-w-[10rem] flex-col gap-1.5">
@@ -140,6 +141,7 @@ export default async function KontaktePage({
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
+                  <TableHead>Nr.</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Rolle</TableHead>
                   <TableHead>Ort</TableHead>
@@ -150,6 +152,9 @@ export default async function KontaktePage({
               <TableBody>
                 {result.items.map((k) => (
                   <TableRow key={k.id}>
+                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
+                      {k.kontaktnummer || "—"}
+                    </TableCell>
                     <TableCell>
                       <Link
                         href={`/app/kontakte/${k.id}`}

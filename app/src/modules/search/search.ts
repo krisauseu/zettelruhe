@@ -45,7 +45,9 @@ export async function searchFirma(
       kind: "kontakt",
       id: k.id,
       title: k.name,
-      subtitle: [roles, k.ort, k.email].filter(Boolean).join(" · ") || "Kontakt",
+      subtitle:
+        [k.kontaktnummer, roles, k.ort, k.email].filter(Boolean).join(" · ") ||
+        "Kontakt",
       href: `/app/kontakte/${k.id}`,
     });
   }

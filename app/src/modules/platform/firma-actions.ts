@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  DEFAULT_NUMMERNKREISE,
   getFirmaById,
+  mergeNummernkreise,
   updateFirma,
   type NummernkreisConfig,
   type Nummernkreise,
@@ -87,16 +87,14 @@ export async function updateFirmaAction(formData: FormData): Promise<void> {
     }
   }
 
-  const currentNk = {
-    ...DEFAULT_NUMMERNKREISE,
-    ...existing.nummernkreise,
-  };
+  const currentNk = mergeNummernkreise(existing.nummernkreise);
   const nummernkreise: Nummernkreise = {
     angebot: parseNummernkreis(formData, "angebot", currentNk.angebot),
     rechnung: parseNummernkreis(formData, "rechnung", currentNk.rechnung),
     gutschrift: parseNummernkreis(formData, "gutschrift", currentNk.gutschrift),
     beleg: parseNummernkreis(formData, "beleg", currentNk.beleg),
     kasse: parseNummernkreis(formData, "kasse", currentNk.kasse),
+    kontakt: parseNummernkreis(formData, "kontakt", currentNk.kontakt),
   };
 
   let dokument_akzentfarbe = "";

@@ -29,7 +29,7 @@ Glossary: [`CONTEXT.md`](../CONTEXT.md) · ADRs: [`docs/adr/`](./adr/)
 
 ### Kontakte, Projekte, Zeit & Fahrten
 
-- Kontaktverwaltung: Kund:innen & Lieferant:innen
+- Kontaktverwaltung: Kund:innen & Lieferant:innen; Kontaktnummer je Kontakt (ein Kreis, Prefix an der Firma; PocketBase-ID bleibt Verknüpfung)
 - Ansprechpartner, Adressen, Bankdaten (IBAN)
 - CSV-Import/Export Kontakte
 - **Projekt** optional je Kund:in (keine Budget-Pflicht)
@@ -127,7 +127,7 @@ Daneben separat: **Kassenbuch aus Barzahlung** ← erledigt als Schnitt, kein Ba
 
 ## Später — Core-Komfort (dieses Repo)
 
-- Dokumenten-Layout nochmal ansehen (Schnitt 2026-08-16 bewusst schlank): Briefpapier-Hintergrund (PNG sowie PDF-Stempel Seite 1 / Folgeseiten), Schrift-Upload und mitgelieferte Hausschrift, Inhaber:in an der Firma, Kunden-Nr. am Kontakt, Ansprechpartner „z. Hd.“ auf dem PDF, AGB als weitere Seiten, Live-Vorschau/Studio in den Einstellungen, Mehrvorlagen, CSS-Profi-Layouts
+- Dokumenten-Layout nochmal ansehen (Schnitt 2026-08-16 bewusst schlank): Briefpapier-Hintergrund (PNG sowie PDF-Stempel Seite 1 / Folgeseiten), Schrift-Upload und mitgelieferte Hausschrift, Inhaber:in an der Firma, Kunden-Nr. auf Angebot/Rechnung-PDF (Vergabe am Kontakt steht), Ansprechpartner „z. Hd.“ auf dem PDF, AGB als weitere Seiten, Live-Vorschau/Studio in den Einstellungen, Mehrvorlagen, CSS-Profi-Layouts
 - Automatischer Mahnlauf (1.–3., Gebühren, Zinsen)
 - Abschlags- & Schlussrechnungskette
 - Lieferscheine

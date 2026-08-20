@@ -40,7 +40,8 @@ export default async function KontaktNeuPage({
         <CardHeader>
           <CardTitle>Stammdaten</CardTitle>
           <CardDescription>
-            Kund:in und/oder Lieferant:in mit Adresse und optionalen Bankdaten.
+            Kund:in und/oder Lieferant:in. Die Kontaktnummer wird automatisch
+            vergeben.
           </CardDescription>
         </CardHeader>
         <CardContent>

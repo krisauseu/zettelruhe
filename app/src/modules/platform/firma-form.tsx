@@ -17,6 +17,7 @@ const NK_ROWS = [
   ["gutschrift", "Gutschrift"],
   ["beleg", "Beleg"],
   ["kasse", "Kassenbuch"],
+  ["kontakt", "Kontakt"],
 ] as const;
 
 export function FirmaForm({
@@ -337,7 +338,11 @@ export function FirmaForm({
             </thead>
             <tbody>
               {NK_ROWS.map(([key, label]) => {
-                const cfg = firma.nummernkreise[key];
+                const cfg = firma.nummernkreise[key] ?? {
+                  prefix: "",
+                  digits: 4,
+                  next: 1,
+                };
                 return (
                   <tr key={key} className="border-b border-border last:border-0">
                     <td className="py-2 pr-3 font-medium">{label}</td>

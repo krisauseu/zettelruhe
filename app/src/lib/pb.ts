@@ -26,6 +26,7 @@ export type Nummernkreise = {
   gutschrift: NummernkreisConfig;
   beleg: NummernkreisConfig;
   kasse: NummernkreisConfig;
+  kontakt: NummernkreisConfig;
 };
 
 export const DEFAULT_NUMMERNKREISE: Nummernkreise = {
@@ -34,7 +35,34 @@ export const DEFAULT_NUMMERNKREISE: Nummernkreise = {
   gutschrift: { prefix: "G-", digits: 4, next: 1 },
   beleg: { prefix: "B-", digits: 4, next: 1 },
   kasse: { prefix: "K-", digits: 4, next: 1 },
+  kontakt: { prefix: "KT-", digits: 4, next: 1 },
 };
+
+/** Gespeichertes JSON (ältere Firmen ohne neue Keys) mit Defaults auffüllen. */
+export function mergeNummernkreise(
+  stored?: Partial<Nummernkreise> | null,
+): Nummernkreise {
+  const base = { ...DEFAULT_NUMMERNKREISE, ...(stored ?? {}) };
+  return {
+    angebot: { ...DEFAULT_NUMMERNKREISE.angebot, ...base.angebot },
+    rechnung: { ...DEFAULT_NUMMERNKREISE.rechnung, ...base.rechnung },
+    gutschrift: { ...DEFAULT_NUMMERNKREISE.gutschrift, ...base.gutschrift },
+    beleg: { ...DEFAULT_NUMMERNKREISE.beleg, ...base.beleg },
+    kasse: { ...DEFAULT_NUMMERNKREISE.kasse, ...base.kasse },
+    kontakt: { ...DEFAULT_NUMMERNKREISE.kontakt, ...base.kontakt },
+  };
+}
+
+/** Prefix plus nächste Nummer mit führenden Nullen. */
+export function formatNummernkreis(
+  cfg: Pick<NummernkreisConfig, "prefix" | "digits" | "next">,
+  defaultPrefix: string,
+): string {
+  const next = Number(cfg.next) || 1;
+  const digits = Math.max(1, Number(cfg.digits) || 4);
+  const prefix = typeof cfg.prefix === "string" ? cfg.prefix : defaultPrefix;
+  return `${prefix}${String(next).padStart(digits, "0")}`;
+}
 
 export type Steuermodus = "kleinunternehmer" | "regelbesteuerung_ist";
 export type SkrWahl = "skr03" | "skr04";
@@ -234,7 +262,7 @@ function mapFirma(r: PbFirma): FirmaRecord {
     name: r.name,
     steuermodus: r.steuermodus,
     skr: r.skr,
-    nummernkreise: r.nummernkreise ?? DEFAULT_NUMMERNKREISE,
+    nummernkreise: mergeNummernkreise(r.nummernkreise),
     strasse: r.strasse ?? "",
     plz: r.plz ?? "",
     ort: r.ort ?? "",
@@ -665,18 +693,16 @@ async function allocateNummernkreis(
   if (!firma) {
     throw new Error("Firma nicht gefunden.");
   }
-  const nk = {
-    ...DEFAULT_NUMMERNKREISE[key],
-    ...(firma.nummernkreise?.[key] ?? {}),
-  };
+  const merged = mergeNummernkreise(firma.nummernkreise);
+  const nk = merged[key];
   const next = Number(nk.next) || 1;
-  const digits = Math.max(1, Number(nk.digits) || 4);
-  const prefix = typeof nk.prefix === "string" ? nk.prefix : defaultPrefix;
-  const nummer = `${prefix}${String(next).padStart(digits, "0")}`;
+  const nummer = formatNummernkreis(
+    { ...nk, prefix: typeof nk.prefix === "string" ? nk.prefix : defaultPrefix },
+    defaultPrefix,
+  );
 
   const updatedKreise: Nummernkreise = {
-    ...DEFAULT_NUMMERNKREISE,
-    ...firma.nummernkreise,
+    ...merged,
     [key]: { ...nk, next: next + 1 },
   };
 
@@ -719,6 +745,14 @@ export async function allocateKassenbuchBelegnummer(
   firmaId: string,
 ): Promise<string> {
   return allocateNummernkreis(firmaId, "kasse", "K-");
+}
+
+/**
+ * Nächste Kontaktnummer aus Firmeneinstellung vergeben und Zähler erhöhen.
+ * Bei Neuanlage des Kontakts aufrufen (kein Entwurfsstatus).
+ */
+export async function allocateKontaktnummer(firmaId: string): Promise<string> {
+  return allocateNummernkreis(firmaId, "kontakt", "KT-");
 }
 
 /** PocketBase-Filter: exakte String-Gleichheit (escaped) */
