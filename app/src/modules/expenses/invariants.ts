@@ -12,7 +12,15 @@ import {
   type NormalizedBetraege,
 } from "@/modules/journal/invariants";
 import type { JournalBuchungInput } from "@/modules/journal/types";
-import type { Beleg, BelegInput, BelegStatus, Buchungsrichtung } from "./types";
+import {
+  BELEG_DATEI_MAX_ANZAHL,
+  type Beleg,
+  type BelegInput,
+  type BelegStatus,
+  type Buchungsrichtung,
+} from "./types";
+
+export { BELEG_DATEI_MAX_ANZAHL };
 
 export { isValidIsoDate, todayBerlin, festschreibungsZeitpunktUtc };
 
@@ -35,7 +43,7 @@ export const FESTGESCHRIEBEN_ERROR =
   "Festgeschriebene Belege dürfen nicht still geändert oder gelöscht werden. Korrektur über neuen Beleg bzw. Storno im Buchungsjournal.";
 
 export const DATEI_IMMUTABLE_ERROR =
-  "Die Belegdatei ist nach der Festschreibung unveränderbar (ADR-0012).";
+  "Belegdateien sind nach der Festschreibung unveränderbar (ADR-0012).";
 
 export type ValidatedBelegInput = {
   belegdatum: string;
@@ -123,6 +131,29 @@ export function assertCanFestschreiben(beleg: Beleg): void {
   }
   if (beleg.journal_eintrag) {
     throw new Error("Beleg ist bereits mit einem Journal-Eintrag verknüpft.");
+  }
+}
+
+/** PB-File-Feld: ein Name oder Liste → bereinigte Namensliste. */
+export function normalizeBelegDateiNamen(
+  raw: string | string[] | null | undefined,
+): string[] {
+  if (typeof raw === "string") {
+    const n = raw.trim();
+    return n ? [n] : [];
+  }
+  if (!Array.isArray(raw)) return [];
+  return raw.map((n) => String(n).trim()).filter(Boolean);
+}
+
+export function assertBelegDateiAnzahl(
+  existing: number,
+  adding: number,
+): void {
+  if (existing + adding > BELEG_DATEI_MAX_ANZAHL) {
+    throw new Error(
+      `Höchstens ${BELEG_DATEI_MAX_ANZAHL} Dateien je Beleg.`,
+    );
   }
 }
 

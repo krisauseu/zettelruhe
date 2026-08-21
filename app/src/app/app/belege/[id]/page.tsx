@@ -20,10 +20,9 @@ import {
   festschreibenBelegAction,
   getBeleg,
   updateBelegAction,
-  clearBelegDateiAction,
 } from "@/modules/expenses";
 import { BelegForm } from "@/modules/expenses/beleg-form";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -33,7 +32,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -238,13 +236,19 @@ export default async function BelegDetailPage({
                   Datei
                 </dt>
                 <dd className="mt-1 text-sm">
-                  {beleg.datei ? (
-                    <Link
-                      href={`/app/belege/${beleg.id}/datei`}
-                      className="text-primary underline-offset-4 hover:underline"
-                    >
-                      {beleg.datei} (anzeigen/herunterladen)
-                    </Link>
+                  {beleg.datei.length > 0 ? (
+                    <ul className="flex flex-col gap-1">
+                      {beleg.datei.map((name) => (
+                        <li key={name}>
+                          <Link
+                            href={`/app/belege/${beleg.id}/datei?${new URLSearchParams({ name }).toString()}`}
+                            className="text-primary underline-offset-4 hover:underline"
+                          >
+                            {name} (anzeigen/herunterladen)
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
                     "—"
                   )}
@@ -290,28 +294,6 @@ export default async function BelegDetailPage({
               />
             </CardContent>
           </Card>
-
-          {beleg.datei ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Datei</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap items-center gap-3">
-                <Link
-                  href={`/app/belege/${beleg.id}/datei`}
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                >
-                  {beleg.datei} anzeigen
-                </Link>
-                <form action={clearBelegDateiAction}>
-                  <input type="hidden" name="id" value={id} />
-                  <Button type="submit" variant="ghost" size="sm">
-                    Datei entfernen
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          ) : null}
 
           <Card>
             <CardHeader>

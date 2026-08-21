@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSchreibenSession } from "@/lib/session";
 import {
-  clearBelegDatei,
+  addBelegDateien,
   createBeleg,
   deleteBeleg,
   festschreibenBeleg,
-  setBelegDatei,
+  removeBelegDatei,
   updateBeleg,
 } from "./repository";
 import type { BelegInput, Buchungsrichtung, Steuersatz } from "./types";
@@ -51,21 +51,23 @@ function parseBelegForm(formData: FormData): BelegInput {
   };
 }
 
-function formFile(formData: FormData, key: string): File | null {
-  const v = formData.get(key);
-  if (v instanceof File && v.size > 0) return v;
-  return null;
+function formFiles(formData: FormData, key: string): File[] {
+  return formData
+    .getAll(key)
+    .filter((v): v is File => v instanceof File && v.size > 0);
 }
 
 /** Neuen Beleg-Entwurf anlegen (optional mit Datei). */
 export async function createBelegAction(formData: FormData): Promise<void> {
   const firmaId = await requireFirmaId();
   const input = parseBelegForm(formData);
-  const datei = formFile(formData, "datei");
+  const dateien = formFiles(formData, "datei");
 
   let id: string;
   try {
-    const beleg = await createBeleg(firmaId, input, { datei });
+    const beleg = await createBeleg(firmaId, input, {
+      datei: dateien.length > 0 ? dateien : null,
+    });
     id = beleg.id;
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Anlegen fehlgeschlagen.";
@@ -86,9 +88,9 @@ export async function updateBelegAction(formData: FormData): Promise<void> {
 
   try {
     await updateBeleg(firmaId, id, input);
-    const datei = formFile(formData, "datei");
-    if (datei) {
-      await setBelegDatei(firmaId, id, datei);
+    const dateien = formFiles(formData, "datei");
+    if (dateien.length > 0) {
+      await addBelegDateien(firmaId, id, dateien);
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Speichern fehlgeschlagen.";
@@ -117,16 +119,20 @@ export async function deleteBelegAction(formData: FormData): Promise<void> {
   redirect("/app/belege");
 }
 
-/** Datei vom Entwurf entfernen. */
+/** Datei vom Entwurf entfernen (eine, per name). */
 export async function clearBelegDateiAction(
   formData: FormData,
 ): Promise<void> {
   const firmaId = await requireFirmaId();
   const id = formString(formData, "id");
   if (!id) redirect("/app/belege");
+  const name = formString(formData, "name");
+  if (!name) {
+    redirect(`/app/belege/${id}?error=${encodeURIComponent("Datei fehlt.")}`);
+  }
 
   try {
-    await clearBelegDatei(firmaId, id);
+    await removeBelegDatei(firmaId, id, name);
   } catch (e) {
     const msg =
       e instanceof Error ? e.message : "Datei konnte nicht entfernt werden.";

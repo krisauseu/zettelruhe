@@ -18,6 +18,7 @@ export type {
 export {
   assertCanFestschreiben,
   assertEntwurfEditable,
+  BELEG_DATEI_MAX_ANZAHL,
   BELEG_DATEI_MAX_BYTES,
   BELEG_DATEI_MIME,
   buildBuchungstextFromBeleg,
@@ -30,11 +31,13 @@ export {
   isValidIsoDate,
   parseStatus,
   todayBerlin,
+  normalizeBelegDateiNamen,
   validateBelegDatei,
   validateBelegInput,
 } from "./invariants";
 
 export {
+  addBelegDateien,
   clearBelegDatei,
   createBeleg,
   deleteBeleg,
@@ -44,6 +47,7 @@ export {
   getBelegDateiResponse,
   listBelege,
   listBelegeByIds,
+  removeBelegDatei,
   setBelegDatei,
   updateBeleg,
   updateFestgeschriebenenBeleg,

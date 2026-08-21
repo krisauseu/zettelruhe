@@ -438,16 +438,16 @@ export async function exportBelegArchivZip(
   const usedNames = new Set<string>();
 
   for (const b of belege) {
-    let dateiname = "";
-    if (b.datei) {
+    const dateinamen: string[] = [];
+    for (const storedName of b.datei) {
       try {
         const { response, filename } = await getBelegDateiResponse(
           firmaId,
           b.id,
+          storedName,
         );
         const buf = new Uint8Array(await response.arrayBuffer());
         let entryName = `dateien/${safeFilename(filename, `${b.belegnummer || b.id}.bin`)}`;
-        // Kollisionen vermeiden
         if (usedNames.has(entryName)) {
           const parts = entryName.split(".");
           const ext = parts.length > 1 ? parts.pop()! : "bin";
@@ -456,11 +456,12 @@ export async function exportBelegArchivZip(
         }
         usedNames.add(entryName);
         entries.push({ name: entryName, data: buf });
-        dateiname = entryName;
+        dateinamen.push(entryName);
       } catch {
-        dateiname = "";
+        /* Datei fehlt im Speicher */
       }
     }
+    const dateiname = dateinamen.join("; ");
 
     meta.push({
       beleg_id: b.id,

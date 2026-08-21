@@ -8,6 +8,9 @@ import {
   FESTGESCHRIEBEN_ERROR,
   isEntwurf,
   isFestgeschrieben,
+  assertBelegDateiAnzahl,
+  BELEG_DATEI_MAX_ANZAHL,
+  normalizeBelegDateiNamen,
   validateBelegDatei,
   validateBelegInput,
 } from "./invariants";
@@ -29,7 +32,7 @@ function sampleBeleg(over: Partial<Beleg> = {}): Beleg {
     notiz: "Stifte",
     konto: "4930",
     status: "entwurf",
-    datei: "",
+    datei: [],
     belegnummer: "",
     journal_eintrag: null,
     festgeschrieben_am: "",
@@ -152,5 +155,32 @@ describe("validateBelegDatei", () => {
 describe("DATEI_IMMUTABLE_ERROR", () => {
   it("ist gesetzt (ADR-0012)", () => {
     expect(DATEI_IMMUTABLE_ERROR).toMatch(/unveränderbar/i);
+  });
+});
+
+describe("normalizeBelegDateiNamen", () => {
+  it("macht aus String und Array eine bereinigte Liste", () => {
+    expect(normalizeBelegDateiNamen("a.jpg")).toEqual(["a.jpg"]);
+    expect(normalizeBelegDateiNamen(["a.jpg", " ", "b.pdf"])).toEqual([
+      "a.jpg",
+      "b.pdf",
+    ]);
+    expect(normalizeBelegDateiNamen("")).toEqual([]);
+    expect(normalizeBelegDateiNamen(undefined)).toEqual([]);
+  });
+});
+
+describe("assertBelegDateiAnzahl", () => {
+  it("erlaubt Auffüllen bis zur Obergrenze", () => {
+    expect(() => assertBelegDateiAnzahl(2, 3)).not.toThrow();
+    expect(() =>
+      assertBelegDateiAnzahl(BELEG_DATEI_MAX_ANZAHL, 0),
+    ).not.toThrow();
+  });
+
+  it("lehnt mehr als die Obergrenze ab", () => {
+    expect(() =>
+      assertBelegDateiAnzahl(BELEG_DATEI_MAX_ANZAHL, 1),
+    ).toThrow(/Höchstens/);
   });
 });

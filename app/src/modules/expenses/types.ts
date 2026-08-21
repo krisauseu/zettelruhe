@@ -7,6 +7,9 @@ import type { Buchungsrichtung, Steuersatz } from "@/modules/journal/types";
 
 export type BelegStatus = "entwurf" | "festgeschrieben";
 
+/** Max. Anzahl Dateien je Beleg (z. B. Fotoseiten). */
+export const BELEG_DATEI_MAX_ANZAHL = 10;
+
 export type { Buchungsrichtung, Steuersatz };
 
 /** Persistierter Beleg */
@@ -28,8 +31,8 @@ export type Beleg = {
   notiz: string;
   konto: string;
   status: BelegStatus;
-  /** Dateiname in PB (leer = keine Datei) */
-  datei: string;
+  /** Dateinamen in PB (leer = keine Datei) */
+  datei: string[];
   /** Erst bei Festschreibung vergeben */
   belegnummer: string;
   /** Verweis auf Journal-Eintrag nach Festschreibung */

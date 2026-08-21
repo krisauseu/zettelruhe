@@ -284,7 +284,7 @@ export async function createBelegFromERechnungSafe(
     }
   }
 
-  if (datei && !beleg.datei) {
+  if (datei && beleg.datei.length === 0) {
     try {
       beleg = await setBelegDatei(firmaId, beleg.id, datei);
     } catch {

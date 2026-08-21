@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 type Params = Promise<{ id: string }>;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Params },
 ): Promise<Response> {
   let firmaId: string;
@@ -25,9 +25,14 @@ export async function GET(
   }
 
   const { id } = await context.params;
+  const name = new URL(request.url).searchParams.get("name") ?? "";
 
   try {
-    const { response, filename } = await getBelegDateiResponse(firmaId, id);
+    const { response, filename } = await getBelegDateiResponse(
+      firmaId,
+      id,
+      name || undefined,
+    );
     const contentType =
       response.headers.get("content-type") || "application/octet-stream";
     const body = await response.arrayBuffer();

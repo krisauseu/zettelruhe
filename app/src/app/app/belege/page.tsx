@@ -213,9 +213,13 @@ export default async function BelegeListPage({
                         >
                           {label}
                         </Link>
-                        {b.datei ? (
+                        {b.datei.length === 1 ? (
                           <span className="mt-0.5 block text-xs text-muted-foreground">
                             mit Datei
+                          </span>
+                        ) : b.datei.length > 1 ? (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            mit {b.datei.length} Dateien
                           </span>
                         ) : null}
                       </TableCell>

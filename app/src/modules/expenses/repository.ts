@@ -22,9 +22,11 @@ import {
   assertCanFestschreiben,
   assertEntwurfEditable,
   buildJournalInputFromBeleg,
+  assertBelegDateiAnzahl,
   DATEI_IMMUTABLE_ERROR,
   FESTGESCHRIEBEN_ERROR,
   festschreibungsZeitpunktUtc,
+  normalizeBelegDateiNamen,
   validateBelegDatei,
   validateBelegInput,
 } from "./invariants";
@@ -79,13 +81,7 @@ function mapBeleg(r: PbBeleg): Beleg {
       ? (r.steuersatz as Steuersatz)
       : "";
 
-  // PB file field: string filename or array
-  let datei = "";
-  if (typeof r.datei === "string") {
-    datei = r.datei;
-  } else if (Array.isArray(r.datei) && r.datei.length > 0) {
-    datei = String(r.datei[0]);
-  }
+  const datei = normalizeBelegDateiNamen(r.datei);
 
   return {
     id: r.id,
@@ -138,17 +134,36 @@ function toPbBody(
   return body;
 }
 
+function asDateiListe(
+  datei?: File | Blob | Array<File | Blob> | null,
+): Array<File | Blob> {
+  if (!datei) return [];
+  return Array.isArray(datei) ? datei : [datei];
+}
+
+function asNamedFile(file: File | Blob, fallback = "beleg.bin"): File {
+  const filename =
+    file instanceof File && file.name ? file.name : fallback;
+  return new File([file], filename, {
+    type: file.type || "application/octet-stream",
+  });
+}
+
 export async function createBeleg(
   firmaId: string,
   input: BelegInput,
-  opts?: { datei?: File | Blob | null },
+  opts?: { datei?: File | Blob | Array<File | Blob> | null },
 ): Promise<Beleg> {
   const validated = validateBelegInput(input);
   const body = toPbBody(validated, firmaId, "entwurf");
+  const dateien = asDateiListe(opts?.datei);
 
-  if (opts?.datei) {
-    validateBelegDatei(opts.datei as File);
-    const fields: Record<string, string | Blob> = {};
+  if (dateien.length > 0) {
+    for (const file of dateien) {
+      validateBelegDatei(file as File);
+    }
+    assertBelegDateiAnzahl(0, dateien.length);
+    const fields: Record<string, string | Blob | Blob[]> = {};
     for (const [k, v] of Object.entries(body)) {
       if (v === null || v === undefined) {
         // PB multipart: leere Relation weglassen
@@ -158,12 +173,7 @@ export async function createBeleg(
         fields[k] = String(v);
       }
     }
-    const file = opts.datei;
-    const filename =
-      file instanceof File && file.name ? file.name : "beleg.bin";
-    fields.datei = new File([file], filename, {
-      type: file.type || "application/octet-stream",
-    });
+    fields.datei = dateien.map((file) => asNamedFile(file));
     const r = await createRecordMultipart<PbBeleg>(COL, fields);
     return mapBeleg(r);
   }
@@ -194,13 +204,13 @@ export async function updateBeleg(
 }
 
 /**
- * Datei an Entwurf anhängen/ersetzen.
+ * Dateien an Entwurf anhängen (nicht ersetzen).
  * Nach Festschreibung blockiert (ADR-0012).
  */
-export async function setBelegDatei(
+export async function addBelegDateien(
   firmaId: string,
   id: string,
-  file: File | Blob,
+  files: Array<File | Blob>,
 ): Promise<Beleg> {
   const existing = await getBeleg(firmaId, id);
   if (!existing) {
@@ -209,19 +219,52 @@ export async function setBelegDatei(
   if (!isEntwurfStatus(existing)) {
     throw new Error(DATEI_IMMUTABLE_ERROR);
   }
-  validateBelegDatei(file as File);
+  if (files.length === 0) return existing;
+  for (const file of files) {
+    validateBelegDatei(file as File);
+  }
+  assertBelegDateiAnzahl(existing.datei.length, files.length);
 
-  const filename =
-    file instanceof File && file.name ? file.name : "beleg.bin";
-  const blob = new File([file], filename, {
-    type: file.type || "application/octet-stream",
+  const blobs = files.map((file) => asNamedFile(file));
+  const r = await updateRecordMultipart<PbBeleg>(COL, id, {
+    "datei+": blobs,
   });
-
-  const r = await updateRecordMultipart<PbBeleg>(COL, id, { datei: blob });
   return mapBeleg(r);
 }
 
-/** Datei vom Entwurf entfernen. */
+/** Eine Datei an Entwurf anhängen (nicht ersetzen). */
+export async function setBelegDatei(
+  firmaId: string,
+  id: string,
+  file: File | Blob,
+): Promise<Beleg> {
+  return addBelegDateien(firmaId, id, [file]);
+}
+
+/** Eine Datei vom Entwurf entfernen. */
+export async function removeBelegDatei(
+  firmaId: string,
+  id: string,
+  filename: string,
+): Promise<Beleg> {
+  const existing = await getBeleg(firmaId, id);
+  if (!existing) {
+    throw new Error("Beleg nicht gefunden.");
+  }
+  if (!isEntwurfStatus(existing)) {
+    throw new Error(DATEI_IMMUTABLE_ERROR);
+  }
+  const name = filename.trim();
+  if (!existing.datei.includes(name)) {
+    throw new Error("Datei nicht am Beleg.");
+  }
+  const r = await updateRecordMultipart<PbBeleg>(COL, id, {
+    "datei-": name,
+  });
+  return mapBeleg(r);
+}
+
+/** Alle Dateien vom Entwurf entfernen. */
 export async function clearBelegDatei(
   firmaId: string,
   id: string,
@@ -391,16 +434,24 @@ export async function listBelegeByIds(
 export async function getBelegDateiResponse(
   firmaId: string,
   id: string,
+  filename?: string,
 ): Promise<{ response: Response; filename: string; beleg: Beleg }> {
   const beleg = await getBeleg(firmaId, id);
   if (!beleg) {
     throw new Error("Beleg nicht gefunden.");
   }
-  if (!beleg.datei) {
+  if (beleg.datei.length === 0) {
     throw new Error("Keine Datei am Beleg.");
   }
-  const response = await fetchRecordFile(COL, id, beleg.datei);
-  return { response, filename: beleg.datei, beleg };
+  const wanted = (filename ?? "").trim();
+  const chosen = wanted
+    ? beleg.datei.find((n) => n === wanted)
+    : beleg.datei[0];
+  if (!chosen) {
+    throw new Error("Datei nicht gefunden.");
+  }
+  const response = await fetchRecordFile(COL, id, chosen);
+  return { response, filename: chosen, beleg };
 }
 
 /**

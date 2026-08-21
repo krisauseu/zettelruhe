@@ -188,7 +188,11 @@ export function BelegForm({
         />
       </div>
 
-      <BelegDateiInput mode={mode} currentName={beleg?.datei} />
+      <BelegDateiInput
+        mode={mode}
+        belegId={beleg?.id}
+        currentNames={beleg?.datei ?? []}
+      />
 
       <p className="text-xs text-muted-foreground">
         {mode === "create"

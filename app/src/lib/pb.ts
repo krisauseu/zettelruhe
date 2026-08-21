@@ -584,24 +584,33 @@ export async function updateRecord<T>(
   });
 }
 
+/** Skalar, eine Datei oder mehrere Werte unter demselben Feldnamen. */
+export type MultipartValue = string | Blob | Array<string | Blob>;
+
+function appendMultipartFields(
+  fd: FormData,
+  fields: Record<string, MultipartValue | null | undefined>,
+): void {
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === null || value === undefined) continue;
+    const items = Array.isArray(value) ? value : [value];
+    for (const item of items) {
+      fd.append(key, item);
+    }
+  }
+}
+
 /**
  * Record anlegen mit Datei(en) — multipart/form-data.
  * Skalare Felder als Strings; Dateien als File/Blob unter dem Feldnamen.
  */
 export async function createRecordMultipart<T>(
   collection: string,
-  fields: Record<string, string | Blob | null | undefined>,
+  fields: Record<string, MultipartValue | null | undefined>,
 ): Promise<T> {
   const token = await getAdminToken();
   const fd = new FormData();
-  for (const [key, value] of Object.entries(fields)) {
-    if (value === null || value === undefined) continue;
-    if (typeof value === "string") {
-      fd.append(key, value);
-    } else {
-      fd.append(key, value);
-    }
-  }
+  appendMultipartFields(fd, fields);
   return pbFetch<T>(`/api/collections/${collection}/records`, {
     method: "POST",
     token,
@@ -612,22 +621,16 @@ export async function createRecordMultipart<T>(
 /**
  * Record patchen mit optionaler Datei — multipart/form-data.
  * Zum Löschen eines File-Feldes: leeren String senden (PB-Konvention).
+ * Einzelne Datei eines Multi-File-Feldes: Schlüssel `feldname-` mit Dateiname.
  */
 export async function updateRecordMultipart<T>(
   collection: string,
   id: string,
-  fields: Record<string, string | Blob | null | undefined>,
+  fields: Record<string, MultipartValue | null | undefined>,
 ): Promise<T> {
   const token = await getAdminToken();
   const fd = new FormData();
-  for (const [key, value] of Object.entries(fields)) {
-    if (value === null || value === undefined) continue;
-    if (typeof value === "string") {
-      fd.append(key, value);
-    } else {
-      fd.append(key, value);
-    }
-  }
+  appendMultipartFields(fd, fields);
   return pbFetch<T>(`/api/collections/${collection}/records/${id}`, {
     method: "PATCH",
     token,
