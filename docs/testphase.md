@@ -20,3 +20,4 @@ _Keine offenen Einträge._
 | ID | Datum | Art | Bereich | Kurz | Notiz |
 |----|-------|-----|---------|------|-------|
 | TP-001 | 2026-08-20 | Änderung | Kontakte | Kontaktnummer je Kontakt (ein Nummernkreis, Prefix an der Firma; PB-ID bleibt Verknüpfung) | Owner: `contacts/*`, `lib/pb.ts`, `platform/firma-*`, Migration `1730002000_kontaktnummer.js`. Tests: `cd app && npx vitest run src/lib/nummernkreis.test.ts src/modules/contacts src/modules/search src/modules/sales/pdf-render.test.ts src/modules/einvoice/outbound.test.ts`. Browser kf nach Docker-Rebuild: keine Fehler. |
+| TP-002 | 2026-08-21 | Verbesserung | Belege | Handyfotos vor dem Speichern auf JPEG ≤2000 px Kante / q=0.82; PDF unverändert | Owner: `expenses/beleg-datei-input.tsx`, `expenses/compress-beleg-image.ts`. Tests: `cd app && npx vitest run src/modules/expenses` (24). Chrome: 4000×3000 JPEG 92 KB → 24 KB, PDF unverändert. Seite `/app/belege/neu` nicht live (kein Compose/Session). |

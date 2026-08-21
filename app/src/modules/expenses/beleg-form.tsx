@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Steuermodus } from "@/lib/pb";
 import { KategorieSelect } from "@/modules/categories/kategorie-select";
+import { BelegDateiInput } from "./beleg-datei-input";
 import type { Beleg } from "./types";
 import { todayBerlin } from "./invariants";
 
@@ -187,23 +188,7 @@ export function BelegForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="datei">
-          Datei {mode === "edit" && beleg?.datei ? "(ersetzen)" : "(PDF/Bild)"}
-        </Label>
-        <Input
-          id="datei"
-          name="datei"
-          type="file"
-          accept="application/pdf,image/jpeg,image/png,image/webp,image/gif,.pdf,.jpg,.jpeg,.png,.webp,.gif"
-          className="cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground"
-        />
-        {beleg?.datei ? (
-          <p className="text-xs text-muted-foreground">
-            Aktuell: {beleg.datei}
-          </p>
-        ) : null}
-      </div>
+      <BelegDateiInput mode={mode} currentName={beleg?.datei} />
 
       <p className="text-xs text-muted-foreground">
         {mode === "create"
